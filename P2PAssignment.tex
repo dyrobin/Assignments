@@ -1,0 +1,22 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage{indentfirst}
+\usepackage[pdftex]{graphicx}
+\pagestyle{empty}
+\date{Deadline: 31st\ October \ 2013}
+\title{P2P Network}
+\author{T-110.5150 - Applications and Services in Internet}
+\begin{document}
+\maketitle
+\section{Description}
+In this assignment, you will form a small team (maximum 2 members) to implement a P2P application based on a given protocol. The major functionalities of this application include:
+\begin{itemize}\item Join the internal P2P network for this assignment
+\item Publish contents in your node and make it visible to other nodes at the same P2P network\item Look up specified content in the P2P network
+\end{itemize}In order to test and observe the behaviour of P2P nodes, an internal P2P network is constructed. This network is Gnutella-alike style (and simplified version), without central facility. Each node uses a piece of bootstrap information to join the network. In order to communicate with other nodes, your application should fulfill the requirements of the protocol. For the details of the protocol, please refer to the next section. Grading is based on numbers of features your application provides, the final report and the demo. Please read the grading section for more information.
+\section{Protocol specification \& behaviours}
+The protocol for this assignment is a binary protocol and originated from Guntella 0.6\footnote{Gnutella Protocol v0.6, http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}. This protocol is located on top of TCP and contains a 16 bytes fix header. Similar to other binary network protocol, all value fields conform to network byte order. In order to differentiate from TCP packets, we use the term “message” in our protocol.
+\subsection{Privacy policy and preferences}
+
+\begin{thebibliography}{1}
+\end{thebibliography}
+
+\end{document}
