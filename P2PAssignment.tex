@@ -1,6 +1,7 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage{indentfirst}
 \usepackage[pdftex]{graphicx}
+\usepackage{verbatimbox}
 \pagestyle{empty}
 \date{Deadline: 31st\ October \ 2013}
 \title{P2P Network}
@@ -11,12 +12,70 @@
 In this assignment, you will form a small team (maximum 2 members) to implement a P2P application based on a given protocol. The major functionalities of this application include:
 \begin{itemize}\item Join the internal P2P network for this assignment
 \item Publish contents in your node and make it visible to other nodes at the same P2P network\item Look up specified content in the P2P network
-\end{itemize}In order to test and observe the behaviour of P2P nodes, an internal P2P network is constructed. This network is Gnutella-alike style (and simplified version), without central facility. Each node uses a piece of bootstrap information to join the network. In order to communicate with other nodes, your application should fulfill the requirements of the protocol. For the details of the protocol, please refer to the next section. Grading is based on numbers of features your application provides, the final report and the demo. Please read the grading section for more information.
+\end{itemize}
+In order to test and observe the behaviour of P2P nodes, an internal P2P network is constructed. This network is Gnutella-alike style (and simplified version), without central facility. Each node uses a piece of bootstrap information to join the network. In order to communicate with other nodes, your application should fulfill the requirements of the protocol. For the details of the protocol, please refer to the next section. Grading is based on numbers of features your application provides, the final report and the demo. Please read the grading section for more information.
 \section{Protocol specification \& behaviours}
-The protocol for this assignment is a binary protocol and originated from Guntella 0.6\footnote{Gnutella Protocol v0.6, http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}. This protocol is located on top of TCP and contains a 16 bytes fix header. Similar to other binary network protocol, all value fields conform to network byte order. In order to differentiate from TCP packets, we use the term “message” in our protocol.
-\subsection{Privacy policy and preferences}
+The protocol for this assignment is a binary protocol and originated from Gnutella 0.6~\cite{gnutella}. This protocol is located on top of TCP and contains a 16 bytes fix header. Similar to other binary network protocol, all value fields conform to network byte order. In order to differentiate from TCP packets, we use the term “message” in our protocol.
+
+\subsection{Node identifier}
+To identify different nodes, each node needs a global unique ID. In the protocol, we use the combination of node IP and its listening port as node ID.
+\subsection{Protocol header}
+\begin{verbbox}0                          16                        32+------------+------------+------------+------------+|  Version   |     TTL    | Msg Type   |Reserve bits|+------------+------------+------------+------------+|       Sender Port       |       Payload length    |+------------+------------+------------+------------+|            Original Sender IP Address             |+------------+------------+------------+------------+|                     Message ID                    |+------------+------------+------------+------------+
+
+\end{verbbox}
+
+\begin{figure}[h!]
+  \centering
+  \theverbbox
+  \caption{Protocol header}
+    \label{fig:header}
+\end{figure}
+
+Figure \ref{fig:header} illustrates the structure of protocol headers.
+
+This is the description of the different fields:
+\textbf{Version}: The version of this protocol, currently it is always one. Any message with a version value other than one should be dropped.
+\textbf{TTL}: Time To Live. This field must be less than or equal to five. Each time when a message is forwarded, this field must be decreased by one. If TTL of one message equals to zero, this message must be dropped.
+\textbf{Msg Type}: The types of message, valid values are:
+\begin{itemize}\item 0x00	 Ping\item 0x01 Pong\item 0x02	 Bye\item 0x03 Join\item 0x80 Query\item 0x81 Query Hit
+\end{itemize}
+\textbf{Original Sender IP Address}: The IPv4 address of the sender who originally sends this message. The intermediate nodes should not change this field when forwarding the message.
+\textbf{Sender Port}: The listening port number of the originally sender.The intermediate nodes should not change this field when forwarding the message.
+\textbf{Message ID}: The message ID should be globally unique for each message. One recommendation to generate the ID is put the IP of the sender, port, time stamp and a sequence number together, then hash them together to form a message ID.
+
+\textbf{Payload length}: the length of payload in bytes. The header length is NOT included.
+
+\textbf{Reserve bits}: Set these bits to zero, they are not used in this version.
+
+
+\subsection{Types of message}
+\subsubsection{0x03 Join}
+The Join message has two sub-types, Join Request and Join Response. Join Request has no body (payload equals to zero). Join Response has a 2 bytes body, which contains the result of Join Request.A new node sends Join Request to a node already residing in the network for the permission of entering the network. This is the so-called bootstrap process. The connection information (IP and port) of the existing nodes are provided from other sources.A node already joined the network can also send a Join Request to another node, in order to expand its own routing table. Through connecting with more nodes, the stability is guaranteed.If the Join Request is accepted by a remote peer, it will return a Join Response message with the same message ID and a 0x0200 status code in the message body. After that, both nodes should consider each other as a normal peer and keep the TCP connection for message exchange.In version one of our protocol, there is only one valid status code (0x0200). All other codes are invalid and how to handle these codes are purly based on implementation. To refuse a Join Request, a standard way is to close the TCP connection.Message body of Join Message response: (the length of the body is 2 bytes)
+\begin{verbbox}0                          16                        32+------------+------------+------------+------------+|      Status code        |                         |+------------+------------+------------+------------+
+\end{verbbox}
+
+\begin{figure}[h!]
+  \centering
+  \theverbbox
+  \label{joinrequest}
+  \caption{Join request}
+\end{figure}
+For instance: the message body of a Join acceptance will be:
+\begin{verbbox}0                          16                        32+------------+------------+------------+------------+|    0x02    |    0x00    |                         |+------------+------------+------------+------------+\end{verbbox}
+
+\begin{figure}[h!]
+  \centering
+  \theverbbox
+  \label{header}
+  \caption{Join response}
+\end{figure}
 
 \begin{thebibliography}{1}
+
+\bibitem{gnutella}
+Gnutella Protocol v0.6, \emph{http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}.
+
 \end{thebibliography}
+
 
 \end{document}
