@@ -14,6 +14,17 @@ CONTENTS
   group.csv : Group sign-up book.
 
 
+TeX -> PDF
+
+  To typeset the TeX files, clone the 'opastus' repository on any
+  Aalto-IT Linux workstations (in Maarintalo, for example) and type:
+
+   $ pdflatex <name>.tex
+
+  and you get the PDF file.
+
+
+
 AT THE END OF THE SEMESTER
 
  1. For current course staff
