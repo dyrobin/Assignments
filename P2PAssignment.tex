@@ -19,22 +19,18 @@ In this assignment, you will form a small team (maximum 2 members) to implement 
 \end{itemize}
 
 In order to test and observe the behaviour of P2P nodes, an internal P2P network is constructed.
-This network is Gnutella-alike style (and simplified version), without a central facility.
+This network is Gnutella-alike style (a simplified version), without a central facility.
 Each node uses a piece of bootstrap information to join the network.
 In order to communicate with other nodes, your application should fulfil the requirements of the protocol.
 For the details of the protocol, please refer to the next section.
 Grading is based on numbers of features your application provides, the final report and the demo.
 Please read the grading section for more information.
 
-
 \section{Protocol Specification and Behaviours}
-The protocol for this assignment is a binary protocol and originated from Gnutella 0.6 \cite{gnutella}.
+The protocol for this assignment is a binary protocol and originated from Gnutella 0.6~\cite{gnutella}.
 This protocol is built on top of TCP and contains a 16 bytes fix header.
-Similar to other binary network protocol, all value fields conform to network byte order.
+Similar to other binary network protocols, all value fields conform to network byte order.
 In order to differentiate from TCP packets, we use the term message in our protocol.
-
-\subsection{Node identifier}
-To identify different nodes, each node needs a global unique ID. In the protocol, we use the combination of node IP and its listening port as node ID.
 
 \subsection{Protocol header}
 \begin{verbbox}
@@ -92,15 +88,13 @@ The header length is NOT included.
 
 \textbf{Reserved}: Set to zero, unused in this version.
 
-
 \subsection{Types of message}
-
 \subsubsection{0x03 Join}
 There are two sub-types of Join message: Join Request and Join Response.
 Join Request has no body (payload equals to zero).
 A Join Response has a 2 bytes body, which contains the result of Join Request.
 
-A new node sends Join Request to a node already residing in the network for the permission of entering the network.
+A new node sends a Join Request message to a node that is already in the network for the permission of entering the network.
 This is the so-called bootstrap process.
 The information about the bootstrap server will given soon so you can start testing your code as soon as possible.
 A node who has already joined the network may also send a Join Request to another node, in order to expand its own routing table.
@@ -140,8 +134,6 @@ For instance: the message body of a Join acceptance will be:
   \label{header}
   \caption{Join response}
 \end{figure}
-
-
 
 \subsubsection{0x00 Ping}
 There are two purposes for a Ping message:
@@ -212,9 +204,9 @@ The body of the message consists of: total number of the entries and one entry r
 \textbf{Port of Xnd Entry}: The listening port number of Xnd Entry.
 
 \subsubsection{0x80 Query}
-A Query Message contains query key in the message body.
+A Query Message contains a query key in the message body.
 It is propagated in the network according to its TTL (forwarded by peers).
-A node receiving this message SHOULD look up its own sharing data, and return matched entry (if any) in a Query Hit message, and it SHOULD also forward this message to its neighbour peers (if TTL larger than 0) no mater the query is hit or not in its local share files.
+A node receiving this message SHOULD look up its own sharing data, and return the matched entries (if any) in a Query Hit message, and it SHOULD also forward this message to its neighbour peers (if TTL is larger than 0) no mater the query is hit or not in its local shared files.
 
 The length of search criteria varies, and the actual length is decided by the Payload length field in the message header.
 Nodes MUST NOT change the message ID of a query message while forwarding.
@@ -263,7 +255,6 @@ Like Pong messages, the first 2 bytes of a Query Hit message contains the total 
   \caption{Query Hit}
 \end{figure}
 
-
 \textbf{Entry size}: the number of entries in the Query Hit message body.
 
 \textbf{SBZ}: should be zero.
@@ -278,10 +269,7 @@ The receiver MUST NOT forwards this message and MUST close the TCP connection im
 The sender SHOULD wait for the termination of the connection and then quit the network.
 Bye message takes no message body.
 
-
-
-\section{Detailed Instructions and Tips}
-
+\section{Detailed Instructions and tips}
 \subsection*{Which development environment and programming language can I use?}
 We highly recommend you to use C under Linux/Unix environment.
 If you are not so familiar to network programming, learning it from C enables fully grasp of the network programming concepts.
@@ -302,6 +290,7 @@ Remember to consider the endianness \footnote{\url{http://en.wikipedia.org/wiki/
 Information regarding the bootstrap network will be announced later through Noppa.
 The bootstrap information contains the IP address and the listening port of existing nodes in the network.
 A new node can send a Join Message to an IP and port combination to participate in the network.
+Also we will provide some test keys so you can search for them inside the network.
 
 \subsection*{Should I implement the full protocol specification in this assignment?}
 Implementation of the whole protocol is not mandatory.
@@ -323,20 +312,18 @@ Though we encourage you to implement a fully functioning node, it is not mandato
 A related I/O API you might be interested in is \texttt{select()}, which is available in both C and Java.
 
 \subsection*{How to locate the problem in my code?}
-For network programming, \emph{Wireshark} or \emph{tcpdump} is a very nice tool for debugging.
-Observe the inbound and outbound packets to check if you really send or receive the messages and weather they satisfy the format of the protocol.
+For network programming, \emph{Wireshark} or \emph{tcpdump} are really useful to check the contents of the packets you send to the network.
+Observe the inbound and outbound packets to check if you really send or receive the messages and wether they satisfy the format of the protocol.
 
 The common debugging tool for Linux is GDB, which allows you to set break points in you application and step through the program.
 There is also similar debugger for Java, and can be easily launched in IDE like Eclipse or NetBeans.
 
-Sometimes, printing out the information also helps you solve the problem.
+Sometimes, printing out the information also helps you to solve the problem.
 
 \subsection*{Think before coding}
 Conquer the feature list one by one without having a full view is discouraged.
 Eventually you may find that you have to rewrite your application in order to implement the next feature.
 Understand all features and have a clear design increase your productivity.
-
-
 \section{Submission}
 Each team will be provided a Niksula Git \footnote{\url{https://git.niksula.hut.fi/}} repository for version control and submission.
 Please check also Git documentation \footnote{\url{http://git-scm.com/doc}} if you have not used it before.
@@ -351,15 +338,17 @@ assignment_1/
 \end{verbatim}
 
 \begin{itemize}
-\item The \texttt{src} directory contains all your source codes.
-\item Submit only the source codes, NOT binary executables.
+\item The \texttt{src} directory contains all your source code.
+\item Submit only the source code, NOT binary executables.
 \item The \texttt{README} file is a text file and it should explain how to build and run your application.
 \item Clearly state your solution for this assignment in \texttt{Report.pdf}. Please be concise and go directly to the main points. The report should be no more than 4 pages long.
 \item Please follow the directory structure and naming convention, otherwise your submission will be ignored.
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
+Deadline is strict and commits of code after the deadline will not be reviewed. Please plan early your workload and test early the features you're implementing. We can't promise 100\% uptime in the bootstrap server so if you can't connect to the bootstrap server please send us an e-mail so we can fix it as soon as possible.
 
+We encourage students to do frequent commits to their assigned repository.
 \section{Demo}
 The demo time is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application and 5 minutes for questions.
 All members should attend the demo session.
@@ -390,10 +379,12 @@ Total: 130 Points
 
 5 - $\ge$  100 points.
 
+Please check the attached tables to see the specific grading we will use.
+
 \begin{table}[htdp]
 \caption{Basic (20 points)}
 \begin{center}
-\begin{tabular}{|p{11cm}|p{2cm}|}
+\begin{tabular}{|p{12cm}|p{2cm}|}
 \hline
 Send Join Request message in order to join the network & 5 Points \\
 \hline
@@ -410,7 +401,7 @@ Publish a key/value pair in the network and respond to a Query message when its 
 \begin{table}[htdp]
 \caption{Advanced (80 points)}
 \begin{center}
-\begin{tabular}{|p{11cm}|p{2cm}|}
+\begin{tabular}{|p{12cm}|p{2cm}|}
 \hline
 Respond to Type A Ping message with a Pong.
 Tell your neighbour that you are still alive. & 10 points \\
@@ -436,7 +427,7 @@ Forward Query Hit message by following the reverse path of its corresponding Que
 \begin{table}[htdp]
 \caption{Other (30 points)}
 \begin{center}
-\begin{tabular}{|p{11cm}|p{2cm}|}
+\begin{tabular}{|p{12cm}|p{2cm}|}
 \hline
 A clear final Report.
 State how you did the assignment.
