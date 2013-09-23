@@ -1,7 +1,9 @@
 \documentclass[12pt, a4paper]{article}
+\usepackage{hyperref}
 \usepackage{indentfirst}
 \usepackage[pdftex]{graphicx}
 \usepackage{verbatimbox}
+\usepackage{placeins}
 \pagestyle{empty}
 \date{Deadline: 31st\ October \ 2013, 23:59, Helsinki time}
 \title{Peer-to-Peer Network}
@@ -58,13 +60,13 @@ To identify different nodes, each node needs a global unique ID. In the protocol
 Figure \ref{fig:header} illustrates the structure of protocol headers.
 The meaning of different fields are as follow:
 
-\textbf{Version}: The version of this protocol, currently it is always one.
-Any message with a version value other than one should be dropped.
+\textbf{Version}: The version of this protocol, always one.
+Any message with other version values MUST be dropped.
 
 \textbf{TTL}: Time To Live.
-This field must be less than or equal to five.
-Each time when a message is forwarded, this field must be decreased by one.
-If TTL of one message equals to zero, this message must be dropped.
+This field MUST be less than or equal to five.
+Each time when a message is forwarded, this field MUST be decreased by one.
+If TTL of one message equals to zero, this message MUST be dropped.
 
 \textbf{Msg Type}: The types of message, valid values are:
 \begin{itemize}
@@ -77,18 +79,18 @@ If TTL of one message equals to zero, this message must be dropped.
 \end{itemize}
 
 \textbf{Original Sender IP Address}: The IPv4 address of the sender who originally sends this message.
-The intermediate nodes should not change this field when forwarding the message.
+The intermediate nodes MUST NOT change this field when forwarding the message.
 
 \textbf{Sender Port}: The listening port number of the originally sender.
-The intermediate nodes should not change this field when forwarding the message.
+The intermediate nodes MUST NOT change this field when forwarding the message.
 
-\textbf{Message ID}: The message ID should be globally unique for each message. 
+\textbf{Message ID}: The message ID SHOULD be globally unique for each message. 
 One recommendation to generate the ID is put the IP of the sender, port, time stamp, and a sequence number together, then hash them together to form a message ID.
 
 \textbf{Payload length}: the length of payload in bytes.
 The header length is NOT included.
 
-\textbf{Reserved}: Set these bits to zero, they are not used in this version.
+\textbf{Reserved}: Set to zero, unused in this version.
 
 
 \subsection{Types of message}
@@ -150,13 +152,13 @@ There are two purposes for a Ping message:
 \item This message is optional, but recommended to send it every 5 seconds.
 \item Peers who receive this Ping message must respond with a Pong message (if this peer supports Pong message).
 \item If no Ping or Pong message is received from the remote side for several times, a node can consider there is some problem with this peer.
-However, the node should still keep this connection, in case the peer does not support Ping and Pong message.
+However, the node SHOULD still keep this connection, in case the peer does not support Ping and Pong message.
 \end{itemize}
 \item Network probing
 \begin{itemize}
 \item A Ping message with TTL larger than 1.
 \item This function aims to find more peers based on existing nodes.
-\item A node (if Pong message is supported) receiving this kind of Ping message should respond a Pong message which contains maximum five entries of its neighbour peers (not include the one who initiates the Ping message).
+\item A node (if Pong message is supported) receiving this kind of Ping message SHOULD respond a Pong message which contains maximum five entries of its neighbour peers (not include the one who initiates the Ping message).
 A node may have more than five entries available, how to choose five from all the neighbours depends on implementation.
 Although a good selection strategy greatly enhances the robustness of the network.
 For simplicity, you can choose randomly or just first five.
@@ -212,11 +214,11 @@ The body of the message consists of: total number of the entries and one entry r
 \subsubsection{0x80 Query}
 A Query Message contains query key in the message body.
 It is propagated in the network according to its TTL (forwarded by peers).
-A node receiving this message should look up its own sharing data, and return matched entry (if any) in a Query Hit message, and it should also forward this message to its neighbour peers (if TTL larger than 0) no mater the query is hit or not in its local share files.
+A node receiving this message SHOULD look up its own sharing data, and return matched entry (if any) in a Query Hit message, and it SHOULD also forward this message to its neighbour peers (if TTL larger than 0) no mater the query is hit or not in its local share files.
 
 The length of search criteria varies, and the actual length is decided by the Payload length field in the message header.
-Nodes should NOT change the message ID of a query message while forwarding.
-If a node receives a Query Message whose ID is identical to a previous query in a short time period, the node should drop this message.
+Nodes MUST NOT change the message ID of a query message while forwarding.
+If a node receives a Query Message whose ID is identical to a previous query in a short time period, the node MUST drop this message.
 
 \begin{verbbox}
 +------------+------------+------------+------------+
@@ -272,8 +274,8 @@ Like Pong messages, the first 2 bytes of a Query Hit message contains the total 
 
 \subsubsection{0x02 Bye}
 Bye message is optional with TTL equals to 1.
-The receiver should not forwards this message and should close the TCP connection immediately.
-The sender should wait for the termination of the connection and then quit the network. 
+The receiver MUST NOT forwards this message and MUST close the TCP connection immediately.
+The sender SHOULD wait for the termination of the connection and then quit the network.
 Bye message takes no message body.
 
 
@@ -293,8 +295,8 @@ If you use Java, you need to implement them by yourself.
 The P2P protocol is a binary protocol, and like other network protocol, it follows network byte order.
 The network byte order is big-endian.
 However, the machine you use for programming is normally x86 architecture.
-In other words, it is little-endian. Remember to consider the endianness when programming (if you programme in C).
-More information of endianness can be found at \cite{endianness}.
+In other words, it is little-endian.
+Remember to consider the endianness \footnote{\url{http://en.wikipedia.org/wiki/Endianness}} when programming (if you programme in C).
 
 \subsection*{How to bootstrap?}
 Information regarding the bootstrap network will be announced later through Noppa.
@@ -336,15 +338,16 @@ Understand all features and have a clear design increase your productivity.
 
 
 \section{Submission}
-Each team will be provided a Niksula Git repository for version control and submission.
-Please check \emph{http://git.nikusla.hut.fi}. Please check also Git documentation if you have not used it before (\emph{http://git-scm.com/doc}).
+Each team will be provided a Niksula Git \footnote{\url{https://git.niksula.hut.fi/}} repository for version control and submission.
+Please check also Git documentation \footnote{\url{http://git-scm.com/doc}} if you have not used it before.
 
 You should create an \texttt{assignment\_1} directory in the repository.
 The contents of the directory are:
 \begin{verbatim}
-src/
-README
-Report.pdf
+assignment_1/
+  src/
+  README
+  Report.pdf
 \end{verbatim}
 
 \begin{itemize}
@@ -353,7 +356,7 @@ Report.pdf
 \item The \texttt{README} file is a text file and it should explain how to build and run your application.
 \item Clearly state your solution for this assignment in \texttt{Report.pdf}. Please be concise and go directly to the main points. The report should be no more than 4 pages long.
 \item Please follow the directory structure and naming convention, otherwise your submission will be ignored.
-\item If you have other files that need to be included, please explain why you need them in the README file.
+\item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
 
@@ -375,30 +378,30 @@ Basic level features also satisfy the basic requirements of demo sessions.
 
 Total: 130 Points
 
-0 - fail (\textless~20 points)
+0 - fail ($<$ 20 points).
 
-1 - ($\ge$ 20 points)
+1 - $\ge$ 20 points.
 
-2 - ($\ge$  40 points)
+2 - $\ge$  40 points.
 
-3 - ($\ge$ 60 points)
+3 - $\ge$ 60 points.
 
-4 - ($\ge$ 80 points)
+4 - $\ge$ 80 points.
 
-5 - ($\ge$  100 points)
+5 - $\ge$  100 points.
 
 \begin{table}[htdp]
 \caption{Basic (20 points)}
 \begin{center}
 \begin{tabular}{|p{11cm}|p{2cm}|}
 \hline
-Send Join Request message in order to join the network	& 5 Points \\
+Send Join Request message in order to join the network & 5 Points \\
 \hline
-Handle Join Response message, considering the situation when the bootstrap server closes the connection & 5 Points\\
+Handle Join Request message. Consider the situation that remote peer closes the connection. & 5 Points\\
 \hline
-Send Query message with a searching key & 5 Points  \\
+Send Query message with a search key & 5 Points  \\
 \hline
-Publish a key/value pair in the network. This is achieved by responding to a Query message when its search key equals your publish key & 5 Points \\
+Publish a key/value pair in the network and respond to a Query message when its search key equals your published key & 5 Points \\
 \hline
 \end{tabular}
 \end{center}
@@ -409,19 +412,22 @@ Publish a key/value pair in the network. This is achieved by responding to a Que
 \begin{center}
 \begin{tabular}{|p{11cm}|p{2cm}|}
 \hline
-Respond Type A Ping message with Pong. Tell you neighbour that you are still alive. & 10 points \\
+Respond to Type A Ping message with a Pong.
+Tell your neighbour that you are still alive. & 10 points \\
 \hline
-Send Type A Ping message. Check if your neighbours are alive. & 10 Points \\
+Send Type A Ping message.
+Check if your neighbours are alive. & 10 Points \\
 \hline
-Replying Type B Ping message with Pong. Tell your peer who else you know. & 10 Points \\
+Respond to Type B Ping message with a Pong.
+Tell your neighbour who else you know. & 10 Points \\
 \hline
-Sending Type B Ping message to find more node information in this network & 10 Points \\
+Send Type B Ping message to find more node information in the network & 10 Points \\
 \hline
-Join multiple peers in order to expand your network &10 Points \\
+Join multiple peers in order to expand your network & 10 Points \\
 \hline
-Forwarding Query message (consider loop avoidance) to help other node to find a resource & 15 Points \\
+Forward Query message with loop avoidance to help other node to find a resource & 15 Points \\
 \hline
-Forwarding Query Hit message by following the reverse path of its corresponding Query message & 15 Points \\
+Forward Query Hit message by following the reverse path of its corresponding Query message & 15 Points \\
 \hline
 \end{tabular}
 \end{center}
@@ -432,9 +438,13 @@ Forwarding Query Hit message by following the reverse path of its corresponding 
 \begin{center}
 \begin{tabular}{|p{11cm}|p{2cm}|}
 \hline
-A clear final Report State how you solve the whole assignment. Comments on this assignment are also welcomed.  No more than 4 pages and donÕt paste source code. & 10 points \\
+A clear final Report.
+State how you did the assignment.
+Comments on the assignment are also welcomed.
+No more than 4 pages and do not paste source code. & 10 points \\
 \hline
-A good demo. Show good understanding of the assignment, application running well and finishing the demo on time. & 10 points \\
+A good demo.
+Show good understanding of the assignment, application runs well, and finish the demo on time. & 10 points \\
 \hline
 Extra points for constructive comments on this assignment, a good implementation, or other unexpected but decent outcome. & 10 points \\
 
@@ -444,14 +454,12 @@ Extra points for constructive comments on this assignment, a good implementation
 \end{table}
 
 
+\FloatBarrier
 
 \begin{thebibliography}{1}
 
 \bibitem{gnutella}
-Gnutella Protocol v0.6, \emph{http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}.
-
-\bibitem{endianness}
-Endianness, \emph{http://en.wikipedia.org/wiki/Endianness}.
+Gnutella Protocol v0.6, \url{http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}.
 
 \end{thebibliography}
 
