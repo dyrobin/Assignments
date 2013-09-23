@@ -101,7 +101,7 @@ A Join Response has a 2 bytes body, which contains the result of Join Request.
 A new node sends Join Request to a node already residing in the network for the permission of entering the network.
 This is the so-called bootstrap process.
 The information about the bootstrap server will given soon so you can start testing your code as soon as possible.
-A node who has already joined the network can also send a Join Request to another node, in order to expand its own routing table.
+A node who has already joined the network may also send a Join Request to another node, in order to expand its own routing table.
 Through connecting with more nodes, the stability is guaranteed.
 If the Join Request is accepted by a remote peer, it will return a Join Response message with the same message ID and a 0x0200 status code in the message body.
 After that, both nodes should consider each other as a normal peer and keep the TCP connection for message exchange.
@@ -158,7 +158,7 @@ However, the node should still keep this connection, in case the peer does not s
 \item This function aims to find more peers based on existing nodes.
 \item A node (if Pong message is supported) receiving this kind of Ping message should respond a Pong message which contains maximum five entries of its neighbour peers (not include the one who initiates the Ping message).
 A node may have more than five entries available, how to choose five from all the neighbours depends on implementation.
-Although a good selection strategy can greatly enhance the robustness of the network.
+Although a good selection strategy greatly enhances the robustness of the network.
 For simplicity, you can choose randomly or just first five.
 \end{itemize}
 \end{itemize}
@@ -219,7 +219,6 @@ Nodes should NOT change the message ID of a query message while forwarding.
 If a node receives a Query Message whose ID is identical to a previous query in a short time period, the node should drop this message.
 
 \begin{verbbox}
-0                          16                        32
 +------------+------------+------------+------------+
 |     Search criteria (variable length)             |
 +------------+------------+------------+------------+
@@ -281,6 +280,15 @@ Bye message takes no message body.
 
 \section{Detailed Instructions and Tips}
 
+\subsection*{Which development environment and programming language can I use?}
+We highly recommend you to use C under Linux/Unix environment.
+If you are not so familiar to network programming, learning it from C enables fully grasp of the network programming concepts.
+Conversely, high level languages, normal coming with highly wrap libraries, hide those things from you.
+
+Another alternative language can be considered is Java.
+However, we can only provide the protocol specification and some utility functions in C.
+If you use Java, you need to implement them by yourself.
+
 \subsection*{Network Byte Order}
 The P2P protocol is a binary protocol, and like other network protocol, it follows network byte order.
 The network byte order is big-endian.
@@ -307,32 +315,24 @@ Read the Gnutella RFC for more information.
 The purpose of this assignment is not fancy GUI, however if you want to try GUI programming, feel free to do it.
 
 \subsection*{Should I use multi-thread/process?}
-The assignment is designed so that it can be achieved with a single process.
-The programs for different demo task can be different applications, as long as you can achieve the goal.
+The assignment is designed so that it is achievable with a single process.
+The programs for different demo task can be separate applications, as long as you achieve the goals.
 Though we encourage you to implement a fully functioning node, it is not mandatory.
-A related I/O API you might be interested in is called “select”, which is both supported by C and Java.
-
-\subsection*{Which development environment and programming language can I use?}
-We highly recommend you to use C under Linux/Unix environment.
-If you are not so familiar to network programming, learning it from C enables fully grasp of the network programming concepts.
-Conversely, high level languages, normal coming with highly wrap libraries, hide those things from you.
-
-Another alternative language can be considered is Java.
-However, we can only provide the protocol specification and some utility functions in C.
-If you use Java, you need to implement them by yourself.
+A related I/O API you might be interested in is \texttt{select()}, which is available in both C and Java.
 
 \subsection*{How to locate the problem in my code?}
 For network programming, \emph{Wireshark} or \emph{tcpdump} is a very nice tool for debugging.
 Observe the inbound and outbound packets to check if you really send or receive the messages and weather they satisfy the format of the protocol.
 
-The common debugging tool for C is GDB, which enables you to set break point in you application and run the program step by step.
-There is also similar debugger in Java, and can be easily launched in IDE like Eclipse or NetBeans.
+The common debugging tool for Linux is GDB, which allows you to set break points in you application and step through the program.
+There is also similar debugger for Java, and can be easily launched in IDE like Eclipse or NetBeans.
+
 Sometimes, printing out the information also helps you solve the problem.
 
 \subsection*{Think before coding}
-Conquer the feature list one by one without having a full view is not recommended.
+Conquer the feature list one by one without having a full view is discouraged.
 Eventually you may find that you have to rewrite your application in order to implement the next feature.
-Understand all features and have a clear design can increase your efficiency.
+Understand all features and have a clear design increase your productivity.
 
 
 \section{Submission}
