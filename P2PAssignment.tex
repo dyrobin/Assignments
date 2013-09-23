@@ -269,7 +269,7 @@ The receiver MUST NOT forwards this message and MUST close the TCP connection im
 The sender SHOULD wait for the termination of the connection and then quit the network.
 Bye message takes no message body.
 
-\section{Detailed Instructions and tips}
+\section{Detailed Instructions and Tips}
 \subsection*{Which development environment and programming language can I use?}
 We highly recommend you to use C under Linux/Unix environment.
 If you are not so familiar to network programming, learning it from C enables fully grasp of the network programming concepts.
@@ -307,7 +307,7 @@ The purpose of this assignment is not fancy GUI, however if you want to try GUI 
 
 \subsection*{Should I use multi-thread/process?}
 The assignment is designed so that it is achievable with a single process.
-The programs for different demo task can be separate applications, as long as you achieve the goals.
+The different demo task can be implemented as separate applications, as long as you achieve the goals.
 Though we encourage you to implement a fully functioning node, it is not mandatory.
 A related I/O API you might be interested in is \texttt{select()}, which is available in both C and Java.
 
@@ -346,19 +346,27 @@ assignment_1/
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
-Deadline is strict and commits of code after the deadline will not be reviewed. Please plan early your workload and test early the features you're implementing. We can't promise 100\% uptime in the bootstrap server so if you can't connect to the bootstrap server please send us an e-mail so we can fix it as soon as possible.
+Deadline is strict and commits of code after the deadline will not be reviewed.
+Please plan early your workload and test early the features that you are implementing.
 
-We encourage students to do frequent commits to their assigned repository.
+We cannot promise 100\% uptime in the bootstrap servers.
+Should the bootstrap servers become unavailable please send us an e-mail so we can fix it as soon as possible.
+
+Frequent commits to Git repository is encouraged.
+Try not to send only one big commit in the end, but many small commits as the development proceeds.
+
+
 \section{Demo}
-The demo time is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application and 5 minutes for questions.
-All members should attend the demo session.
+The demo session is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application and 5 minutes for questions.
+Your applications must be checked out from the Git and be built from source onsite during the demo session.
+Both team members shall be present at the demo session.
 The basic requirements are:
 \begin{itemize}
-\item Show the application is able to search a specified key in the network, and get the value of the specified key.
-\item Show the application is able to publish a specified key in the network.
+\item Show the application is able to search for a specified key in the network, and retrieve the corresponding value(s).
+\item Show the application is able to publish a specified key to the network.
 \end{itemize}
 You are free to decide how to present other features of your application, but remember to make a plan and finish your demo on time.
-Detailed arrangements of demo sessions will be announced later.
+Detailed arrangements of the demo session will be announced later.
 
 \section{Grading}
 The assignment is split into several functions, and points are given separately to each function.
