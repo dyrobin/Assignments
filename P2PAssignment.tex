@@ -15,8 +15,8 @@ The major functionalities of this application include:
 
 \begin{itemize}
 \item Join the experimental P2P network for this assignment.
-\item Publish a key at your node and make it visible to other nodes in the P2P network.
-\item Look up a specific key in the P2P network.
+\item Search for a key in the P2P network.
+\item Publish a key from your node and make it visible to other nodes in the P2P network.
 \end{itemize}
 
 In order to test and observe the behaviour of P2P nodes, an experimental P2P network is constructed.
@@ -236,7 +236,7 @@ If a node receives a Query Message whose ID is identical to a recent query, the 
 The message ID of a Query Hit message is identical to that of the corresponding Query message.
 A Query Hit message is routed back to the query sender using the reverse path of the Query message.
 The body of Query Hit message contains entries of matched resources.
-Each entry provides: resource ID (unique for the sharing node) and resource value.
+Each entry provides a resource ID and the corresponding resource value.
 The first 2 bytes of a Query Hit message body contains the total number of entries in the message.
 
 \begin{verbbox}
@@ -381,6 +381,9 @@ The basic requirements are:
 \end{itemize}
 You are free to decide how to present other features of your application, but remember to make a plan and finish your demo on time.
 Detailed arrangements of the demo session will be announced later.
+
+Your application should be able to connect to any given IP and port combination at the demo.
+In other words, the peer list shall not be hard coded (or at least in a way that is easy to change).
 
 \section{Grading}
 The assignment is split into several functions, and points are given separately to each function.
