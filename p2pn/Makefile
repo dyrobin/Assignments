@@ -1,14 +1,18 @@
-CFLAGS := -g -Wall $(CFLAGS)
+CC= gcc
+CFLAGS= -Wall $(DEBUG)
+DEBUG= -ggdb
 
-targets = p2pn pmon
+EXE= p2pn pmon
+p2pn_src= p2pn.c proto.c sock_util.c
+pmon_src= pmon.c
 
 .PHONY: all
-all: $(targets)
-
-p2pn: p2pn.c proto.c sock_util.c
-
-pmon: pmon.c
+all: $(EXE)
 
 .PHONY: clean
 clean:
-	$(RM) $(targets) *.o
+	$(RM) $(EXE) *.o
+
+.SECONDEXPANSION:
+$(EXE): $$(patsubst %.c,%.o,$$($$@_src))
+
