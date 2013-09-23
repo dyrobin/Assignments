@@ -4,33 +4,36 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{verbatimbox}
 \usepackage{placeins}
-\pagestyle{empty}
-\date{Deadline: 31st\ October \ 2013, 23:59, Helsinki time}
 \title{Peer-to-Peer Network}
 \author{T-110.5150 - Applications and Services in Internet}
+\date{Deadline: 31st of October 2013, 23:59 Helsinki Time}
 \begin{document}
 \maketitle
 \section{Description}
-In this assignment, you will form a small team (maximum 2 members) to implement a peer-to-peer (P2P) application based on a given protocol. The major functionalities of this application include:
+In this assignment, you will form a small team (maximum 2 members) to implement a peer-to-peer (P2P) application based on a simple protocol.
+The major functionalities of this application include:
+
 \begin{itemize}
-\item Join the internal P2P network for this assignment
-\item Publish a key in your node and make it visible to other nodes at the P2P network
-\item Look up a specific key in the P2P network
+\item Join the internal P2P network for this assignment.
+\item Publish a key at your node and make it visible to other nodes in the P2P network.
+\item Look up a specific key in the P2P network.
 \end{itemize}
 
-In order to test and observe the behaviour of P2P nodes, an internal P2P network is constructed.
-This network is Gnutella-alike style (a simplified version), without a central facility.
+In order to test and observe the behaviour of P2P nodes, an experimental P2P network is constructed.
+This network is Gnutella style (a simplified version), without a central facility.
 Each node uses a piece of bootstrap information to join the network.
 In order to communicate with other nodes, your application should fulfil the requirements of the protocol.
-For the details of the protocol, please refer to the next section.
-Grading is based on numbers of features your application provides, the final report and the demo.
-Please read the grading section for more information.
+
+Details of the protocol are specified in the next section.
+Grading is based on numbers of features your application provides, the final report, and the demo.
+See the grading section for more information.
+
 
 \section{Protocol Specification and Behaviours}
-The protocol for this assignment is a binary protocol and originated from Gnutella 0.6~\cite{gnutella}.
-This protocol is built on top of TCP and contains a 16 bytes fix header.
-Similar to other binary network protocols, all value fields conform to network byte order.
-In order to differentiate from TCP packets, we use the term message in our protocol.
+The protocol for this assignment is a binary protocol and originated from Gnutella 0.6 \cite{gnutella}.
+This protocol works on top of TCP and contains a 16 bytes fixed header.
+Similar to other binary network protocols, all value fields are in network byte order.
+In order to differentiate from TCP packets, we use the term ``message'' in our protocol.
 
 \subsection{Protocol header}
 \begin{verbbox}
@@ -53,7 +56,7 @@ In order to differentiate from TCP packets, we use the term message in our proto
     \label{fig:header}
 \end{figure}
 
-Figure \ref{fig:header} illustrates the structure of protocol headers.
+Figure \ref{fig:header} illustrates the structure of the protocol header.
 The meaning of different fields are as follow:
 
 \textbf{Version}: The version of this protocol, always one.
@@ -74,36 +77,38 @@ If TTL of one message equals to zero, this message MUST be dropped.
 \item 0x81 Query Hit
 \end{itemize}
 
-\textbf{Original Sender IP Address}: The IPv4 address of the sender who originally sends this message.
+\textbf{Original Sender IP Address}: The IPv4 address of the original sender of this message.
 The intermediate nodes MUST NOT change this field when forwarding the message.
 
-\textbf{Sender Port}: The listening port number of the originally sender.
+\textbf{Sender Port}: The listening port number of the original sender.
 The intermediate nodes MUST NOT change this field when forwarding the message.
 
 \textbf{Message ID}: The message ID SHOULD be globally unique for each message. 
-One recommendation to generate the ID is put the IP of the sender, port, time stamp, and a sequence number together, then hash them together to form a message ID.
+One way to generate the ID is to put the IP of the sender, port, time stamp, and a sequence number together, then hash them to create a message ID.
 
-\textbf{Payload length}: the length of payload in bytes.
+\textbf{Payload length}: The length of payload in bytes.
 The header length is NOT included.
 
-\textbf{Reserved}: Set to zero, unused in this version.
+\textbf{Reserved}: Set to zero. Unused in this version.
 
 \subsection{Types of message}
 \subsubsection{0x03 Join}
 There are two sub-types of Join message: Join Request and Join Response.
-Join Request has no body (payload equals to zero).
-A Join Response has a 2 bytes body, which contains the result of Join Request.
+Join Request has no payload.
 
+A Join Response has a 2 bytes body, which contains the result of Join Request.
 A new node sends a Join Request message to a node that is already in the network for the permission of entering the network.
 This is the so-called bootstrap process.
-The information about the bootstrap server will given soon so you can start testing your code as soon as possible.
-A node who has already joined the network may also send a Join Request to another node, in order to expand its own routing table.
-Through connecting with more nodes, the stability is guaranteed.
+A node which has already joined the network may also send a Join Request to another node to expand its own neighbourhood.
+By connecting with more nodes, the reliability is enhanced.
+
+A Join Response has a 2 bytes body, which contains the result of Join Request.
 If the Join Request is accepted by a remote peer, it will return a Join Response message with the same message ID and a 0x0200 status code in the message body.
 After that, both nodes should consider each other as a normal peer and keep the TCP connection for message exchange.
 
 In version one of our protocol, there is only one valid status code (0x0200).
-All other codes are invalid and how to handle these codes are purely based on implementation.
+All others are invalid and how to handle them are implementation dependant.
+
 To refuse a Join Request, a standard way is to close the TCP connection.
 
 \begin{verbbox}
@@ -120,7 +125,6 @@ To refuse a Join Request, a standard way is to close the TCP connection.
   \caption{Join message}
 \end{figure}
 
-For instance: the message body of a Join acceptance will be:
 \begin{verbbox}
 0                          16
 +------------+------------+
@@ -131,48 +135,47 @@ For instance: the message body of a Join acceptance will be:
 \begin{figure}[h!]
   \centering
   \theverbbox
-  \label{header}
-  \caption{Join response}
+  \label{joinresponse}
+  \caption{Join response (acceptance)}
 \end{figure}
 
 \subsubsection{0x00 Ping}
 There are two purposes for a Ping message:
 \begin{itemize}
-\item Availability testing (heart-beat testing)
+\item Availability testing (heart-beat testing).
 \begin{itemize}
 \item A Ping message with TTL equals to 1.
 \item This message is optional, but recommended to send it every 5 seconds.
-\item Peers who receive this Ping message must respond with a Pong message (if this peer supports Pong message).
-\item If no Ping or Pong message is received from the remote side for several times, a node can consider there is some problem with this peer.
+\item Peers which receive a Ping message must respond with a Pong message (if the peer supports Pong message).
+\item If no Ping or Pong message is received from a peer for some time, a node may assume that there is some problem with this peer.
 However, the node SHOULD still keep this connection, in case the peer does not support Ping and Pong message.
 \end{itemize}
 \item Network probing
 \begin{itemize}
 \item A Ping message with TTL larger than 1.
 \item This function aims to find more peers based on existing nodes.
-\item A node (if Pong message is supported) receiving this kind of Ping message SHOULD respond a Pong message which contains maximum five entries of its neighbour peers (not include the one who initiates the Ping message).
-A node may have more than five entries available, how to choose five from all the neighbours depends on implementation.
-Although a good selection strategy greatly enhances the robustness of the network.
-For simplicity, you can choose randomly or just first five.
+\item A node (if Pong message is supported) receiving this kind of Ping message SHOULD respond with a Pong message which contains maximum five entries of its neighbour peers, excluding the one which sent the Ping message.
+A node may have more than five entries available, how to choose among them is implementation dependant.
+Although a good selection strategy greatly enhances the robustness of the network, you may choose randomly or just the first five for simplicity.
 \end{itemize}
 \end{itemize}
 
-A Ping message always contains NO message body.
-The only different between Ping type A and B is the TTL field.
+Ping messages carry NO payload.
+The only difference between Ping type A and B is the TTL field.
 
 \subsubsection{0x01 Pong}
-Correspondingly, a Pong message also has two types.
-Since a PONG message replies a PING message, the original sender IP, sender port and message ID keep unchanged.
+Correspondingly, there are also two types of Pong messages.
+Since a Pong message responds to a Ping message, the original sender IP, sender port and message ID are identical to the Ping message.
 \begin{itemize}
-\item A Pong message for responding availability testing.
-This Pong message carries NO body information.
-\item A Pong message for responding network probing.
-This Pong message contains its neighbour peer information in the body.
-The body of the message consists of: total number of the entries and one entry record(neighbour IP and listening port) for each neighbour.
+\item A Pong message responding to an availability test.
+This Pong message carries no payload.
+\item A Pong message responding to a network probe.
+This Pong message contains the neighbour information of the peer in the body.
+See the description for the corresponding Ping message for details.
 \end{itemize}
 
 \begin{verbbox}
-0                          16                        32
+0                         16                        32
 +------------+------------+------------+------------+
 |        Entry size       |           SBZ           |
 +------------+------------+------------+------------+
@@ -191,11 +194,11 @@ The body of the message consists of: total number of the entries and one entry r
 \begin{figure}[h!]
   \centering
   \theverbbox
-  \label{header}
+  \label{pong}
   \caption{Pong message}
 \end{figure}
 
-\textbf{Entry size}: the number of entries in the Pong message body.
+\textbf{Entry size}: The number of entries in the Pong message body.
 
 \textbf{SBZ}: Should be zero. These bits are reserved.
 
@@ -205,12 +208,15 @@ The body of the message consists of: total number of the entries and one entry r
 
 \subsubsection{0x80 Query}
 A Query Message contains a query key in the message body.
-It is propagated in the network according to its TTL (forwarded by peers).
-A node receiving this message SHOULD look up its own sharing data, and return the matched entries (if any) in a Query Hit message, and it SHOULD also forward this message to its neighbour peers (if TTL is larger than 0) no mater the query is hit or not in its local shared files.
+It is propagated in the network according to its TTL.
+A node receiving this message SHOULD look up its own sharing data, and return the matched entries (if any) in a Query Hit message.
+It SHOULD also forward this message to its neighbours (if TTL is larger than 0) no mater the query is a hit or not in its local shared files.
 
-The length of search criteria varies, and the actual length is decided by the Payload length field in the message header.
-Nodes MUST NOT change the message ID of a query message while forwarding.
-If a node receives a Query Message whose ID is identical to a previous query in a short time period, the node MUST drop this message.
+The length of search criteria varies, and the actual length is determined by the Payload length field in the message header.
+Nodes MUST NOT change the message ID of a Query Message while forwarding.
+
+A node SHOULD keep a record of recently received Query Messages.
+If a node receives a Query Message whose ID is identical to a recent query, the message SHOULD be discarded.
 
 \begin{verbbox}
 +------------+------------+------------+------------+
@@ -221,16 +227,17 @@ If a node receives a Query Message whose ID is identical to a previous query in 
 \begin{figure}[h!]
   \centering
   \theverbbox
-  \label{header}
+  \label{query}
   \caption{Query message}
 \end{figure}
 
 
 \subsubsection{0x81 Query Hit}
-Query Hit message uses the same message ID as the Query message.
-It is routed back to the query sender using the reverse path of the Query message.
-The body of Query Hit message contains entries of matched resources, each entry provides information: resource ID (unique for the sharing node), resource value.
-Like Pong messages, the first 2 bytes of a Query Hit message contains the total number of entries in the message.
+The message ID of a Query Hit message is identical to that of the corresponding Query message.
+A Query Hit message is routed back to the query sender using the reverse path of the Query message.
+The body of Query Hit message contains entries of matched resources.
+Each entry provides: resource ID (unique for the sharing node) and resource value.
+The first 2 bytes of a Query Hit message body contains the total number of entries in the message.
 
 \begin{verbbox}
 0                          16                        32
@@ -251,13 +258,13 @@ Like Pong messages, the first 2 bytes of a Query Hit message contains the total 
 \begin{figure}[h!]
   \centering
   \theverbbox
-  \label{header}
+  \label{queryhit}
   \caption{Query Hit}
 \end{figure}
 
-\textbf{Entry size}: the number of entries in the Query Hit message body.
+\textbf{Entry size}: The number of entries in the Query Hit message body.
 
-\textbf{SBZ}: should be zero.
+\textbf{SBZ}: Should be zero.
 
 \textbf{Resource ID (Xnd)}: The ID of the resource.
 
@@ -267,63 +274,70 @@ Like Pong messages, the first 2 bytes of a Query Hit message contains the total 
 Bye message is optional with TTL equals to 1.
 The receiver MUST NOT forwards this message and MUST close the TCP connection immediately.
 The sender SHOULD wait for the termination of the connection and then quit the network.
-Bye message takes no message body.
+A Bye message carries no payload.
 
 \section{Detailed Instructions and Tips}
 \subsection*{Which development environment and programming language can I use?}
 We highly recommend you to use C under Linux/Unix environment.
-If you are not so familiar to network programming, learning it from C enables fully grasp of the network programming concepts.
-Conversely, high level languages, normal coming with highly wrap libraries, hide those things from you.
+If you are not familiar with network programming, learning it in C enables full grasp of the network programming concepts.
+On the contrary, high level languages usually come with highly wrapped libraries which hide those details from you.
 
-Another alternative language can be considered is Java.
-However, we can only provide the protocol specification and some utility functions in C.
-If you use Java, you need to implement them by yourself.
+One alternative is Java.
+However, we can only provide the protocol specification and sample codes in C.
+If you use Java, you have to adapt them by yourself.
 
 \subsection*{Network Byte Order}
 The P2P protocol is a binary protocol, and like other network protocol, it follows network byte order.
 The network byte order is big-endian.
-However, the machine you use for programming is normally x86 architecture.
+However, your workstation is most likely of x86 architecture.
 In other words, it is little-endian.
-Remember to consider the endianness \footnote{\url{http://en.wikipedia.org/wiki/Endianness}} when programming (if you programme in C).
+Keep the endianness \footnote{\url{http://en.wikipedia.org/wiki/Endianness}} in your mind.
 
 \subsection*{How to bootstrap?}
 Information regarding the bootstrap network will be announced later through Noppa.
 The bootstrap information contains the IP address and the listening port of existing nodes in the network.
 A new node can send a Join Message to an IP and port combination to participate in the network.
-Also we will provide some test keys so you can search for them inside the network.
+We will also provide some test keys so you can search for them in the network.
 
 \subsection*{Should I implement the full protocol specification in this assignment?}
 Implementation of the whole protocol is not mandatory.
-Only fulfilling parts of them are enough to accomplish the two tasks.
-However, you are encouraged to explore more in your application.
+Only fulfilling parts of them is enough to pass the assignment.
+However, you are encouraged to explore further.
 
 \subsection*{Should I consider NAT or firewall problems?}
-In this assignment, we assume that there are no NAT boxes or firewalls between any two nodes, so you do not need to consider them.
-In the Gnutella v0.6 protocol, a special PUSH message is adopted to handle these problems.
+You are not required to traverse NAT or firewall in this assignment.
+In the Gnutella v0.6 protocol, there is a Push message to mitigate these problems.
 Read the Gnutella RFC for more information.
 
-\subsection*{Should I provide GUI?}
-The purpose of this assignment is not fancy GUI, however if you want to try GUI programming, feel free to do it.
+Note, however, that there might be an NAT or a firewall in your working environment.
+They may hamper the interaction between your nodes and the bootstrap network or other students' nodes.
+
+\subsection*{Should I provide a GUI?}
+The purpose of this assignment is not a fancy GUI.
+However, if you want to try GUI programming, feel free to do it.
 
 \subsection*{Should I use multi-thread/process?}
 The assignment is designed so that it is achievable with a single process.
-The different demo task can be implemented as separate applications, as long as you achieve the goals.
-Though we encourage you to implement a fully functioning node, it is not mandatory.
-A related I/O API you might be interested in is \texttt{select()}, which is available in both C and Java.
+The different demo task may be implemented as separate applications, as long as you achieve the goals.
+An API you might be interested in is \texttt{select()}, which is available in both C and Java.
+
+Nevertheless, you are encouraged to explore different possibilities.
 
 \subsection*{How to locate the problem in my code?}
-For network programming, \emph{Wireshark} or \emph{tcpdump} are really useful to check the contents of the packets you send to the network.
-Observe the inbound and outbound packets to check if you really send or receive the messages and wether they satisfy the format of the protocol.
+For network programming, \emph{Wireshark} or \emph{tcpdump} are useful for checking the contents of the packets you send to and receive from the network.
+Observe the inbound and outbound packets to check if you are actually sending or receiving the messages and whether they conforms to the format of the protocol.
 
-The common debugging tool for Linux is GDB, which allows you to set break points in you application and step through the program.
-There is also similar debugger for Java, and can be easily launched in IDE like Eclipse or NetBeans.
+The common debugging tool for Linux is \emph{GDB}, which allows you to set break points in you programme and step through the program.
+There is also similar debugger for Java, and can be easily launched in IDE such as Eclipse or NetBeans.
 
-Sometimes, printing out the information also helps you to solve the problem.
+Printing out the states often helps you to track down the problem.
 
 \subsection*{Think before coding}
 Conquer the feature list one by one without having a full view is discouraged.
 Eventually you may find that you have to rewrite your application in order to implement the next feature.
 Understand all features and have a clear design increase your productivity.
+
+
 \section{Submission}
 Each team will be provided a Niksula Git \footnote{\url{https://git.niksula.hut.fi/}} repository for version control and submission.
 Please check also Git documentation \footnote{\url{http://git-scm.com/doc}} if you have not used it before.
@@ -339,31 +353,31 @@ assignment_1/
 
 \begin{itemize}
 \item The \texttt{src} directory contains all your source code.
-\item Submit only the source code, NOT binary executables.
+\item Submit only the source code, not binary executables.
 \item The \texttt{README} file is a text file and it should explain how to build and run your application.
 \item Clearly state your solution for this assignment in \texttt{Report.pdf}. Please be concise and go directly to the main points. The report should be no more than 4 pages long.
 \item Please follow the directory structure and naming convention, otherwise your submission will be ignored.
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
-Deadline is strict and commits of code after the deadline will not be reviewed.
-Please plan early your workload and test early the features that you are implementing.
-
-We cannot promise 100\% uptime in the bootstrap servers.
-Should the bootstrap servers become unavailable please send us an e-mail so we can fix it as soon as possible.
+Deadline is strict and commits after the deadline will not be graded.
+Please plan early your workload and test early the features which you are implementing.
 
 Frequent commits to Git repository is encouraged.
 Try not to send only one big commit in the end, but many small commits as the development proceeds.
 
+Unfortunately, we cannot guarantee 100\% uptime in the bootstrap servers.
+Should they become unavailable please send us an e-mail so we can fix it as soon as possible.
+
 
 \section{Demo}
-The demo session is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application and 5 minutes for questions.
-Your applications must be checked out from the Git and be built from source onsite during the demo session.
+The demo session is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application, and 5 minutes for questions.
+You must check out the source code from the Git and build your application from source onsite during the demo session.
 Both team members shall be present at the demo session.
 The basic requirements are:
 \begin{itemize}
-\item Show the application is able to search for a specified key in the network, and retrieve the corresponding value(s).
-\item Show the application is able to publish a specified key to the network.
+\item Show the application is able to search for a given key in the network, and retrieve the corresponding value(s).
+\item Show the application is able to publish a given key to the network.
 \end{itemize}
 You are free to decide how to present other features of your application, but remember to make a plan and finish your demo on time.
 Detailed arrangements of the demo session will be announced later.
@@ -373,21 +387,25 @@ The assignment is split into several functions, and points are given separately 
 To pass the assignment, you have to implement all features in the basic level.
 Basic level features also satisfy the basic requirements of demo sessions.
 
+\vskip 20pt
+
+fail --- $<$ 20 points \emph{or} a missing basic feature.
+
+1 --- $\ge$ 20 points.
+
+2 --- $\ge$  40 points.
+
+3 --- $\ge$ 60 points.
+
+4 --- $\ge$ 80 points.
+
+5 --- $\ge$  100 points.
+
+\vskip 20pt
+
 Total: 130 Points
 
-0 - fail ($<$ 20 points).
-
-1 - $\ge$ 20 points.
-
-2 - $\ge$  40 points.
-
-3 - $\ge$ 60 points.
-
-4 - $\ge$ 80 points.
-
-5 - $\ge$  100 points.
-
-Please check the attached tables to see the specific grading we will use.
+Please check the attached tables to see the detailed grading criteria.
 
 \begin{table}[htdp]
 \caption{Basic (20 points)}
@@ -443,7 +461,7 @@ Comments on the assignment are also welcomed.
 No more than 4 pages and do not paste source code. & 10 points \\
 \hline
 A good demo.
-Show good understanding of the assignment, application runs well, and finish the demo on time. & 10 points \\
+Show good understanding of the assignment, application runs well, and finish the demo within allotted time. & 10 points \\
 \hline
 Extra points for constructive comments on this assignment, a good implementation, or other unexpected but decent outcome. & 10 points \\
 
