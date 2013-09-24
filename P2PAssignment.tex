@@ -99,17 +99,19 @@ Join Request has no payload.
 A Join Response has a 2 bytes body, which contains the result of Join Request.
 A new node sends a Join Request message to a node that is already in the network for the permission of entering the network.
 This is the so-called bootstrap process.
-A node which has already joined the network may also send a Join Request to another node to expand its own neighbourhood.
+A node which has already joined the network MAY also send a Join Request to another node to expand its own neighbourhood.
 By connecting with more nodes, the reliability is enhanced.
 
 A Join Response has a 2 bytes body, which contains the result of Join Request.
-If the Join Request is accepted by a remote peer, it will return a Join Response message with the same message ID and a 0x0200 status code in the message body.
-After that, both nodes should consider each other as a normal peer and keep the TCP connection for message exchange.
+If the Join Request is accepted by a remote peer, it MUST respond with a Join Response message with the same message ID and a 0x0200 status code in the message body.
+After that, both nodes consider each other as a normal peer and keep the TCP connection for message exchange.
 
 In version one of our protocol, there is only one valid status code (0x0200).
 All others are invalid and how to handle them are implementation dependant.
 
 To refuse a Join Request, a standard way is to close the TCP connection.
+
+A node SHOULD be able to connect to any given IP and port combination.
 
 \begin{verbbox}
 0                          16
@@ -142,21 +144,19 @@ To refuse a Join Request, a standard way is to close the TCP connection.
 \subsubsection{0x00 Ping}
 There are two purposes for a Ping message:
 \begin{itemize}
-\item Availability testing (heart-beat testing).
+\item Type A: Availability test (heart-beat).
 \begin{itemize}
 \item A Ping message with TTL equals to 1.
-\item This message is optional, but recommended to send it every 5 seconds.
-\item Peers which receive a Ping message must respond with a Pong message (if the peer supports Pong message).
-\item If no Ping or Pong message is received from a peer for some time, a node may assume that there is some problem with this peer.
+\item It is recommended to send a Type A Ping message to your neighbours every 5 seconds.
+\item A node receiving a Type A Ping message SHOULD respond with a Type A Pong message.
+\item If neither Ping or Pong message is received from a peer for some time, a node MAY assume that there is some problem with this peer.
 However, the node SHOULD still keep this connection, in case the peer does not support Ping and Pong message.
 \end{itemize}
-\item Network probing
+\item Type B: Network probe
 \begin{itemize}
-\item A Ping message with TTL larger than 1.
+\item A Ping message with TTL greater than 1.
 \item This function aims to find more peers based on existing nodes.
-\item A node (if Pong message is supported) receiving this kind of Ping message SHOULD respond with a Pong message which contains maximum five entries of its neighbour peers, excluding the one which sent the Ping message.
-A node may have more than five entries available, how to choose among them is implementation dependant.
-Although a good selection strategy greatly enhances the robustness of the network, you may choose randomly or just the first five for simplicity.
+\item A node receiving a Type B Ping message SHOULD respond with a Type B Pong message. 
 \end{itemize}
 \end{itemize}
 
@@ -164,15 +164,18 @@ Ping messages carry NO payload.
 The only difference between Ping type A and B is the TTL field.
 
 \subsubsection{0x01 Pong}
-Correspondingly, there are also two types of Pong messages.
-Since a Pong message responds to a Ping message, the original sender IP, sender port and message ID are identical to the Ping message.
+There are two types of Pong messages.
+
 \begin{itemize}
-\item A Pong message responding to an availability test.
+\item Type A: A Pong message responding to an availability test.
 This Pong message carries no payload.
-\item A Pong message responding to a network probe.
-This Pong message contains the neighbour information of the peer in the body.
-See the description for the corresponding Ping message for details.
+\item Type B: A Pong message responding to a network probe.
+This Pong message contains maximum five entries of the node's neighbours, excluding the one which sent the Ping message.
+A node may have more than five entries available, how to choose among them is implementation dependant.
+Although a good selection strategy greatly enhances the robustness of the network, you may choose randomly or just the first five for simplicity.
 \end{itemize}
+
+Since a Pong message responds to a Ping message, its message ID is identical to that of the corresponding Ping message.
 
 \begin{verbbox}
 0                         16                        32
@@ -209,14 +212,14 @@ See the description for the corresponding Ping message for details.
 \subsubsection{0x80 Query}
 A Query Message contains a query key in the message body.
 It is propagated in the network according to its TTL.
-A node receiving this message SHOULD look up its own sharing data, and return the matched entries (if any) in a Query Hit message.
-It SHOULD also forward this message to its neighbours (if TTL is larger than 0) no mater the query is a hit or not in its local shared files.
+A node receiving this message SHOULD look up its own sharing data, and return the matched entries, if any, in a Query Hit message.
+It SHOULD also forward this message to its neighbours, if TTL is greater than 0, no mater the query is a hit or not among its local shared files.
 
-The length of search criteria varies, and the actual length is determined by the Payload length field in the message header.
-Nodes MUST NOT change the message ID of a Query Message while forwarding.
+The length of search criteria varies. The actual length is determined by the Payload length field in the message header.
+Nodes MUST NOT change the message ID of a Query Message while forwarding the message.
 
-A node SHOULD keep a record of recently received Query Messages.
-If a node receives a Query Message whose ID is identical to a recent query, the message SHOULD be discarded.
+A node SHOULD keep a record of recently received Query Messages and their senders or forwarders.
+If a node receives a Query Message whose message ID is identical to a recent Query, the message SHOULD be discarded.
 
 \begin{verbbox}
 +------------+------------+------------+------------+
@@ -234,10 +237,11 @@ If a node receives a Query Message whose ID is identical to a recent query, the 
 
 \subsubsection{0x81 Query Hit}
 The message ID of a Query Hit message is identical to that of the corresponding Query message.
-A Query Hit message is routed back to the query sender using the reverse path of the Query message.
 The body of Query Hit message contains entries of matched resources.
 Each entry provides a resource ID and the corresponding resource value.
 The first 2 bytes of a Query Hit message body contains the total number of entries in the message.
+
+A Query Hit message is routed back to the Query sender using the reverse path of the Query message.
 
 \begin{verbbox}
 0                          16                        32
@@ -272,8 +276,8 @@ The first 2 bytes of a Query Hit message body contains the total number of entri
 
 \subsubsection{0x02 Bye}
 Bye message is optional with TTL equals to 1.
-The receiver MUST NOT forwards this message and MUST close the TCP connection immediately.
-The sender SHOULD wait for the termination of the connection and then quit the network.
+The receiver MUST NOT forward this message and MUST close the TCP connection immediately.
+The sender SHOULD wait for the termination of the connection.
 A Bye message carries no payload.
 
 \section{Detailed Instructions and Tips}
@@ -382,8 +386,6 @@ The basic requirements are:
 You are free to decide how to present other features of your application, but remember to make a plan and finish your demo on time.
 Detailed arrangements of the demo session will be announced later.
 
-Your application should be able to connect to any given IP and port combination at the demo.
-In other words, the peer list shall not be hard coded (or at least in a way that is easy to change).
 
 \section{Grading}
 The assignment is split into several functions, and points are given separately to each function.
