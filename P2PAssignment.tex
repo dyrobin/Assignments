@@ -29,11 +29,11 @@ Grading is based on numbers of features your application provides, the final rep
 See the grading section for more information.
 
 
-\section{Protocol Specification and Behaviours}
+\section{Protocol Specification}
 The protocol for this assignment is a binary protocol and originated from Gnutella 0.6 \cite{gnutella}.
 This protocol works on top of TCP and contains a 16 bytes fixed header.
 Similar to other binary network protocols, all value fields are in network byte order.
-In order to differentiate from TCP packets, we use the term ``message'' in our protocol.
+In order to differentiate from TCP packets, we use the term \emph{message} in our protocol.
 
 \subsection{Protocol header}
 \begin{verbbox}
@@ -53,14 +53,14 @@ In order to differentiate from TCP packets, we use the term ``message'' in our p
   \centering
   \theverbbox
   \caption{Protocol header}
-    \label{fig:header}
+  \label{fig:header}
 \end{figure}
 
 Figure \ref{fig:header} illustrates the structure of the protocol header.
 The meaning of different fields are as follow:
 
 \textbf{Version}: The version of this protocol, always one.
-Any message with other version values MUST be dropped.
+Any message with other version values MUST be discarded.
 
 \textbf{TTL}: Time To Live.
 This field MUST be less than or equal to five.
@@ -78,10 +78,8 @@ If TTL of a message equals to zero, this message MUST be discarded.
 \end{itemize}
 
 \textbf{Original Sender IP Address}: The IPv4 address of the original sender of this message.
-The intermediate nodes MUST NOT change this field when forwarding the message.
 
 \textbf{Sender Port}: The listening port number of the original sender.
-The intermediate nodes MUST NOT change this field when forwarding the message.
 
 \textbf{Message ID}: The message ID SHOULD be globally unique for each message. 
 One way to generate the ID is to put the IP of the sender, port, time stamp, and a sequence number together, then hash them to create a message ID.
@@ -94,38 +92,25 @@ The header length is NOT included.
 \subsection{Types of message}
 \subsubsection{0x03 Join}
 There are two sub-types of Join message: Join Request and Join Response.
-Join Request has no payload.
 
-A Join Response has a 2 bytes body, which contains the result of Join Request.
 A new node sends a Join Request message to a node that is already in the network for the permission of entering the network.
 This is the so-called bootstrap process.
 A node which has already joined the network MAY also send a Join Request to another node to expand its own neighbourhood.
 By connecting with more nodes, the reliability is enhanced.
+Join Request carries no payload.
 
-A Join Response has a 2 bytes body, which contains the result of Join Request.
-If the Join Request is accepted by a remote peer, it MUST respond with a Join Response message with the same message ID and a 0x0200 status code in the message body.
+A Join Response carries a 2 bytes body, which contains the result of Join Request.
+If a node accepts a Join Request, it MUST respond with a Join Response message with the same message ID and a 0x0200 status code in the message body.
 After that, both nodes consider each other as a normal peer and keep the TCP connection for message exchange.
 
-In version one of our protocol, there is only one valid status code (0x0200).
+To refuse a Join Request, a standard way is to close the TCP connection.
+Note that the joining node may as well close the connection while you are processing its Join Request.
+
+In the current version of the protocol 0x0200 is the only valid status code.
 All others are invalid and how to handle them are implementation dependant.
 
-To refuse a Join Request, a standard way is to close the TCP connection.
+A node SHOULD be able to connect to any IP and port combination.
 
-A node SHOULD be able to connect to any given IP and port combination.
-
-\begin{verbbox}
-0                          16
-+------------+------------+
-|      Status code        |
-+------------+------------+
-\end{verbbox}
-
-\begin{figure}[h!]
-  \centering
-  \theverbbox
-  \label{joinrequest}
-  \caption{Join message}
-\end{figure}
 
 \begin{verbbox}
 0                          16
@@ -142,40 +127,39 @@ A node SHOULD be able to connect to any given IP and port combination.
 \end{figure}
 
 \subsubsection{0x00 Ping}
-There are two purposes for a Ping message:
+There are two sub-types of Ping message:
+
 \begin{itemize}
 \item Type A: Availability test (heart-beat).
 \begin{itemize}
 \item A Ping message with TTL equals to 1.
 \item It is recommended to send a Type A Ping message to your neighbours every 5 seconds.
 \item A node receiving a Type A Ping message SHOULD respond with a Type A Pong message.
-\item If neither Ping or Pong message is received from a peer for some time, a node MAY assume that there is some problem with this peer.
-However, the node SHOULD still keep this connection, in case the peer does not support Ping and Pong message.
 \end{itemize}
 \item Type B: Network probe
 \begin{itemize}
 \item A Ping message with TTL greater than 1.
-\item This function aims to find more peers based on existing nodes.
-\item A node receiving a Type B Ping message SHOULD respond with a Type B Pong message. 
+\item Its goal is to find more peers beyond its current neighbourhood.
+\item A node receiving a Type B Ping message SHOULD respond with a Type B Pong message (see below). 
 \end{itemize}
 \end{itemize}
 
-Ping messages carry NO payload.
-The only difference between Ping type A and B is the TTL field.
+If neither Ping or Pong message is received from a peer for some time, a node MAY assume that there is some problem with this peer.
+However, the node SHOULD still keep this connection, in case the peer does not support Ping and Pong messages.
+
+Ping message carries no payload.
 
 \subsubsection{0x01 Pong}
-There are two types of Pong messages.
+There are two sub-types of Pong message:
 
 \begin{itemize}
 \item Type A: A Pong message responding to an availability test.
-This Pong message carries no payload.
+It carries no payload.
 \item Type B: A Pong message responding to a network probe.
-This Pong message contains maximum five entries of the node's neighbours, excluding the one which sent the Ping message.
+Its message body carries maximum five entries of the node's neighbours, excluding the one which sent the Ping message.
 A node may have more than five entries available, how to choose among them is implementation dependant.
 Although a good selection strategy greatly enhances the robustness of the network, you may choose randomly or just the first five for simplicity.
 \end{itemize}
-
-Since a Pong message responds to a Ping message, its message ID is identical to that of the corresponding Ping message.
 
 \begin{verbbox}
 0                         16                        32
@@ -197,9 +181,11 @@ Since a Pong message responds to a Ping message, its message ID is identical to 
 \begin{figure}[h!]
   \centering
   \theverbbox
-  \label{pong}
-  \caption{Pong message}
+  \caption{Type B Pong message}
+  \label{bpong}
 \end{figure}
+
+Fields of the body of a Type B Pong message (Figure \ref{bpong}):
 
 \textbf{Entry size}: The number of entries in the Pong message body.
 
@@ -208,6 +194,11 @@ Since a Pong message responds to a Ping message, its message ID is identical to 
 \textbf{IP address of Xnd Entry}: The IP address of Xnd Entry.
 
 \textbf{Port of Xnd Entry}: The listening port number of Xnd Entry.
+
+\vskip 12pt
+
+Since a Pong message responds to a Ping message, its message ID is identical to that of the corresponding Ping message.
+
 
 \subsubsection{0x80 Query}
 A Query Message contains a query key in the message body.
@@ -219,8 +210,8 @@ The length of search criteria varies. The actual length is determined by the Pay
 Nodes MUST NOT change the message ID of a Query Message while forwarding the message.
 
 A node SHOULD keep a record of recently received Query Messages and their senders or forwarders.
-Note that there may be multiple paths between two nodes.
 If a node receives a Query Message whose message ID is identical to a recent Query, the message SHOULD be discarded.
+How to deal with multi-path problem is implmentation dependant.
 
 \begin{verbbox}
 +------------+------------+------------+------------+
@@ -277,11 +268,11 @@ A Query Hit message is routed back to the Query sender using the reverse path of
 
 \subsubsection{0x02 Bye}
 Bye message is optional with TTL equals to 1.
-The receiver MUST NOT forward this message and MUST close the TCP connection immediately.
+The receiver MUST close the TCP connection immediately.
 The sender SHOULD wait for the termination of the connection.
 A Bye message carries no payload.
 
-\section{Detailed Instructions and Tips}
+\section{Frequently Asked Questions}
 \subsection*{Which development environment and programming language can I use?}
 We highly recommend you to use C under Linux/Unix environment.
 If you are not familiar with network programming, learning it in C enables full grasp of the network programming concepts.
@@ -299,7 +290,7 @@ In other words, it is little-endian.
 Keep the endianness \footnote{\url{http://en.wikipedia.org/wiki/Endianness}} in your mind.
 
 \subsection*{How to bootstrap?}
-Information regarding the bootstrap network will be announced later through Noppa.
+Information regarding the bootstrap network will be announced later through Noppa \footnote{\url{https://noppa.aalto.fi/}}.
 The bootstrap information contains the IP address and the listening port of existing nodes in the network.
 A new node can send a Join Message to an IP and port combination to participate in the network.
 We will also provide some test keys so you can search for them in the network.
@@ -365,7 +356,8 @@ assignment_1/
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
-Deadline is strict and commits after the deadline will not be graded.
+The deadline is strict.
+Commits after the deadline will not be graded.
 Please plan early your workload and test early the features which you are implementing.
 
 Frequent commits to Git repository is encouraged.
@@ -381,11 +373,11 @@ You must check out the source code from the Git and build your application from 
 Both team members shall be present at the demo session.
 The basic requirements are:
 \begin{itemize}
-\item Show the application is able to search for a given key in the network, and retrieve the corresponding value(s).
+\item Show the application is able to search for a given key in the network and retrieve the corresponding value(s).
 \item Show the application is able to publish a given key to the network.
 \end{itemize}
-You are free to decide how to present other features of your application, but remember to make a plan and finish your demo on time.
-Detailed arrangements of the demo session will be announced later.
+You are free to decide how to present other features of your application, but remember to make a plan and finish your demo within allotted time.
+Detailed arrangements of the demo sessions will be announced later.
 
 
 \section{Grading}
@@ -420,9 +412,9 @@ Please check the attached tables to see the detailed grading criteria.
 \hline
 Send Join Request message in order to join the network & 5 Points \\
 \hline
-Handle Join Request message. Consider the situation that remote peer closes the connection. & 5 Points\\
+Handle Join Request message & 5 Points\\
 \hline
-Send Query message with a search key & 5 Points  \\
+Send Query message with a search key and handle Query Hit messages & 5 Points  \\
 \hline
 Publish a key/value pair in the network and respond to a Query message when its search key equals your published key & 5 Points \\
 \hline
@@ -435,20 +427,19 @@ Publish a key/value pair in the network and respond to a Query message when its 
 \begin{center}
 \begin{tabular}{|p{12cm}|p{2cm}|}
 \hline
-Respond to Type A Ping message with a Pong.
+Join multiple peers to expand your network & 10 Points \\
+\hline
+Send Type A Ping message and handle Type A Pong message to check if your neighbours are alive. & 10 Points \\
+\hline
+Respond to Type A Ping message with a Type A Pong message.
 Tell your neighbour that you are still alive. & 10 points \\
 \hline
-Send Type A Ping message.
-Check if your neighbours are alive. & 10 Points \\
+Send Type B Ping message and handle Type B Pong message to find more node information in the network & 10 Points \\
 \hline
-Respond to Type B Ping message with a Pong.
+Respond to Type B Ping message with a Type B Pong message.
 Tell your neighbour who else you know. & 10 Points \\
 \hline
-Send Type B Ping message to find more node information in the network & 10 Points \\
-\hline
-Join multiple peers in order to expand your network & 10 Points \\
-\hline
-Forward Query message with loop avoidance to help other node to find a resource & 15 Points \\
+Forward Query messages with loop avoidance to help other node to find a resource & 15 Points \\
 \hline
 Forward Query Hit message by following the reverse path of its corresponding Query message & 15 Points \\
 \hline
