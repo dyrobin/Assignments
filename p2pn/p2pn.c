@@ -64,6 +64,7 @@ usage()
     printf("    -p: Max Number of neighbor entries in PONG \n");
 }
 
+#if 0
 static void
 debug_env()
 {
@@ -91,6 +92,7 @@ debug_env()
     }
     p2plog(DEBUG, "\n\n");
 }
+#endif
 
 /**
  * handle messages in the peer_cache
@@ -265,7 +267,7 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
         return;
     }
 
-    bcopy(buf, pc->recvbuf + pc->bp, bufsize);
+    memcpy(pc->recvbuf + pc->bp, buf, bufsize);
     pc->bp += bufsize;
     while ((n = recv_msg(pc)) != 0) {
         //blank;
@@ -297,8 +299,8 @@ handle_waiting_list()
     list_for_each_entry_safe(wtn, wtnx, &waiting_nodes.list, list) {
     /* if there is urgent waiting node, try to establish connection */
         if (!wtn_conn_established(wtn) && wtn_urgent(wtn)) {
-            bzero(&addr, sizeof(addr));
-            bcopy(&wtn->ip, &addr.sin_addr, sizeof(struct in_addr));
+            memset(&addr, 0, sizeof(addr));
+            memcpy(&addr.sin_addr, &wtn->ip, sizeof(struct in_addr));
             addr.sin_port = wtn->lport;
             addr.sin_family = AF_INET;
 
@@ -539,20 +541,20 @@ start_node()
     p2plog(INFO, "P2P node starts on  %s\n", sock_ntop(&ltn_addr));
 
     /* init local node database */
-    bzero(&neighbors, sizeof(neighbors));
+    memset(&neighbors, 0, sizeof(neighbors));
     INIT_LIST_HEAD(&neighbors.list);
-    bzero(&waiting_nodes, sizeof(waiting_nodes));
+    memset(&waiting_nodes, 0, sizeof(waiting_nodes));
     INIT_LIST_HEAD(&waiting_nodes.list);
 
     /*init local sent_msg store */
-    bzero(&sentmsgs, sizeof(sentmsgs));
+    memset(&sentmsgs, 0, sizeof(sentmsgs));
     INIT_LIST_HEAD(&sentmsgs.list);
     /*init local recv mes_store */
-    bzero(&g_recvmsgs, sizeof(g_recvmsgs));
+    memset(&g_recvmsgs, 0, sizeof(g_recvmsgs));
     INIT_LIST_HEAD(&g_recvmsgs.list);
 
     /*init peer cache */
-    bzero(&pr_cache, sizeof(pr_cache));
+    memset(&pr_cache, 0, sizeof(pr_cache));
     INIT_LIST_HEAD(&pr_cache.list);
 
     /* If there is bootstrap code provided, read it and put
@@ -572,8 +574,8 @@ start_node()
     }
 
     /* Init other global data */
-    bzero(&prev_hbeat, sizeof(prev_hbeat));
-    bzero(&prev_nghquery, sizeof(prev_nghquery));
+    memset(&prev_hbeat, 0, sizeof(prev_hbeat));
+    memset(&prev_nghquery, 0, sizeof(prev_nghquery));
 
     node_loop();
 
@@ -602,7 +604,7 @@ read_kvfile(char *file)
         if (n == 2) {
             kv = (struct keyval *) Malloc(sizeof(struct keyval));
             klen = (strlen(buf) > KEYLEN) ? KEYLEN : strlen(buf);
-            bcopy(buf, kv->key, klen);
+            memcpy(kv->key, buf, klen);
             kv->key[klen] = '\0';
             kv->value = value;
             list_add(&kv->list, &localdata.list);
@@ -625,7 +627,7 @@ main(int argc, char **argv)
     laddr = NULL;
     bsp_code = NULL;
     maxp = NULL;
-    bzero(&ltn_addr, sizeof(ltn_addr));
+    memset(&ltn_addr, 0, sizeof(ltn_addr));
     ltn_addr.sin_family = AF_INET;
 
     setbuf(stdout, NULL);
@@ -684,7 +686,7 @@ main(int argc, char **argv)
     search_key = search;
 
     /* init local key value data store */
-    bzero(&localdata, sizeof(localdata));
+    memset(&localdata, 0, sizeof(localdata));
     INIT_LIST_HEAD(&localdata.list);
 
     if (kvfile != NULL) {

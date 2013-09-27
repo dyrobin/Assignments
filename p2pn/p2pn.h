@@ -190,7 +190,7 @@ get_msgid(struct msgstore *ms)
 static inline void
 wtn_init(struct wtnode_meta *wtn)
 {
-    bzero(wtn, sizeof(struct wtnode_meta));
+    memset(wtn, 0, sizeof(struct wtnode_meta));
     wtn->nrequest = -1;
 }
 
@@ -239,7 +239,7 @@ wtn_contains(struct in_addr *addr, int lport)
 static inline void
 nm_init(struct node_meta *nm)
 {
-    bzero(nm, sizeof(struct node_meta));
+    memset(nm, 0, sizeof(struct node_meta));
     INIT_LIST_HEAD(&nm->msgs.list);
 }
 
@@ -291,7 +291,7 @@ sock_pton(struct sockaddr_in *addr, char *addstr)
     char *sp;
     char buf[SLEN];
 
-    bzero(addr, sizeof(struct sockaddr_in));
+    memset(addr, 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
     read_fail = 0;
     if (addstr != NULL) {
@@ -355,13 +355,13 @@ msg_new(void *msg, int len, int fromfd)
     struct msgstore *nwmsg;
 
     nwmsg = (struct msgstore *) Malloc(sizeof(struct msgstore));
-    bzero(nwmsg, sizeof(struct msgstore));
+    memset(nwmsg, 0, sizeof(struct msgstore));
 
     gettimeofday(&nwmsg->ts, NULL);
     nwmsg->len = len;
     nwmsg->fromfd = fromfd;
     nwmsg->msg = (unsigned char *) Malloc(len);
-    bcopy(msg, nwmsg->msg, len);
+    memcpy(nwmsg->msg, msg, len);
 
     return nwmsg;
 }
@@ -425,7 +425,7 @@ create_peer_cache(int connfd)
     struct peer_cache *pc;
     p2plog(DEBUG, "create new cache for socket fd %d\n", connfd);
     pc = (struct peer_cache *)Malloc(sizeof(struct peer_cache));
-    bzero(pc, sizeof(struct peer_cache));
+    memset(pc, 0, sizeof(struct peer_cache));
     pc->connfd = connfd;
     list_add(&pc->list, &pr_cache.list);
     return 0;

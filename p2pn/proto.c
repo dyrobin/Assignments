@@ -76,7 +76,7 @@ SuperFastHash (const char * data, int len) {
 static void
 init_p2ph(struct P2P_h* ph, uint8_t msgType)
 {
-    bzero(ph, sizeof(struct P2P_h));
+    memset(ph, 0, sizeof(struct P2P_h));
 
     ph->version = 1;
     ph->ttl = 5;
@@ -207,7 +207,7 @@ void handle_ping_message(int connfd, void *msg, int len)
     char buf[256];
     int count, pong_len;
 
-    bcopy(msg, buf, len);
+    memcpy(buf, msg, len);
 
     ph = (struct P2P_h *) buf;
     p2plog(DEBUG, "TTL=%d\n", ph->ttl);
@@ -321,7 +321,7 @@ handle_join_message(int connfd, void *msg, int len)
     if (len == HLEN) { /* JOIN REQUEST */
         /* send JOIN accept */
         //Now we just accept any request
-        bcopy(msg, buf, len);
+        memcpy(buf, msg, len);
         ph->length = htons(JOINLEN);
         pj = (struct P2P_join *) (buf + HLEN);
         pj->status = htons(JOIN_ACC);
@@ -408,7 +408,7 @@ search_localdata(struct P2P_h *ph, int msglen)
         return 0;
     }
 
-    bcopy(((char*)ph) + HLEN, buf, kylen);
+    memcpy(buf, ((char*)ph) + HLEN, kylen);
     buf[kylen] = '\0';
 
     list_for_each_entry(kv, &localdata.list, list) {
@@ -437,11 +437,11 @@ send_query_hit(int connfd, void *msg,
     phme->msg_id = pho->msg_id;
 
     qf = (struct P2P_qhit_front *) (buf + HLEN);
-    bzero(qf, QHIT_MINLEN);
+    memset(qf, 0, QHIT_MINLEN);
     qf->entry_size = htons(1);
 
     qe = (struct P2P_qhit_entry *) (buf + HLEN + QHIT_MINLEN);
-    bzero(qe, QHIT_ENTRYLEN);
+    memset(qe, 0, QHIT_ENTRYLEN);
     qe->res_id = htons(1);
     qe->res_val = htonl(val);
 
@@ -492,7 +492,7 @@ handle_query_hit(int connfd, void *msg, int msglen)
 
     if ( (ms = find_stored_msg(&g_recvmsgs, ph->msg_id)) != NULL) {
         if (ms->fromfd == 0) {
-            bcopy(ms->msg + HLEN, buf, ms->len - HLEN);
+            memcpy(buf, ms->msg + HLEN, ms->len - HLEN);
             buf[ms->len - HLEN] = '\0';
             p2plog(INFO, "query: %s hit, at % %s:%d",
 		   buf,
@@ -539,7 +539,7 @@ int send_query_message(char *search)
     init_p2ph(ph, MSG_QUERY);
     ph->msg_id = gen_msgid_wrap();
 
-    bcopy(search, buf + HLEN, slen);
+    memcpy(buf + HLEN, search, slen);
     buf[HLEN + slen] = '\0';
 
     ph->length = htons(slen+1);
