@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -Wall -pedantic -std=c99 $(DEBUG)
+CFLAGS= -Werror -pedantic -std=c99 $(DEBUG)
 DEBUG= -ggdb
 
 EXE= p2pn pmon
