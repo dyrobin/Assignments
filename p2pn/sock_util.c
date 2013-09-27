@@ -1,3 +1,14 @@
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+
 #include "sock_util.h"
 
 

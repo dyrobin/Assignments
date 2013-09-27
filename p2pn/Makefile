@@ -1,9 +1,9 @@
 CC= gcc
-CFLAGS= -Wall $(DEBUG)
+CFLAGS= -Wall -pedantic -std=c99 $(DEBUG)
 DEBUG= -ggdb
 
 EXE= p2pn pmon
-p2pn_src= p2pn.c proto.c sock_util.c
+p2pn_src= p2pn.c proto.c sock_util.c util.c
 pmon_src= pmon.c
 
 .PHONY: all

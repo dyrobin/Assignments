@@ -2,6 +2,10 @@
  * @brief handler functions for messages of our home-brew p2p protocol.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "p2pn.h"
 #include "proto.h"
 
@@ -10,15 +14,7 @@ int msg_seq = 0;
 
 /*----------------- A hash implementation -------------------------------*/
 #undef get16bits
-#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
-  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
 #define get16bits(d) (*((const uint16_t *) (d)))
-#endif
-
-#if !defined (get16bits)
-#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
-                       +(uint32_t)(((const uint8_t *)(d))[0]) )
-#endif
 
 static uint32_t
 SuperFastHash (const char * data, int len) {
@@ -264,7 +260,7 @@ handle_pong_message(int connfd, void *msg, int len)
         return;
     }
 
-    pf = (struct P2P_pong_front *) (msg + HLEN);
+    pf = (struct P2P_pong_front *) ((char *)msg + HLEN);
     entry_size = ntohs(pf->entry_size);
     if (len != entry_size*PONG_ENTRYLEN + PONG_MINLEN + HLEN) {
     /* check if pong's entry size is valid */
@@ -274,7 +270,7 @@ handle_pong_message(int connfd, void *msg, int len)
     }
 
     /* iterate each pong entry and add it to waiting list */
-    pe = msg + HLEN + PONG_MINLEN;
+    pe = (struct P2P_pong_entry *)((char *)msg + HLEN + PONG_MINLEN);
     p2plog(DEBUG, "PONG with %d entries.\n", entry_size);
     for (i = 0; i < entry_size; i++) {
         p2plog(DEBUG, "HLEN: %d\n"
@@ -282,7 +278,7 @@ handle_pong_message(int connfd, void *msg, int len)
                "PONG_ENTRYLEN * i %d\n",
                HLEN, PONG_MINLEN, PONG_ENTRYLEN * i);
         pe = (struct P2P_pong_entry *)
-                (msg + HLEN + PONG_MINLEN + PONG_ENTRYLEN * i);
+                ((char *)msg + HLEN + PONG_MINLEN + PONG_ENTRYLEN * i);
 
         if (!wtn_contains(&pe->ip, pe->port)
 	    && !nm_contains(&pe->ip, pe->port)) {
@@ -320,7 +316,7 @@ handle_join_message(int connfd, void *msg, int len)
 
     if (len == HLEN) { /* JOIN REQUEST */
         /* send JOIN accept */
-        //Now we just accept any request
+        /* Now we just accept any request */
         memcpy(buf, msg, len);
         ph->length = htons(JOINLEN);
         pj = (struct P2P_join *) (buf + HLEN);
@@ -367,7 +363,7 @@ handle_join_message(int connfd, void *msg, int len)
 
     } else if (len == HLEN + JOINLEN
                 &&ntohs(ph->length) == JOINLEN) { /* JOIN RESPONSE */
-        pj = (struct P2P_join *) (msg + HLEN);
+        pj = (struct P2P_join *) ((char *)msg + HLEN);
         p2plog(DEBUG, "join response: 0x%04X\n", ntohs(pj->status));
         if (ntohs(pj->status) != JOIN_ACC) {
             p2plog(ERROR, "JOIN Refused\n");
@@ -482,7 +478,7 @@ handle_query_hit(int connfd, void *msg, int msglen)
         p2plog(ERROR, "Message body too small\n");
         return -1;
     }
-    qf = (struct P2P_qhit_front *) (msg + HLEN);
+    qf = (struct P2P_qhit_front *) ((char *)msg + HLEN);
 
     nEntry = ntohs(qf->entry_size);
     if ((nEntry * QHIT_ENTRYLEN + QHIT_MINLEN + HLEN) != msglen) {
@@ -492,7 +488,7 @@ handle_query_hit(int connfd, void *msg, int msglen)
 
     if ( (ms = find_stored_msg(&g_recvmsgs, ph->msg_id)) != NULL) {
         if (ms->fromfd == 0) {
-            memcpy(buf, ms->msg + HLEN, ms->len - HLEN);
+            memcpy(buf, (char *)ms->msg + HLEN, ms->len - HLEN);
             buf[ms->len - HLEN] = '\0';
             p2plog(INFO, "query: %s hit, at % %s:%d",
 		   buf,
@@ -501,7 +497,7 @@ handle_query_hit(int connfd, void *msg, int msglen)
 
             for (i = 0; i < nEntry; i++) {
                 qe = (struct P2P_qhit_entry *)
-                        (msg + HLEN + QHIT_MINLEN + QHIT_ENTRYLEN * i);
+                        ((char *)msg + HLEN + QHIT_MINLEN + QHIT_ENTRYLEN * i);
                 p2plog(INFO, "resource ID: %08x = %08X\n",
 		       ntohs(qe->res_id),
 		       ntohl(qe->res_val));

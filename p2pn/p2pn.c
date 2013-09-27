@@ -1,3 +1,14 @@
+#define _POSIX_C_SOURCE 2
+#define _BSD_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+
 #include "proto.h"
 #include "p2pn.h"
 
@@ -270,7 +281,7 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
     memcpy(pc->recvbuf + pc->bp, buf, bufsize);
     pc->bp += bufsize;
     while ((n = recv_msg(pc)) != 0) {
-        //blank;
+        /* blank */
     }
 }
 
@@ -324,8 +335,8 @@ handle_waiting_list()
             /*TODO we should select nodes to connect
             if number of neighbors become less. */
 
-            //send_join_message(connfd);
-            //wtn->nrequest++;
+            /* send_join_message(connfd);
+            wtn->nrequest++; */
         }
     }
 }
