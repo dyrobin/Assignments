@@ -63,9 +63,9 @@ The meaning of different fields are as follow:
 Any message with other version values MUST be discarded.
 
 \textbf{TTL}: Time To Live.
-This field MUST be less than or equal to five.
+This field MUST be greater than zero and be less than or equal to five.
 Each time when a message is forwarded, this field MUST be decreased by one.
-If TTL of a message equals to zero, this message MUST be discarded.
+A message with invalid TTL field MUST be discarded.
 
 \textbf{Msg Type}: The types of message, valid values are:
 \begin{itemize}
