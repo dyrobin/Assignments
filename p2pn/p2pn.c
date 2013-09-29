@@ -1,5 +1,5 @@
-#define _POSIX_C_SOURCE 2
-#define _BSD_SOURCE
+#define _POSIX_C_SOURCE 2 /* getopt */
+#define _BSD_SOURCE       /* timercmp -- check if host is not Linux */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -163,9 +163,8 @@ recv_msg(struct peer_cache *pc)
         goto CLEAR_CACHE;
     }
 
-    if (ph->ttl > MAX_TTL) {
-        p2plog(ERROR, "TTL too large: %d\n",
-	       ph->ttl);
+    if (ph->ttl == 0 || ph->ttl > MAX_TTL) {
+        p2plog(ERROR, "Invalid TTL: %d\n", ph->ttl);
         goto CLEAR_CACHE;
     }
 

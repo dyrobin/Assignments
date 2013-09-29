@@ -165,8 +165,8 @@ forward_p2p_message(int connfd, void *msg, int len)
     struct P2P_h *ph;
 
     ph = (struct P2P_h *) msg;
-    if (ph->ttl == 0) {
-        p2plog(ERROR, "Forward message with ttl = 0\n");
+    if (ph->ttl <= 1) {
+        p2plog(ERROR, "Forward message with TTL <= 1\n");
         return -1;
     }
 
