@@ -221,7 +221,7 @@ Read(int fd, void *ptr, size_t nbytes)
  * @return
  */
 void
-Write(int fd, void *ptr, size_t nbytes)
+Write(int fd, void *ptr, ssize_t nbytes)
 {
     if (write(fd, ptr, nbytes) != nbytes) {
         perror("write error");

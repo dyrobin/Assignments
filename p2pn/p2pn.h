@@ -111,7 +111,7 @@ struct peer_cache {
     uint16_t            lport;
     int                 connfd;
     unsigned char       recvbuf[MAXLINE];
-    int                 bp;
+    unsigned int        bp;
     struct list_head    list;
 };
 
@@ -193,7 +193,7 @@ void nm_list_add(struct node_meta *new_nm);
 void nm_list_del(struct node_meta *nm);
 
 /* Create a new item for the msgstore list */
-struct msgstore *msg_new(void *msg, int len, int fromfd);
+struct msgstore *msg_new(void *msg, unsigned int len, int fromfd);
 
 /* Free the memory of a msgstore item */
 void free_msg(struct msgstore *ms);
@@ -207,7 +207,7 @@ struct msgstore *find_stored_msg(struct msgstore *head, uint32_t msgid);
 void gc_msgstore(struct msgstore *head);
 
 /* Add a message to the global msgstore for incoming messages */
-int push_g_recv_msg(int connfd, void *msg, int len);
+int push_g_recv_msg(int connfd, void *msg, unsigned int len);
 
 /* Create a new peer cache for a new socket descriptor */
 int create_peer_cache(int connfd);

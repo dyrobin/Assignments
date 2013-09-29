@@ -154,7 +154,7 @@ sock_pton(struct sockaddr_in *addr, char *addstr)
     if (addstr != NULL) {
         if((sp = strstr(addstr, ":")) != NULL) {
             iplen = sp - addstr;
-            if (iplen < 50 && iplen > 0 && iplen < strlen(addstr)) {
+            if (iplen < 50 && iplen > 0 && iplen < (int)strlen(addstr)) {
                 strncpy(buf, addstr, iplen);
                 buf[iplen] = '\0';
                 if ((inet_pton(AF_INET, buf, &addr->sin_addr)) == -1)
@@ -207,7 +207,7 @@ nm_list_del(struct node_meta *nm)
 
 /* Create a new item for the msgstore list */
 struct msgstore *
-msg_new(void *msg, int len, int fromfd)
+msg_new(void *msg, unsigned int len, int fromfd)
 {
     struct msgstore *nwmsg;
 
@@ -265,7 +265,7 @@ gc_msgstore(struct msgstore *head)
 
 /* Add a message to the global msgstore for incoming messages */
 int
-push_g_recv_msg(int connfd, void *msg, int len)
+push_g_recv_msg(int connfd, void *msg, unsigned int len)
 {
     struct msgstore *ms;
 

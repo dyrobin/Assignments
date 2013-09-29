@@ -121,11 +121,11 @@ gen_msgid_wrap()
 }
 
 static void
-send_p2p_message(int connfd, void *msg, int len)
+send_p2p_message(int connfd, void *msg, unsigned int len)
 {
     struct P2P_h *ph;
     char buf[128];
-    int nbody;
+    unsigned int nbody;
 
 
     ph = (struct P2P_h *) msg;
@@ -160,7 +160,7 @@ send_p2p_message(int connfd, void *msg, int len)
 }
 
 int
-forward_p2p_message(int connfd, void *msg, int len)
+forward_p2p_message(int connfd, void *msg, unsigned int len)
 {
     struct P2P_h *ph;
 
@@ -194,7 +194,7 @@ send_ping_message(int connfd, int ttl)
     send_p2p_message(connfd, &ph, sizeof(ph));
 }
 
-void handle_ping_message(int connfd, void *msg, int len)
+void handle_ping_message(int connfd, void *msg, unsigned int len)
 {
     struct P2P_h *ph;
     struct P2P_pong_front *pf;
@@ -241,7 +241,7 @@ void handle_ping_message(int connfd, void *msg, int len)
 }
 
 void
-handle_pong_message(int connfd, void *msg, int len)
+handle_pong_message(void *msg, unsigned int len)
 {
     struct P2P_pong_front *pf;
     struct P2P_pong_entry *pe;
@@ -301,7 +301,7 @@ handle_pong_message(int connfd, void *msg, int len)
 
 
 void
-handle_join_message(int connfd, void *msg, int len)
+handle_join_message(int connfd, void *msg, unsigned int len)
 {
     struct P2P_h *ph;
     struct P2P_join *pj;
@@ -394,10 +394,10 @@ handle_join_message(int connfd, void *msg, int len)
 }
 
 uint32_t
-search_localdata(struct P2P_h *ph, int msglen)
+search_localdata(struct P2P_h *ph, unsigned int msglen)
 {
     char buf[MLEN];
-    int kylen;
+    unsigned int kylen;
     struct keyval *kv;
     kylen = msglen - HLEN;
     if (kylen > KEYLEN) {
@@ -417,8 +417,7 @@ search_localdata(struct P2P_h *ph, int msglen)
 }
 
 int
-send_query_hit(int connfd, void *msg,
-               int msglen, uint32_t val)
+send_query_hit(int connfd, void *msg, uint32_t val)
 {
     struct P2P_h *pho, *phme;
     struct P2P_qhit_front *qf;
@@ -447,7 +446,7 @@ send_query_hit(int connfd, void *msg,
 }
 
 int
-flood_msg(int fromfd, void *msg, int msglen)
+flood_msg(int fromfd, void *msg, unsigned int msglen)
 {
     struct node_meta *nm;
 
@@ -460,7 +459,7 @@ flood_msg(int fromfd, void *msg, int msglen)
 }
 
 int
-handle_query_hit(int connfd, void *msg, int msglen)
+handle_query_hit(void *msg, unsigned int msglen)
 {
     struct msgstore *ms;
     struct P2P_h *ph;
@@ -468,7 +467,7 @@ handle_query_hit(int connfd, void *msg, int msglen)
     struct P2P_qhit_entry *qe;
     struct node_meta *nm;
     char buf[MLEN];
-    int bodylen, i;
+    unsigned int bodylen, i;
     uint16_t nEntry;
 
     ph = (struct P2P_h *) msg;
@@ -504,8 +503,10 @@ handle_query_hit(int connfd, void *msg, int msglen)
             }
         } else {
             if((nm = nm_find_by_connfd(ms->fromfd)) != NULL){
-                /* The query is from a neighbor
-                   i should forward back this QHIT */
+                /* This QHIT is for a previously forwarded QUERY. */
+                /* TTL will be decreased to 1 later. */
+                ph->ttl = 2;
+                /* Relay it back. */
                 forward_p2p_message(nm->connfd, msg, msglen);
             } else {
                 p2plog(INFO, "no matched peer\n");
@@ -549,7 +550,7 @@ int send_query_message(char *search)
 
 
 void
-handle_bye_message(int connfd, void *msg, int len)
+handle_bye_message(int connfd)
 {
     struct node_meta *nm;
 

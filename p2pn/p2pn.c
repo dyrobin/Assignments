@@ -119,7 +119,8 @@ recv_msg(struct peer_cache *pc)
     struct node_meta *nm;
 
     uint32_t kval;
-    int msglen, remain_len, from_neigh, connfd, i;
+    int from_neigh, connfd;
+    unsigned int msglen, remain_len, i;
     char mmbuf[SLEN];
 
 #define from_neigh() \
@@ -186,19 +187,19 @@ recv_msg(struct peer_cache *pc)
     }
     switch(ph->msg_type) {
         case MSG_PING:
-        handle_ping_message(connfd, (char *)ph, msglen);
+        handle_ping_message(connfd, ph, msglen);
         break;
 
         case MSG_PONG:
-        handle_pong_message(connfd, (char *)ph, msglen);
+        handle_pong_message(ph, msglen);
         break;
 
         case MSG_BYE:
-        handle_bye_message(connfd, (void *)ph, msglen);
+        handle_bye_message(connfd);
         break;
 
         case MSG_JOIN:
-        handle_join_message(connfd, (char *)ph, msglen);
+        handle_join_message(connfd, ph, msglen);
         break;
 
         case MSG_QUERY:
@@ -214,10 +215,10 @@ recv_msg(struct peer_cache *pc)
                 break;
         }
         gc_msgstore(&g_recvmsgs);
-        push_g_recv_msg(connfd, (void *)ph, msglen);
+        push_g_recv_msg(connfd, ph, msglen);
         /* match local keys */
         if ((kval = search_localdata(ph, msglen)) != 0) {
-            send_query_hit(connfd, ph, msglen, kval);
+            send_query_hit(connfd, ph, kval);
             p2plog(INFO, "QUERY matches local key, QUERY HIT sent.\n");
         }
         /* still forward msg to find more result */
@@ -233,7 +234,7 @@ recv_msg(struct peer_cache *pc)
 	       inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
 	       ntohs(nm->lport));
 
-        handle_query_hit(connfd, (void *)ph, msglen);
+        handle_query_hit(ph, msglen);
         break;
 
         default:

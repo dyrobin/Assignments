@@ -29,7 +29,7 @@ ssize_t
 Read(int fd, void *ptr, size_t nbytes);
 
 void
-Write(int fd, void *ptr, size_t nbytes);
+Write(int fd, void *ptr, ssize_t nbytes);
 
 char *
 sock_ntop(struct sockaddr_in *addr);
