@@ -22,10 +22,10 @@
 /* body length of JOIN message */
 #define JOINLEN         (sizeof(struct P2P_join))
 
-/* Minimum length of PONG body for network probing response */
+/* The minimum length of PONG body for network probing response */
 #define PONG_MINLEN     (sizeof(struct P2P_pong_front))
 
-/* length of each entry in Pong body */
+/* The length of each entry in Pong body */
 #define PONG_ENTRYLEN   (sizeof(struct P2P_pong_entry))
 
 /* Protocol version */
@@ -55,7 +55,7 @@ struct P2P_h {
     uint32_t    msg_id;
 };
 
-/* The body of P2P JOIN response */
+/* The body of the JOIN response */
 struct P2P_join {
     uint16_t    status;
 };

@@ -64,22 +64,23 @@ struct P2P_h {
     uint32_t    msg_id;
 };
 
-/* The body of the JOIN message */
+/* The body of the JOIN response */
 struct P2P_join {
     uint16_t    status;
 };
 
-/* The first part of the PONG message */
+/* The front part of the Pong message body,
+   which includes the entry size */
 struct P2P_pong_front {
     uint16_t    entry_size;
     uint16_t    sbz;
 };
 
-/* Each entry of the PONG message */
+/* The structure of each entry in Pong body */
 struct P2P_pong_entry {
     struct in_addr ip;
     uint16_t       port;
-    uint16_t       nfile;
+    uint16_t       sbz;
 };
 
 /* The first part of the QUERY_HIT message */

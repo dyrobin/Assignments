@@ -224,7 +224,7 @@ void handle_ping_message(int connfd, void *msg, unsigned int len)
             if (nm->connfd != connfd) {
                 pe->ip = nm->ip;
                 pe->port = nm->lport;
-                pe->nfile = 0;
+                pe->sbz = 0;
                 count++;
             }
             if (count >= n_peer_ad)
