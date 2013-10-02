@@ -438,7 +438,6 @@ node_loop()
             }
         }
 
-	p2plog(DEBUG, "\n");
         /* Set select timeout to TICK seconds */
         timeout.tv_sec = TICK_SELECT;
         timeout.tv_usec = 0;
