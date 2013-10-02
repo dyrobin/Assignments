@@ -8,9 +8,6 @@
 /* Default listening port */
 #define PORT_DEFAULT    8601
 
-/* max number of entries for PONG response */
-#define RECM_NEIB       5
-
 /* definition of protocol message type */
 #define MSG_PING        0x00
 #define MSG_PONG        0x01
