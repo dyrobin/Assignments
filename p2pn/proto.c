@@ -272,6 +272,10 @@ handle_pong_message(void *msg, unsigned int len)
     /* iterate each pong entry and add it to waiting list */
     pe = (struct P2P_pong_entry *)((char *)msg + HLEN + PONG_MINLEN);
     p2plog(DEBUG, "PONG with %d entries.\n", entry_size);
+    if (suppress_auto_join) {
+      p2plog(DEBUG, "Auto join suppressed\n");
+      return;
+    }
     for (i = 0; i < entry_size; i++) {
         p2plog(DEBUG, "HLEN: %d\n"
                "PONG_MINLEN %d\n"

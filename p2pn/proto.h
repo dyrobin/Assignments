@@ -9,7 +9,7 @@
 #define PORT_DEFAULT    8601
 
 /* max number of entries for PONG response */
-#define RECM_NEIB        2
+#define RECM_NEIB       5
 
 /* definition of protocol message type */
 #define MSG_PING        0x00

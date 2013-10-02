@@ -55,6 +55,14 @@ enum DLEVEL {
 
 extern enum DLEVEL debuglv;
 
+/* Whether to join newly discovered peers automatically */
+extern int suppress_auto_join;
+
+/* Maximum neighborhood size */
+#define MAX_NEIB   8
+/* Number of retries to join a 'waiting' peer */
+#define JOIN_RETRY 3
+
 #define LISTENQ 5
 #define MAXLINE 4096
 #define SLEN    128

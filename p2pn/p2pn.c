@@ -57,6 +57,8 @@ static struct timeval search_timer;
 struct timeval prev_hbeat;
 struct timeval prev_nghquery;
 
+/* Whether to join newly discovered peers automatically */
+int  suppress_auto_join = 0;
 
 /* debug level */
 enum DLEVEL debuglv = DEBUG;
@@ -67,12 +69,14 @@ static void
 usage()
 {
     printf("Usage: p2pn -l [ip:port] -f [kvfile] \n"
-                "\t    [-s [search_key] -b [ip:port] -p [max_peers_in_pong]]\n");
+           "           [-s [search_key] -b [ip:port] -p [max_peers_in_pong]]\n"
+           "           [-j]\n");
     printf("    -l: Listening address and port \n");
     printf("    -f: key/value data file \n");
     printf("    -s: Search key \n");
     printf("    -b: Bootstrap server address and port \n");
     printf("    -p: Max Number of neighbor entries in PONG \n");
+    printf("    -j: Suppress auto join behaviour\n");
 }
 
 #if 0
@@ -293,22 +297,11 @@ handle_waiting_list()
 {
     struct wtnode_meta *wtn, *wtnx;
     struct sockaddr_in addr;
-    int connfd, n;
-
-    if (nm_size < RECM_NEIB) {
-    /* We try to connect more peers if our own neighbor database
-       is small.
-    */
-        list_for_each_entry(wtn, &waiting_nodes.list, list) {
-            if (!wtn_conn_established(wtn)
-                    && !wtn_urgent(wtn) && !wtn_requested(wtn))
-                wtn_urgent_set(wtn);
-                break;
-        }
-    }
+    int connfd;
 
     list_for_each_entry_safe(wtn, wtnx, &waiting_nodes.list, list) {
-    /* if there is urgent waiting node, try to establish connection */
+        /* Establish connections to newly discovered peers when
+         * it becomes 'urgent'. */
         if (!wtn_conn_established(wtn) && wtn_urgent(wtn)) {
             memset(&addr, 0, sizeof(addr));
             memcpy(&addr.sin_addr, &wtn->ip, sizeof(struct in_addr));
@@ -317,8 +310,8 @@ handle_waiting_list()
 
             if ((connfd = socket(AF_INET, SOCK_STREAM, 0)) >= 0) {
                 wtn->connfd = connfd;
-                if ((n = connect_pto(connfd, (SA *)&addr,
-				     sizeof(addr), 2)) >= 0) {
+                if (connect_pto(connfd, (SA *)&addr,
+				     sizeof(addr), 2) >= 0) {
                     send_join_message(connfd);
                     wtn->nrequest++;
                     wtn_urgent_reset(wtn);
@@ -331,12 +324,19 @@ handle_waiting_list()
                 perror("socket error");
                 wt_list_del(wtn);
             }
-        } else {
-            /*TODO we should select nodes to connect
-            if number of neighbors become less. */
+        }
+    }
 
-            /* send_join_message(connfd);
-            wtn->nrequest++; */
+    /* Currently, the only chance that a newly discovered peer can become
+     * 'urgent' is when we are in need of more neighbours. */
+    if (nm_size < MAX_NEIB) {
+        list_for_each_entry(wtn, &waiting_nodes.list, list) {
+            /* Here we pick one such peer at a time. */
+            if (!wtn_conn_established(wtn)
+                    && !wtn_urgent(wtn) && !wtn_requested(wtn)) {
+              wtn_urgent_set(wtn);
+              break;
+            }
         }
     }
 }
@@ -352,6 +352,7 @@ network_maintain()
 {
     struct timeval now, hbeat, nquery;
     struct node_meta *nm;
+    struct wtnode_meta *wtn, *wtn_tmp;
 
     /* check waiting list */
     handle_waiting_list();
@@ -368,6 +369,20 @@ network_maintain()
         list_for_each_entry(nm, &neighbors.list, list) {
             send_ping_message(nm->connfd, PING_TTL_HB);
         }
+        /* kick off those who neither send a Join Request or accept our Join */
+        list_for_each_entry_safe(wtn, wtn_tmp, &waiting_nodes.list, list) {
+          if (wtn_conn_established(wtn)) {
+            if (wtn->nrequest == 2) {
+              Close(wtn->connfd);
+              wt_list_del(wtn);
+            }
+            /* = 0: new peer that connected to us, but no Join Request yet.
+               = 1: discovered peer, Join Request sent.
+               = 2: we are waiting for Join Request/Accept. */
+            wtn->nrequest = 2;
+          } /* if conn established */
+        } /* list wtn */
+
         prev_hbeat = now;
     }
     if (timercmp(&nquery, &now, <=)) {
@@ -642,7 +657,7 @@ main(int argc, char **argv)
     ltn_addr.sin_family = AF_INET;
 
     setbuf(stdout, NULL);
-    while ((opt = getopt(argc, argv, "l:b:s:f:p:")) != -1) {
+    while ((opt = getopt(argc, argv, "l:b:s:f:p:j")) != -1) {
         switch (opt) {
             case 'l':
             laddr = optarg;
@@ -663,6 +678,10 @@ main(int argc, char **argv)
             case 'p':
             maxp = optarg;
             break;
+
+            case 'j':
+              suppress_auto_join = 1;
+              break;
 
             default:
             usage();
