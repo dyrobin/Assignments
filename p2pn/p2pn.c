@@ -468,10 +468,6 @@ node_loop()
             /* save to waiting list */
             wt_list_add(wtn);
             create_peer_cache(connfd);
-
-            /* add to fdset */
-            FD_SET(connfd, &aset);
-
         } /* if FD_ISSET listen_fd */
 
         /* Check all neighbor nodes if they are readable */
