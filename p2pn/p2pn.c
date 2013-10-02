@@ -418,8 +418,6 @@ node_loop()
 
 
     opt_recv_low = HLEN;
-    FD_ZERO(&aset);
-    FD_SET(listen_fd, &aset);
 
 
     for ( ; ; ) {
@@ -449,9 +447,9 @@ node_loop()
         nready = select(maxfd + 1, &aset, NULL, NULL, &timeout);
         gettimeofday(&post_slct, NULL);
 
-        if (nready == 0) {
-            network_maintain();
-            continue;
+        if (nready == -1) {
+          p2plog(ERROR, "select() failed\n");
+          return 1;
         }
 
         if (FD_ISSET(listen_fd, &aset)) { /* New connection arrives */
@@ -475,11 +473,7 @@ node_loop()
             /* add to fdset */
             FD_SET(connfd, &aset);
 
-            if (--nready <= 0) { /* no more discriptor to read */
-                network_maintain();
-                continue;
-            }
-        }
+        } /* if FD_ISSET listen_fd */
 
         /* Check all neighbor nodes if they are readable */
         list_for_each_entry_safe(tempn, nxtn, &neighbors.list, list) {
@@ -503,13 +497,8 @@ node_loop()
                 } else {
                     recv_byte_stream(tempn->connfd, buf, n);
                 }
-
-                if (--nready <= 0) { /* no more discriptor to read */
-                    network_maintain();
-                    break;
-                }
-            }
-        }
+            } /* if FD_ISSET */
+        } /* list neighbors */
 
         /* check nodes in waiting list */
         list_for_each_entry_safe(wtn, wtnn, &waiting_nodes.list, list) {
@@ -534,13 +523,12 @@ node_loop()
                     recv_byte_stream(wtn->connfd, buf, n);
                 }
             }
+        } /* list waiting_nodes */
 
-            if (--nready <=0) {
-                network_maintain();
-                break;
-            }
-        }
-    }
+        network_maintain();
+
+        p2plog(INFO, "Waiting: %d  Neighbours: %d\n", wt_size, nm_size);
+    } /* main for loop */
 
     return 0;
 }
@@ -655,8 +643,10 @@ main(int argc, char **argv)
     maxp = NULL;
     memset(&ltn_addr, 0, sizeof(ltn_addr));
     ltn_addr.sin_family = AF_INET;
-
     setbuf(stdout, NULL);
+
+    srand(time(NULL));
+
     while ((opt = getopt(argc, argv, "l:b:s:f:p:j")) != -1) {
         switch (opt) {
             case 'l':
