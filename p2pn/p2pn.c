@@ -226,6 +226,7 @@ recv_msg(struct peer_cache *pc)
             p2plog(INFO, "QUERY matches local key, QUERY HIT sent.\n");
         }
         /* still forward msg to find more result */
+        ph->ttl --;
         flood_msg(connfd, ph, msglen);
         p2plog(INFO, "flood query message\n");
         break;

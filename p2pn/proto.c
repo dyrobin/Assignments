@@ -165,13 +165,12 @@ forward_p2p_message(int connfd, void *msg, unsigned int len)
     struct P2P_h *ph;
 
     ph = (struct P2P_h *) msg;
-    if (ph->ttl <= 1) {
-        p2plog(ERROR, "Forward message with TTL <= 1\n");
+    if (ph->ttl < 1) {
+        p2plog(ERROR, "Forward message with TTL < 1\n");
         return -1;
     }
-
-    ph->ttl--;
     send_p2p_message(connfd, msg, len);
+
     return 0;
 }
 
@@ -508,8 +507,7 @@ handle_query_hit(void *msg, unsigned int msglen)
         } else {
             if((nm = nm_find_by_connfd(ms->fromfd)) != NULL){
                 /* This QHIT is for a previously forwarded QUERY. */
-                /* TTL will be decreased to 1 later. */
-                ph->ttl = 2;
+                ph->ttl = 1;
                 /* Relay it back. */
                 forward_p2p_message(nm->connfd, msg, msglen);
             } else {
