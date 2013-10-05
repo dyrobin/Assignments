@@ -52,3 +52,4 @@ demultiplexing (the "select()" function in POSIX), but the function
 a new connection.
 
 2. No IPv6 support.
+3. Resource value must not be zero.
