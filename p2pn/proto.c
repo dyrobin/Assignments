@@ -126,6 +126,8 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     struct P2P_h *ph;
     char buf[128];
     unsigned int nbody;
+    struct sockaddr_in outgoing_addr;
+    socklen_t addrlen;
 
 
     ph = (struct P2P_h *) msg;
@@ -133,9 +135,14 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     /* Filling IP and PORT in header if necessary */
 
     if (ph->org_ip == 0) {
-        /* Set org_ip and port */
+      /* Set org_ip and port */
+      addrlen = sizeof(struct sockaddr_in);
+      if (GetSockName(connfd, (struct sockaddr *)&outgoing_addr, &addrlen) == 0) {
+        ph->org_ip = outgoing_addr.sin_addr.s_addr;
+      } else {
         ph->org_ip = ltn_addr.sin_addr.s_addr;
-        ph->org_port = ltn_addr.sin_port;
+      }
+      ph->org_port = ltn_addr.sin_port;
     }
 
     /* Filling the message id in header if necessary */

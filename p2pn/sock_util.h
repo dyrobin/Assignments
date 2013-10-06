@@ -31,6 +31,9 @@ Read(int fd, void *ptr, size_t nbytes);
 void
 Write(int fd, void *ptr, ssize_t nbytes);
 
+int
+GetSockName(int sock, struct sockaddr *addr, socklen_t *addrlen);
+
 char *
 sock_ntop(struct sockaddr_in *addr);
 

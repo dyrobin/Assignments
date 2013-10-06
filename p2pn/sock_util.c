@@ -227,6 +227,16 @@ Write(int fd, void *ptr, ssize_t nbytes)
         perror("write error");
     }
 }
+
+int
+GetSockName(int sock, struct sockaddr *addr, socklen_t *addrlen)
+{
+  if (getsockname(sock, addr, addrlen) == -1) {
+    perror("getsockname() error");
+  }
+  return 0;
+}
+
 /* ===========END of wrap socket function ========*/
 
 char *
