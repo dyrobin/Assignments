@@ -499,7 +499,7 @@ handle_query_hit(void *msg, unsigned int msglen)
         if (ms->fromfd == 0) {
             memcpy(buf, (char *)ms->msg + HLEN, ms->len - HLEN);
             buf[ms->len - HLEN] = '\0';
-            p2plog(INFO, "query: %s hit, at % %s:%d",
+            p2plog(INFO, "query: %s hit, at %s:%d\n",
 		   buf,
 		   inet_ntop(AF_INET, &ph->org_ip, buf, MLEN),
 		   ntohs(ph->org_port));

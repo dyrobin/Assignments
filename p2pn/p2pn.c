@@ -15,6 +15,7 @@
 #define TICK_SELECT    3
 #define TICK_HEARTBEAT 5
 #define TICK_NGHQUERY  8
+#define TICK_SEARCH    5
 
 /* the listening fd of this p2p node */
 int listen_fd;
@@ -51,11 +52,10 @@ static char *bsp_code = NULL;
 
 static char *search_key = NULL;
 
-static struct timeval search_timer;
-
 /* previous time for network_maintain */
 struct timeval prev_hbeat;
 struct timeval prev_nghquery;
+struct timeval prev_search;
 
 /* Whether to join newly discovered peers automatically */
 int  suppress_auto_join = 0;
@@ -351,7 +351,7 @@ handle_waiting_list()
 void
 network_maintain()
 {
-    struct timeval now, hbeat, nquery;
+    struct timeval now, hbeat, nquery, search;
     struct node_meta *nm;
     struct wtnode_meta *wtn, *wtn_tmp;
 
@@ -363,6 +363,8 @@ network_maintain()
     hbeat.tv_sec += TICK_HEARTBEAT;
     nquery = prev_nghquery;
     nquery.tv_sec += TICK_NGHQUERY;
+    search = prev_search;
+    search.tv_sec += TICK_SEARCH;
 
     gettimeofday(&now, NULL);
     if (timercmp(&hbeat, &now, <=)) {
@@ -395,9 +397,9 @@ network_maintain()
     }
     /* search the network */
     if (search_key != NULL &&
-        timercmp(&search_timer, &now, <=)) {
+        timercmp(&search, &now, <=)) {
         send_query_message(search_key);
-        search_key = NULL;
+        prev_search = now;
     }
 }
 
@@ -711,8 +713,6 @@ main(int argc, char **argv)
             exit(1);
         }
     }
-    gettimeofday(&search_timer, NULL);
-    search_timer.tv_sec += 10;
 
     /* Start the p2p node */
     start_node();
