@@ -200,30 +200,33 @@ send_ping_message(int connfd, int ttl)
     send_p2p_message(connfd, &ph, sizeof(ph));
 }
 
-void handle_ping_message(int connfd, void *msg, unsigned int len)
+void handle_ping_message(int connfd, const void *msg, unsigned int len)
 {
-    struct P2P_h *ph;
+    struct P2P_h *ph_in, *ph_out;
     struct P2P_pong_front *pf;
     struct P2P_pong_entry *pe;
     struct node_meta *nm;
-    char buf[256];
+    char buf[128];
     int count, pong_len;
 
-    memcpy(buf, msg, len);
+    ph_in = (struct P2P_h *)msg;
 
-    ph = (struct P2P_h *) buf;
-    p2plog(DEBUG, "TTL=%d\n", ph->ttl);
-    if (ph->ttl == 1 && len == HLEN) { /* heartbeat */
-        ph->msg_type = MSG_PONG;
-        send_p2p_message(connfd, ph, HLEN);
-    } else if (ph->ttl > 1) { /* network detect */
+    memset(buf, 0, 128);
+    ph_out = (struct P2P_h *) buf;
+    init_p2ph(ph_out, MSG_PONG);
+    ph_out->ttl = 1;
+    ph_out->msg_id = ph_in->msg_id;
+
+    p2plog(DEBUG, "TTL=%d\n", ph_in->ttl);
+    if (ph_in->ttl == 1 && len == HLEN) { /* heartbeat */
+        send_p2p_message(connfd, buf, HLEN);
+    } else if (ph_in->ttl > 1) { /* network probe */
     /* We use PONG to respond network detection,
        TODO carefully choose return entries can
        avoid very heavy node (which is a node with a lot of peers).
     */
         count = 0;
 
-        ph->msg_type = MSG_PONG;
         list_for_each_entry(nm, &neighbors.list, list) {
             pe = (struct P2P_pong_entry *)
                     (buf + HLEN + PONG_MINLEN + count * PONG_ENTRYLEN);
@@ -311,24 +314,27 @@ handle_pong_message(void *msg, unsigned int len)
 
 
 void
-handle_join_message(int connfd, void *msg, unsigned int len)
+handle_join_message(int connfd, const void *msg, unsigned int len)
 {
-    struct P2P_h *ph;
+    struct P2P_h *ph_in, *ph_out;
     struct P2P_join *pj;
     struct wtnode_meta *wtn;
     struct node_meta *nm;
     char buf[128];
 
-    ph = (struct P2P_h *) msg;
+    ph_in = (struct P2P_h *) msg;
+    memset(buf, 0, 128);
+    ph_out = (struct P2P_h *) buf;
+    init_p2ph(ph_out, MSG_JOIN);
+    ph_out->ttl = 1;
+    ph_out->msg_id = ph_in->msg_id;
 
     p2plog(DEBUG, "Message len = %d, body len = %d\n",
-	   len, ntohs(ph->length));
+	   len, ntohs(ph_in->length));
 
     if (len == HLEN) { /* JOIN REQUEST */
         /* send JOIN accept */
         /* Now we just accept any request */
-        memcpy(buf, msg, len);
-        ph->length = htons(JOINLEN);
         pj = (struct P2P_join *) (buf + HLEN);
         pj->status = htons(JOIN_ACC);
 
@@ -351,7 +357,7 @@ handle_join_message(int connfd, void *msg, unsigned int len)
             /* this is the first time a peer send us a P2P_h header!
                we should save the identifier of the peer: its ip and
                listening port */
-            wtn->lport = ph->org_port;
+            wtn->lport = ph_in->org_port;
             nm = (struct node_meta*) Malloc(sizeof(struct node_meta));
             nm_init(nm);
             nm->connfd = wtn->connfd;
@@ -359,7 +365,6 @@ handle_join_message(int connfd, void *msg, unsigned int len)
             nm->lport = wtn->lport;
             nm_list_add(nm);
             wt_list_del(wtn);
-            send_p2p_message(connfd, buf, HLEN + JOINLEN);
             p2plog(INFO, "NEW NEIGHBOR: Accept a new neighbor, %s\n",
 		   sock_ntop2(&nm->ip, nm->lport));
         } else {
@@ -368,11 +373,12 @@ handle_join_message(int connfd, void *msg, unsigned int len)
            JOIN accept message, or the neighbor wants
            to reassure the connection, so we resend the
            accept message */
-           send_p2p_message(connfd, buf, HLEN + JOINLEN);
         }
+        /* common action: send JOIN_ACC */
+        send_p2p_message(connfd, buf, HLEN + JOINLEN);
 
     } else if (len == HLEN + JOINLEN
-                &&ntohs(ph->length) == JOINLEN) { /* JOIN RESPONSE */
+                && ntohs(ph_in->length) == JOINLEN) { /* JOIN RESPONSE */
         pj = (struct P2P_join *) ((char *)msg + HLEN);
         p2plog(DEBUG, "join response: 0x%04X\n", ntohs(pj->status));
         if (ntohs(pj->status) != JOIN_ACC) {

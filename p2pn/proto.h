@@ -97,11 +97,11 @@ uint32_t search_localdata(struct P2P_h *ph, unsigned int msglen);
 
 void send_join_message(int connfd);
 
-void handle_join_message(int connfd, void *msg, unsigned int len);
+void handle_join_message(int connfd, const void *msg, unsigned int len);
 
 void send_ping_message(int connfd, int ttl);
 
-void handle_ping_message(int connfd, void *msg, unsigned int len);
+void handle_ping_message(int connfd, const void *msg, unsigned int len);
 
 void handle_pong_message(void *msg, unsigned int len);
 
