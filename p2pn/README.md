@@ -22,6 +22,11 @@ The p2pn application is the implementation of a p2p node.
 The pmon application is a guard application to restart the p2pn if it crashes.
 The usage of each executable will be given when input the above commands.
 
+If run within GDB, you must tell GDB to not stop on SIGPIPE.
+
+  $ gdb p2pn
+  (gdb) handle SIGPIPE nostop pass
+  (gdb) run -l ....
 
 SCENARIO
 ==================================
