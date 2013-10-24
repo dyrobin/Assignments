@@ -5,96 +5,160 @@
 
 \title{Amazon Web Services}
 \author{T-110.5150 - Applications and Services in Internet}
-\date{Deadline: 31th November 2013, 23:59 Helsinki Time}
+\date{Deadline: 30th of November 2013, 23:59 Helsinki Time}
 \begin{document}
 \maketitle
-\section{Goal}
-Introduce yourself to the Amazon Web Services (AWS) on cloud technology, specifically, Amazon Elastic Compute Cloud (EC2), Amazon Simple Storage Service (S3) and Amazon Elastic MapReduce.
-\section{Exercise summary}
+\section{Introduction}
+
+This assignment aims to introduce you to the cloud based Amazon Web Services (AWS)\footnote{\url{http://aws.amazon.com/}}, specifically Amazon Elastic Compute Cloud (EC2), Amazon Simple Storage Service (S3), and Amazon Elastic MapReduce.
+
+In this assignment, you will:
 \begin{itemize}
-\item Get practical experience in Amazon EC2 and other Amazon Web Services.
-\item Implement an experimental program to explore the scheduling behaviors between virtual machines in one single EC2 host; analyze the measurement results.
-\item Implement an experimental program to test the network throughput between instances within a single region, and analyze the measurement results.
+\item Gain practical experience in Amazon Web Services.
+\item Investigate the scheduling behaviour among virtual machines.
+\item Investigate the network throughput between EC2 instances within the same AWS Region.
 \end{itemize}
-\section{Usage}
-For this course, students will be assigned an Amazon account and a passwords. Details and instructions of account will be send later through e-mail and Noppa.
 
-\textbf{Caution}: Monitor your account activity carefully and make sure you turn off the instancesbefore you log out Amazon management console. Previous year, some students were charged some thousands of USD (even though we figured out some way to solve that problem eventually) as they forgot to terminate the instances. Clear your account, i.e. empty the Amazon S3, terminate all the instances in Amazon EC2, and close down the other related Amazon Web Services, after you have finished the assignment.
+\section{Description}
+Each group will be assigned an Amazon account.
+Account credentials will be distributed by e-mail and detailed instructions will announced through Noppa\footnote{\url{https://noppa.aalto.fi/}}.
+
+Monitor your account activity carefully.
+Remember to turn off your instances before logging out from the management console.
+
+Please clear your account at the end of this assignment by removing all your S3 buckets, terminating all your EC2 instances, and closing all other related services.
+Previously, some students were charged thousands of U.S. dollars since they forgot to terminate their instances at the end.
+Although we found some way to resolve it, please try your best to avoid it.
 
 
-\section{Basic features}
-\subsection{Amazon S3 (10 pts)}
-Using Amazon S3 as the storage, upload files with different sizes (1KB, 10KB, 100KB, 1MB, 10MB etc), and test throughput from your local machine to the Ireland region for the bucket. Use s3cmd (http://s3tools.org/s3cmd ) as the benchmark tool, or any similar tool you are familiar with can be used as well.
-\subsection{Amazon EC2 and scheduling behavior (30 pts)}
-The purpose of this experiment is to measure whether your Virtual Machine (VM) is sharing the physical processor with other VMs or not. One way to achieve this goal is to get the system time continuously, e.g. using the gettimeofday() function in C language (Posix compatible system). If the VM occupies the processor solely, the system time should be continuous without any noticeable gap. If the VM is sharing the processor with other VMs, there supposed to be some gap (during which period your VM is scheduled off and given way to other VMs running concurrently on the same physical machine) in the system time.
+\subsection{Basic features}
+You must complete all of them to pass the assignment.
 
-In this experiment, you are required to launch two types of Amazon EC2 instances: Micro and Small, by using the Basic 32-bit Amazon Linux Amazon Machine Image (AMI) 2011.09 (AMI Id: ami-31814f58). Then you are required to test the CPU utilization ratio of your VM, i.e. how much percentage of CPU time it gets during the whole process. Here is the link for getting started: http://docs.amazonwebservices.com/AWSEC2/latest/GettingStartedGuide/. 
+\subsubsection{Amazon S3 (10 pts)}
+Create an Amazon S3 bucket in the EU West (Ireland) Region.
+Upload files of different sizes (1KB, 10KB, 100KB, 1MB, 10MB, etc) into your bucket and investigate the transfer throughput between your local machine and the EU West (Ireland) Region.
+Use \emph{s3cmd}\footnote{\url{http://s3tools.org/s3cmd}} as the benchmark tool.
+You may also use other tool with which you are familiar.
 
-You are required to implement a small program, which retrieves current system time as fine-grained as possible, i.e. calling the aforementioned function gettimeofday() in C or similar functions in other programming languages, 1 million times in a loop. The system time can be recorded in the memory firstly, and then write through to the local file. Run this program on both the Micro and the Small instance and collect the data, then analyze the results carefully, you will notice the difference between the Micro and Small instances in terms of CPU utilization ratio. Use your data to draw a graph and explain your findings, then calculate the CPU utilization ratio for your Micro and the Small instances.
+\subsubsection{Amazon EC2 and scheduling behaviour (30 pts)}
+The purpose of this experiment is to determine whether your instance (which is a virtual machine) is sharing the physical processor with other instances or not.
+One way to achieve this is to get the system time continuously, for example by invoking the \texttt{gettimeofday()} system call.
+If your instance occupies the processor exclusively the system time should be continuous without any noticeable gap.
+If the processor is shared with other instances some gaps in system time are anticipated.
+These are the periods in which your instance is scheduled off and the process is yielded to other instances.
 
-There is no any limitation on which tool you use for graph drawing. Some potential choices can be Microsoft Excel, Matlab, or GNU Plot\footnote{http://www.gnuplot.info/}.
-\subsection{Amazon EC2 network throughput (30 pts)}
-Establish two pairs of instances (Micro-Micro, and Small-Small) in the Ireland region using the AMI mentioned before, then implement a TCP and UDP throughput program to measure the fine-grained network throughput between the pairs of instance.
+You are asked to experiment with two types of Amazon EC2 instances: Micro and Small.
+All instances shall be launched using 32-bit Amazon Linux Amazon Machine Image (AMI).
+The latest version of the AMI is 2013.09 and the AMI ID for EU West Region is \texttt{ami-109f7867}.
+You may find the AWS documentation useful.\footnote{\url{http://docs.amazonwebservices.com/AWSEC2/latest/GettingStartedGuide/}}
 
-Regardless of using TCP or UDP, a throughput measurement program consists of two parts, the client and the server. The client side acts as a sender while the server is a receiver. In the client side, a file is read and transmitted. In the server side, you calculate the throughput for every 256KB data received, record the finish time of this 256KB data and the throughput as a line of data.
+Please implement a small application which retrieves current system time as fine-grained as possible, such as invoking the \texttt{gettimeofday()} system call one million times in a loop.
+Collect system time stamps from both the Micro and the Small instances and analyse the data.
+Compute the CPU utilisation ratio for both instances and plot your data.
+Explain your findings.
 
-In order to boost the performance of TCP, the sending buffer in the client and the receiving buffer in the server are needed to be enlarged to 256KB (enlarge these buffers will expand the sending and receiving window size in TCP). In the C language, this is achieved by setsockopt() function with option SO\_SNDBUF and SO\_RCVBUF; In Java, check the setSendBufferSize() and setReceiveBufferSize() methods in the class java.net.Socket. Other languages should also have similar interfaces.
+You may use any tool for graph plotting.
+Here we list some possible candidates: LibreOffice Calc, MATLAB, or GNU Plot\footnote{\url{http://www.gnuplot.info/}}.
 
-For the UDP client and the server, each UDP packet should use a payload of 1024 bytes.
+\subsubsection{Amazon EC2 network throughput (30 pts)}
+Launch two pairs of instances (Micro-Micro and Small-Small) in the EU West Region using the aforementioned AMI.
+Implement applications to investigate TCP and UDP throughput between the pairs of instances.
 
-Use your data to draw two figures, i.e. one for TCP throughput and one for UDP throughput, then calculate the average TCP and UDP throughput for the whole period, compare the difference between the  Micro-Micro pair and the Small-Small pair, and explain your findings, how this is related to the results from the previous CPU utilization experiments.
+Whether TCP or UDP, a throughput measurement program consists of two parts: the client and the server.
+The client side acts as the sender and the server acts as the receiver.
+In the client side a file is read and transmitted.
+In the server side you record the time elapsed for every 256KB data received.
 
-Similar to the basic feature 2, the tool for graph drawing can be chosen freely.
-\subsection{Additional features (25 pts each)}
-\subsubsection{MapReduce}
-Test Amazon Elastic MapReduce as shown in this example: http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html. Report the completion time for the task. Some benchmark tool for recording the completion time should be used.
-\subsubsection{Bundling image service}
-Test the bundling image service, either Windows OS or Linux OS of the original image.
-\subsubsection{P2P integration}
-If you implement a full feature p2p application in assignment 1, here you can deploy the application to more number of nodes (for example, 5 nodes in each instance, 5 instance) in Amazon EC2. Analyse the topology and search behaviors in your p2p network by using different parameters in the p2p application (Max number of peers, max number of PONG entries in one PONG message, different algorithms to select peers to be filled in a PONG message etc.); State your experiment setup and show your analysis in the report.
-\subsubsection{Amazon API and your own idea}
-Do you have your own ideas? Use Amazon API to develop your own service.
-\subsubsection{Survey (10 pts)}
-Complete two surveys, which includes some general questions regarding cloud computing and Amazon Web Services. The surveys should be finished after you have completed the exercise work and the final report. The link of this survey will be sent to you by email. The motivation for this survey is to express your opinions after being exposed to some real-life commercial services.
+In order to boost the performance of TCP, the sending buffer in the client and the receiving buffer in the server need to be enlarged to 256KB.
+Enlarging these buffers will expand the sending and receiving window size of TCP.
+In C, this is achieved by \texttt{setsockopt()} system call with option \texttt{SO\_SNDBUF} and \texttt{SO\_RCVBUF}.
+In Java, please check the \texttt{setSendBufferSize()} and \texttt{setReceiveBufferSize()} methods in the class \texttt{java.net.Socket}.
 
-Note: The surveys need to be completed by every student who attend the second assignment, even you are in a group of two, you still need to finish them separately.
-\section{Submissions}
-The final report should include the following elements:
+For UDP experiment, each UDP packet from the client shall carry a payload of 1024 bytes.
+
+Plot two figures out of the data: one for TCP throughput and one for UDP throughput.
+Then calculate the average throughput for the whole transmission.
+Compare the difference between the Micro-Micro pair and the Small-Small pair.
+Explain your findings and how this is related to the results from the previous CPU utilisation experiment.
+
+
+\subsection{Additional features}
+Choose at most two of them.
+
+\subsubsection{MapReduce (25 pts)}
+Test Amazon Elastic MapReduce as shown in this example: \url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}.
+Report the completion time for the task.
+Some benchmark tool for recording the completion time should be used.
+
+\subsubsection{Bundling image service (25 pts)}
+Test the bundling image service.
+Create your own AMI.
+
+\subsubsection{P2P integration (25 pts)}
+If you implemented a full feature P2P application in the first assignment you can deploy the application to some EC2 nodes.
+For example, five peers in each of the five EC2 instances.
+Analyse the topology and the search behaviour in your P2P network by varying parameters of the P2P application, such as max number of peers, max number of Pong entries in one Pong message, different algorithms to select peers to be filled in a Pong message, etc.
+Describe your experiment setup and your findings.
+
+\subsubsection{Amazon API and your own idea (25 pts)}
+Do you have your own idea?
+Use Amazon API to develop your own service.
+Note that you may be requested for a demo of your own service.
+
+\subsection{Survey (10 pts)}
+Complete two surveys which include some general questions regarding cloud computing and Amazon Web Services.
+The surveys should be finished after you have completed the exercise work and the report.
+The link of this survey will be sent to you by e-mail.
+The motivation for this survey is to express your opinions after having some experience with real-life commercial services.
+
+The surveys shall be completed by every student who undertake the second assignment.
+Even though you are in groups of two, you will complete them individually.
+
+\section{Submission}
+The final report shall include the following elements:
+
 \begin{itemize}
-\item Report the process of the experiment, results and analysis for each basic feature;
-\item Report the process of the experiment, and other related contents (mentioned in the requirement) for the additional features.
+\item The process of the experiment, results, and analysis for each basic feature.
+\item The process of the experiment, and other related contents (mentioned in the requirement) for the additional features.
 \end{itemize}
-For the second assignment, please create a new directory called "assignment\_2" to your repository's root directory and submit the final report to this repository.
-\section{Evaluation}
-Experimenting with basic features is enough, but by trying out some additional features you can get more points.The basic features are rather fixed, but you have free hands to try out additional features. With freedom comes responsibility, you should report your experience with detailed documentation.
+
+Please create a new directory called ``\texttt{assignment\_2}'' in your repository and submit the final report into this directory.
+
+There is no demo for this assignment, except possibly for your own idea with Amazon API.
+
+\section{Grading}
+Experimenting with basic features is enough to pass the assignment.
+By trying some additional features you gain more points.
+
+The basic features are rather fixed, but you have free hands to try out additional features.
+With freedom comes responsibility, you should report your experience with proper documentation.
+
 \begin{itemize}
-\item Basic features: 70 points
-\item Additional features: 25 points each (max. 2)
-\item Final report: 15 points
-\item Finishing the surveys (10 points)
+\item Basic features: 70 points.
+\item Additional features: 25 points each (maximum 2 features).
+\item Final report: 15 points.
+\item Finishing the surveys: 10 points.
 \end{itemize}
 
 fail --- $<$ 70 points \emph{or} a missing basic feature.
 
 1 --- $\ge$ 70 points.
 
-2 --- $\ge$  90 points.
+2 --- $\ge$ 90 points.
 
 3 --- $\ge$ 110 points.
 
 4 --- $\ge$ 125 points.
 
-5 --- $\ge$  140 points.
+5 --- $\ge$ 140 points.
+
+\vskip 20pt
 
 Total: 155 points
 
-The assignment 1and the assignment 2 each accounts for 20\% in the whole course grading, in other words, the percentage of the whole assignment part is 40\%, another 60\% is the final exam.
-\begin{thebibliography}{1}
+\vskip 20pt
 
-\bibitem{gnutella}
-Gnutella Protocol v0.6, \url{http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}.
-
-\end{thebibliography}
-
+The first assignment and this assignment each accounts for 20\% in the whole course grading.
+In other words, the percentage of the whole assignment part is 40\% and the other 60\% is the final exam.
 
 \end{document}
