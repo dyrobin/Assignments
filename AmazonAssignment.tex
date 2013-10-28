@@ -47,8 +47,8 @@ If the processor is shared with other instances some gaps in system time are ant
 These are the periods in which your instance is scheduled off and the processor is yielded to other instances.
 
 You are asked to experiment with two types of Amazon EC2 instances: Micro and Small.
-All instances shall be launched using 32-bit Amazon Linux Amazon Machine Image (AMI).
-The latest version of the AMI is 2013.09 and the AMI ID for EU West Region is \texttt{ami-109f7867}.
+All instances shall be launched using 64-bit Amazon Linux Amazon Machine Image (AMI).
+The latest version of the AMI is 2013.09 and the AMI ID for EU West Region is \texttt{ami-149f7863}.
 You may find the AWS documentation useful.\footnote{\url{http://docs.amazonwebservices.com/AWSEC2/latest/GettingStartedGuide/}}
 
 Please implement a small application which retrieves current system time as fine-grained as possible, such as invoking the \texttt{gettimeofday()} system call one million times in a loop.
