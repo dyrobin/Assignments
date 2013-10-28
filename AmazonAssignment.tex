@@ -21,13 +21,13 @@ In this assignment, you will:
 
 \section{Description}
 Each group will be assigned an Amazon account.
-Account credentials will be distributed by e-mail and detailed instructions will announced through Noppa\footnote{\url{https://noppa.aalto.fi/}}.
+Account credentials will be distributed by e-mail and detailed instructions will be announced through Noppa\footnote{\url{https://noppa.aalto.fi/}}.
 
 Monitor your account activity carefully.
 Remember to turn off your instances before logging out from the management console.
 
 Please clear your account at the end of this assignment by removing all your S3 buckets, terminating all your EC2 instances, and closing all other related services.
-Previously, some students were charged thousands of U.S. dollars since they forgot to terminate their instances at the end.
+Previously some students were charged thousands of U.S. dollars since they forgot to terminate their instances at the end.
 Although we found some way to resolve it, please try your best to avoid it.
 
 
@@ -36,16 +36,15 @@ You must complete all of them to pass the assignment.
 
 \subsubsection{Amazon S3 (10 pts)}
 Create an Amazon S3 bucket in the EU West (Ireland) Region.
-Upload files of different sizes (1KB, 10KB, 100KB, 1MB, 10MB, etc) into your bucket and investigate the transfer throughput between your local machine and the EU West (Ireland) Region.
-Use \emph{s3cmd}\footnote{\url{http://s3tools.org/s3cmd}} as the benchmark tool.
-You may also use other tool with which you are familiar.
+Upload files of different sizes (1KiB, 10KiB, 100KiB, 1MiB, 10MiB, etc) into your bucket and investigate the transfer throughput between your local machine and the EU West (Ireland) Region.
+Use \emph{s3cmd}\footnote{\url{http://s3tools.org/s3cmd}} as the benchmark tool.In addition, you may also use other tools with which you are familiar.
 
 \subsubsection{Amazon EC2 and scheduling behaviour (30 pts)}
 The purpose of this experiment is to determine whether your instance (which is a virtual machine) is sharing the physical processor with other instances or not.
-One way to achieve this is to get the system time continuously, for example by invoking the \texttt{gettimeofday()} system call.
+One way to achieve this is to get the system time continuously, for example, by invoking the \texttt{gettimeofday()} system call.
 If your instance occupies the processor exclusively the system time should be continuous without any noticeable gap.
 If the processor is shared with other instances some gaps in system time are anticipated.
-These are the periods in which your instance is scheduled off and the process is yielded to other instances.
+These are the periods in which your instance is scheduled off and the processor is yielded to other instances.
 
 You are asked to experiment with two types of Amazon EC2 instances: Micro and Small.
 All instances shall be launched using 32-bit Amazon Linux Amazon Machine Image (AMI).
@@ -67,12 +66,12 @@ Implement applications to investigate TCP and UDP throughput between the pairs o
 Whether TCP or UDP, a throughput measurement program consists of two parts: the client and the server.
 The client side acts as the sender and the server acts as the receiver.
 In the client side a file is read and transmitted.
-In the server side you record the time elapsed for every 256KB data received.
+In the server side you record the time elapsed for every 256KiB data received.
 
-In order to boost the performance of TCP, the sending buffer in the client and the receiving buffer in the server need to be enlarged to 256KB.
+In order to boost the performance of TCP, the sending buffer in the client and the receiving buffer in the server need to be enlarged to 256KiB.
 Enlarging these buffers will expand the sending and receiving window size of TCP.
-In C, this is achieved by \texttt{setsockopt()} system call with option \texttt{SO\_SNDBUF} and \texttt{SO\_RCVBUF}.
-In Java, please check the \texttt{setSendBufferSize()} and \texttt{setReceiveBufferSize()} methods in the class \texttt{java.net.Socket}.
+In C, this is achieved by \texttt{setsockopt()} system call with options \texttt{SO\_SNDBUF} and \texttt{SO\_RCVBUF}.
+In Java, please check \texttt{setSendBufferSize()} and \texttt{setReceiveBufferSize()} methods in the class \texttt{java.net.Socket}.
 
 For UDP experiment, each UDP packet from the client shall carry a payload of 1024 bytes.
 
@@ -86,18 +85,17 @@ Explain your findings and how this is related to the results from the previous C
 Choose at most two of them.
 
 \subsubsection{MapReduce (25 pts)}
-Test Amazon Elastic MapReduce as shown in this example: \url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}.
+Test Amazon Elastic MapReduce as shown in the example.\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}}
 Report the completion time for the task.
 Some benchmark tool for recording the completion time should be used.
 
-\subsubsection{Bundling image service (25 pts)}
-Test the bundling image service.
-Create your own AMI.
+\subsubsection{Create your own AMI (25 pts)}
+Experiment with the process of creating your own AMI.\footnote{\url{http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami.html}}
 
 \subsubsection{P2P integration (25 pts)}
 If you implemented a full feature P2P application in the first assignment you can deploy the application to some EC2 nodes.
 For example, five peers in each of the five EC2 instances.
-Analyse the topology and the search behaviour in your P2P network by varying parameters of the P2P application, such as max number of peers, max number of Pong entries in one Pong message, different algorithms to select peers to be filled in a Pong message, etc.
+Analyse the topology and the search behaviour in your P2P network by varying parameters of the P2P application, such as max number of peers, max number of Pong entries in one Pong message, or different algorithms to select peers to be filled in a Pong message.
 Describe your experiment setup and your findings.
 
 \subsubsection{Amazon API and your own idea (25 pts)}
@@ -106,12 +104,12 @@ Use Amazon API to develop your own service.
 Note that you may be requested for a demo of your own service.
 
 \subsection{Survey (10 pts)}
-Complete two surveys which include some general questions regarding cloud computing and Amazon Web Services.
-The surveys should be finished after you have completed the exercise work and the report.
-The link of this survey will be sent to you by e-mail.
-The motivation for this survey is to express your opinions after having some experience with real-life commercial services.
+Complete two questionnaires which include some general questions regarding cloud computing and Amazon Web Services.
+The survey should be finished after you have completed the exercise work and the report.
+Links to the survey will be sent to you by e-mail.
+The motivation behind the survey is to have you express your opinions after having some experience with real-life commercial services.
 
-The surveys shall be completed by every student who undertake the second assignment.
+The survey shall be completed by every student who undertake the second assignment.
 Even though you are in groups of two, you will complete them individually.
 
 \section{Submission}
@@ -119,16 +117,16 @@ The final report shall include the following elements:
 
 \begin{itemize}
 \item The process of the experiment, results, and analysis for each basic feature.
-\item The process of the experiment, and other related contents (mentioned in the requirement) for the additional features.
+\item The process of the experiment and other related contents (mentioned in the requirement) for the additional features.
 \end{itemize}
 
-Please create a new directory called ``\texttt{assignment\_2}'' in your repository and submit the final report into this directory.
+Please create a new directory called ``\texttt{assignment\_2}'' in your repository and submit the final report and all source code of the programs used in this assignment into this directory.
 
-There is no demo for this assignment, except possibly for your own idea with Amazon API.
+There is no demo for this assignment except possibly for your own idea with Amazon API.
 
 \section{Grading}
 Experimenting with basic features is enough to pass the assignment.
-By trying some additional features you gain more points.
+You gain more points by trying some additional features.
 
 The basic features are rather fixed, but you have free hands to try out additional features.
 With freedom comes responsibility, you should report your experience with proper documentation.
