@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <signal.h>
 
 #include "proto.h"
 #include "p2pn.h"
@@ -62,6 +63,15 @@ int  suppress_auto_join = 0;
 
 /* debug level */
 enum DLEVEL debuglv = DEBUG;
+
+int  handle_peer_error = 0;
+struct sigaction act;
+
+void sig_pipe(int s)
+{
+  handle_peer_error = 4;
+  sigaction(s, &act, NULL);
+}
 
 /* Usage of the p2pn program
  */
@@ -274,12 +284,14 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
     if((pc = get_peer_cache(connfd)) == NULL) {
         p2plog(ERROR, "cannot find peer cache, connfd = %d\n",
 		connfd);
+        handle_peer_error = 2;
         return;
     }
 
     if (pc->bp + bufsize > MAXLINE) {
         p2plog(ERROR, "buffer is full in the peer cache for connfd = %d\n",
 	       connfd);
+        handle_peer_error = 3;
         return;
     }
 
@@ -476,6 +488,7 @@ node_loop()
         /* Check all neighbor nodes if they are readable */
         list_for_each_entry_safe(tempn, nxtn, &neighbors.list, list) {
             if (FD_ISSET(tempn->connfd, &aset)) {
+                handle_peer_error = 0;
                 if ((n = Read(tempn->connfd, buf, MAXLINE)) <= 0) {
                     if (n == 0) {
                         p2plog(WARN, "Disconnect from neighbor: %s:%d, fd = %d\n",
@@ -488,12 +501,16 @@ node_loop()
 			       ntohs(tempn->lport),
 			       tempn->connfd);
                     }
+                    handle_peer_error = 1;
+                } else {
+                    recv_byte_stream(tempn->connfd, buf, n);
+                }
+                if (handle_peer_error != 0) {
+                    p2plog(ERROR, "handle_peer_error: %d\n", handle_peer_error);
                     remove_peer_cache(tempn->connfd);
                     Close(tempn->connfd);
                     FD_CLR(tempn->connfd, &aset);
                     nm_list_del(tempn);
-                } else {
-                    recv_byte_stream(tempn->connfd, buf, n);
                 }
             } /* if FD_ISSET */
         } /* list neighbors */
@@ -501,6 +518,7 @@ node_loop()
         /* check nodes in waiting list */
         list_for_each_entry_safe(wtn, wtnn, &waiting_nodes.list, list) {
             if (wtn_conn_established(wtn) && FD_ISSET(wtn->connfd, &aset)) {
+                handle_peer_error = 0;
                 if ((n = Read(wtn->connfd, buf, MAXLINE)) <= 0) {
                     if (n == 0) {
                     p2plog(WARN, "Disconnect from waiting node: %s:%d, fd = %d\n",
@@ -513,12 +531,16 @@ node_loop()
                         ntohs(wtn->lport),
                         wtn->connfd);
                     }
+                    handle_peer_error = 1;
+                } else {
+                    recv_byte_stream(wtn->connfd, buf, n);
+                }
+                if (handle_peer_error != 0) {
+                    p2plog(ERROR, "handle_peer_error: %d\n", handle_peer_error);
                     remove_peer_cache(wtn->connfd);
                     Close(wtn->connfd);
                     FD_CLR(wtn->connfd, &aset);
                     wt_list_del(wtn);
-                } else {
-                    recv_byte_stream(wtn->connfd, buf, n);
                 }
             }
         } /* list waiting_nodes */
@@ -712,6 +734,13 @@ main(int argc, char **argv)
             p2plog(ERROR, "Fail to read kvfile!\n");
             exit(1);
         }
+    }
+
+    memset(&act, 0, sizeof(struct sigaction));
+    act.sa_handler = sig_pipe;
+    if (sigaction(SIGPIPE, &act, NULL) != 0) {
+      perror("sigaction failed");
+      exit(1);
     }
 
     /* Start the p2p node */

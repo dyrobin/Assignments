@@ -58,6 +58,8 @@ extern enum DLEVEL debuglv;
 /* Whether to join newly discovered peers automatically */
 extern int suppress_auto_join;
 
+extern int handle_peer_error;
+
 /* Maximum neighborhood size */
 #define MAX_NEIB   8
 /* Number of retries to join a 'waiting' peer */

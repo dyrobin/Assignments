@@ -11,7 +11,6 @@
 
 #include "sock_util.h"
 
-
 /**
  * Initiate a TCP connection with an optional timeout value.
  * 

@@ -1,11 +1,12 @@
 T-110.5150 Application and Services in Internet
+===========================
 Materials for Assignments and Course Staff
 
 URL to course Git group:
- https://git.niksula.hut.fi/t-110-5150/
-===========================
+https://git.niksula.hut.fi/groups/t-110-5150
 
 CONTENTS
+===========================
 
   p2pn/ : Sample implementation of Peer-to-Peer assignment.
           Including stripped headers that are supplied to students as
@@ -14,7 +15,7 @@ CONTENTS
   group.csv : Group sign-up book.
 
 
-TeX -> PDF
+  TeX -> PDF
 
   To typeset the TeX files, clone the 'opastus' repository on any
   Aalto-IT Linux workstations (in Maarintalo, for example) and type:
@@ -26,17 +27,19 @@ TeX -> PDF
 
 
 AT THE END OF THE SEMESTER
+===========================
 
- 1. For current course staff
+ 1. Clone, pack, and send the 'opastus' repository to the teacher,
+    so that it can be passed on to future course staff.
 
-  a) Clone, pack, and send the 'opastus' repository to the teacher,
-     so it can be passed on to future course staff.
+FOR FUTURE COURSE STAFF
+===========================
 
- 2. For future course staff
-
-  a) Please contact Niksula admin to transfer the ownership of course
-     Git group to one (and only one) of you.
-  b) Review and update materials in 'opastus' repository.
-     Re-create the reference header (p2p.h) if necessary.
-  c) Create repositories for this year's students.
+ 1. Please contact Niksula admin to transfer the ownership of course
+    Git group to you.
+    If the previous course staff is still reachable you may also ask
+    them to do the transfer.
+ 2. Review and update materials in 'opastus' repository.
+    Re-create the reference header p2pn/p2p.h if necessary.
+ 3. Create repositories for this year's students.
 
