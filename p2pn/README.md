@@ -68,5 +68,3 @@ a new connection.
 3. Resource value must not be zero.
 3. Does not send Bye Message.
 5. Does not actually handle Bye Messages. The connection is disconnected because remote closed the TCP link and we had a read() error.
-6. Need a loop detection method. If we get ourself in a Pong B, we will connect to ourself and create a self-loop.
-  We can, for example, keep a list of Message IDs of recently sent Join and Ping for each peer and check against incoming Join and Pings.

@@ -68,6 +68,21 @@ wtn_find_by_connfd(int connfd)
     return wtn_tgt;
 }
 
+struct wtnode_meta *
+wtn_find_by_joinid(uint32_t msgid)
+{
+    struct wtnode_meta *wtn, *wtn_tgt;
+
+    wtn_tgt = NULL;
+    list_for_each_entry(wtn, &waiting_nodes.list, list) {
+        if (wtn->join_msgid == msgid) {
+            wtn_tgt = wtn;
+            break;
+        }
+    }
+    return wtn_tgt;
+}
+
 /* Check if the waiting node with given IP and port number exists
  * in the waiting node list.
  */

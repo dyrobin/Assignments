@@ -112,6 +112,8 @@ struct wtnode_meta {
     /* Is it an urgent one? eg. for bootstrap */
     int                 urgent;
     int                 connfd;
+    /* The Message ID of our Join to this node. For loop detection. */
+    uint32_t            join_msgid;
     struct list_head    list;
 };
 
@@ -170,6 +172,9 @@ void wtn_init(struct wtnode_meta *wtn);
 
 /* Search a waiting node by its socket descriptor */
 struct wtnode_meta *wtn_find_by_connfd(int connfd);
+
+/* Search a waiting node by our Join Message ID */
+struct wtnode_meta *wtn_find_by_joinid(uint32_t msgid);
 
 /* Check if the waiting node with given IP and port number exists
  * in the waiting node list.

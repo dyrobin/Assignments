@@ -159,9 +159,10 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     Write(connfd, msg, len);
 
 
-    p2plog(DEBUG, "Sent P2P message: TYPE=0x%02X, TTL=%d LEN=%d/%d\n",
+    p2plog(DEBUG, "out msg TYPE=0x%02X TTL=%d ID:0x%08x LEN=%d/%d\n",
 	   ph->msg_type,
 	   ph->ttl,
+           ph->msg_id,
 	   ntohs(ph->length),
 	   len);
 }
@@ -181,13 +182,13 @@ forward_p2p_message(int connfd, void *msg, unsigned int len)
     return 0;
 }
 
-void
-send_join_message(int connfd)
+uint32_t send_join_message(int connfd)
 {
     struct P2P_h ph;
     init_p2ph(&ph, MSG_JOIN);
 
     send_p2p_message(connfd, &ph, sizeof(ph));
+    return ph.msg_id;
 }
 
 void
@@ -344,6 +345,12 @@ handle_join_message(int connfd, const void *msg, unsigned int len)
         /* JOIN message is not from a waiting node.
            This is not allowed, so we drop this message */
             p2plog(ERROR, "JOIN from an unknown node, connfd = %d\n", connfd);
+            return;
+        }
+
+        /* This is a self-loop */
+        if (wtn_find_by_joinid(ph_in->msg_id) != NULL) {
+            p2plog(WARN, "JOIN from ourself - loop detected.\n");
             return;
         }
 

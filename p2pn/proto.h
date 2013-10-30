@@ -95,7 +95,7 @@ struct P2P_qhit_entry {
 
 uint32_t search_localdata(struct P2P_h *ph, unsigned int msglen);
 
-void send_join_message(int connfd);
+uint32_t send_join_message(int connfd);
 
 void handle_join_message(int connfd, const void *msg, unsigned int len);
 

@@ -332,7 +332,7 @@ handle_waiting_list()
                 wtn->connfd = connfd;
                 if (connect_pto(connfd, (SA *)&addr,
 				     sizeof(addr), 2) >= 0) {
-                    send_join_message(connfd);
+                    wtn->join_msgid = send_join_message(connfd);
                     wtn->nrequest++;
                     wtn_urgent_reset(wtn);
                     create_peer_cache(connfd);
