@@ -30,23 +30,32 @@ If run within GDB, you must tell GDB to not stop on SIGPIPE.
 
 SCENARIO
 ==================================
-Let us assume that we want to deploy three nodes (N1, N2, N3) with address
-IP1:PORT1, IP2:PORT2, IP3:PORT3, respectively. N1 stores key/value pairs in
-the "kv.txt" file. N2 connects to N1, and N3 connects to N2. N3 wants to
-search the value of the key "testkey". We can deploy the network by input
-commands as follow:
+Assume that we are to deploy the following network:
 
-N1:
-$ ./p2pn -l IP1:PORT1 -f kv.txt
+  VM1(IP1)              VM2(IP2)
+ -----------           -----------
 
-N2:
-$ ./p2pn -l IP2:PORT2 -b IP1:PORT1
+  Node1                 Node2
+ 0.0.0.0:10001    ===  0.0.0.0:100002
+ key1:0x12345678       key3:0x98765432
+                       SEND QUERY "testkey"
+  |
 
-N3:
-$ ./p2pn -l IP3:PORT3 -b IP2:PORT2 -s testkey
+  Node2
+ 127.0.0.1:10003
+ key2:0x43219876
+ NO AUTO JOIN
 
-N4:
-$ ./p2pn -l IP4:PORT4 -b IP1:PORT1 -f kv1.txt
+VM1:
+(Node1) $ ./p2pn -l 0.0.0.0:10001 -f k1.txt
+(Node2) $ ./p2pn -l 127.0.0.1:10003 -f k2.txt -b 127.0.0.1:10001 -j
+
+VM2:
+(Node3) $ ./p2pn -l 0.0.0.0:10002 -f k3.txt -b IP1:10001 -s testkey
+
+Format of -f input files:
+<key:string> <value:hex>
+One pair per line. See kv.txt for an example.
 
 
 KNOWN ISSUES
@@ -55,8 +64,9 @@ KNOWN ISSUES
 demultiplexing (the "select()" function in POSIX), but the function
 "connect_pto()" will temporarily block the whole process for establishing
 a new connection.
-
 2. No IPv6 support.
 3. Resource value must not be zero.
-4. Does not actually handle Bye Messages.
-5. Mysterious clients to ourselves after some time, possibly something wrong with connection handling.
+3. Does not send Bye Message.
+5. Does not actually handle Bye Messages. The connection is disconnected because remote closed the TCP link and we had a read() error.
+6. Need a loop detection method. If we get ourself in a Pong B, we will connect to ourself and create a self-loop.
+  We can, for example, keep a list of Message IDs of recently sent Join and Ping for each peer and check against incoming Join and Pings.
