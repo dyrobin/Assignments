@@ -42,4 +42,5 @@ FOR FUTURE COURSE STAFF
  2. Review and update materials in 'opastus' repository.
     Re-create the reference header p2pn/p2p.h if necessary.
  3. Create repositories for this year's students.
-
+ 4. P2P: Search criteria of a Query should be NUL terminated.
+    Clarify this in the instructions.

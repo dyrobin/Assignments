@@ -172,6 +172,11 @@ recv_msg(struct peer_cache *pc)
     ph = (struct P2P_h *) (pc->recvbuf);
     msglen = HLEN + ntohs(ph->length);
 
+    if (pc->bp < msglen) {
+        /* corrupted payload length */
+        return 0;
+    }
+
     if (ph->version != P_VERSION) {
         p2plog(ERROR, "Invalid version number: %d\n",
 	       ph->version);
@@ -288,7 +293,9 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
         return;
     }
 
-    if (pc->bp + bufsize > MAXLINE) {
+    /* pc->bp is unsigned, watch for the wrapping of negative side */
+    if (pc->bp >= MAXLINE || bufsize < 0
+        || (MAXLINE - pc->bp) < (unsigned)bufsize) {
         p2plog(ERROR, "buffer is full in the peer cache for connfd = %d\n",
 	       connfd);
         handle_peer_error = 3;
