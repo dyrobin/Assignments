@@ -59,3 +59,4 @@ a new connection.
 2. No IPv6 support.
 3. Resource value must not be zero.
 4. Does not actually handle Bye Messages.
+5. Mysterious clients to ourselves after some time, possibly something wrong with connection handling.
