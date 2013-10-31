@@ -215,9 +215,18 @@ nm_list_add(struct node_meta *new_nm)
 void
 nm_list_del(struct node_meta *nm)
 {
-    list_del(&nm->list);
-    nm_size--;
-    free(nm);
+    if (nm != NULL)
+    {
+      if (nm->list.next != NULL && nm->list.prev != NULL) {
+        list_del(&nm->list);
+      } else {
+        p2plog(ERROR, "nm->list contains NULL\n");
+      }
+      nm_size--;
+      free(nm);
+    } else {
+      p2plog(ERROR, "nm = NULL\n");
+    }
 }
 
 /* Create a new item for the msgstore list */
