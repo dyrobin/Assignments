@@ -1,7 +1,8 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage{hyperref}
 \usepackage{indentfirst}
-\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
+\usepackage[top=2.33cm, bottom=2.33cm, left=2.33cm, right=2.33cm]{geometry}
 
 \title{Amazon Web Services}
 \author{T-110.5150 - Applications and Services in Internet}
@@ -83,14 +84,23 @@ Explain your findings and how this is related to the results from the previous C
 Choose at most two of them.
 
 \subsubsection{MapReduce (25 pts)}
-Test Amazon Elastic MapReduce with the sample job named "WordCount (Streaming)".\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}} Instead of using the predefined input, upload the Ulysses by James Joyce\footnote{http://www.gutenberg.org/ebooks/4300} to one of your buckets.
-Run the job in small and large instances. Report the completion time for the tasks (you should enable and check the logs) and the most recurrent word.
+First, test Amazon Elastic MapReduce with the sample job named ``WordCount (Streaming)''.\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}}
+Instead of using the predefined input, upload the \emph{Ulysses} by James Joyce\footnote{\url{http://www.gutenberg.org/ebooks/4300}} to one of your buckets.
+Run the job in Small and Large instances.
+Enable and check the logs.
+Report the completion time for the tasks and the most recurrent word.
 
-Check the code for the splitter\footnote{https://s3.amazonaws.com/elasticmapreduce/samples/wordcount/wordSplitter.py}. Write a new splitter that counts the different bigrams\footnote{http://en.wikipedia.org/wiki/Bigram} present in the Ulysses. You don't need to write your splitter in Python, Amazon Elastic MapReduce Streaming jobs supports the following languages: Ruby, Perl, Python, PHP, R, Bash, or C++.
+Second, check the code for the splitter\footnote{\url{https://s3.amazonaws.com/elasticmapreduce/samples/wordcount/wordSplitter.py}}.
+Write a new splitter that counts the different bigrams\footnote{\url{http://en.wikipedia.org/wiki/Bigram}} present in the Ulysses.
+It is not required to write your splitter in Python.
+Amazon Elastic MapReduce Streaming jobs supports the following languages: Ruby, Perl, Python, PHP, R, Bash, and C++.
+Run the job in Small and Large instances.
+Remember to enable and check the logs.
+Report the completion time for the tasks and the most recurrent bigram.
 
-Run the job in small and large instances. Report the completion time for the tasks (you should enable and check the logs) and the most recurrent bigram.
 \subsubsection{Create your own AMI (25 pts)}
 Experiment with the process of creating your own AMI.\footnote{\url{http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami.html}}
+Others should be able to launch new instances with your AMI.
 
 \subsubsection{P2P integration (25 pts)}
 If you implemented a full feature P2P application in the first assignment you can deploy the application to some EC2 nodes.
@@ -108,11 +118,11 @@ The final report shall include the following elements:
 
 \begin{itemize}
 \item The process of the experiment, results, and analysis for each basic feature.
-\item The process of the experiment and other related contents (mentioned in the requirement) for the additional features.
+\item The process of the experiment and other related contents (mentioned in the requirement) for each choosen additional features.
 \item Feedback about the assignment.
 \end{itemize}
 
-Please create a new directory called ``\texttt{assignment\_2}'' in your repository and submit the final report and all source code of the programs used in this assignment into this directory.
+Please create a new directory called ``\texttt{assignment\_2}'' in your Git repository and submit the final report and all source code of the programs used in this assignment into this directory.
 
 There is no demo for this assignment except possibly for your own idea with Amazon API.
 
@@ -123,6 +133,8 @@ You gain more points by trying some additional features.
 The basic features are rather fixed, but you have free hands to try out additional features.
 With freedom comes responsibility, you should report your experience with proper documentation.
 
+\vskip 20pt
+
 \begin{itemize}
 \item Basic features: 75 points.
 \item Additional features: 25 points each (maximum 2 features).
@@ -130,7 +142,9 @@ With freedom comes responsibility, you should report your experience with proper
 \item Finishing the surveys: 10 points.
 \end{itemize}
 
-fail --- $<$ 75 points, a missing basic feature \emph{or} no report.
+\vskip 10pt
+
+fail --- $<$ 75 points \emph{or} a missing basic feature \emph{or} no report.
 
 1 --- $\ge$ 75 points.
 
