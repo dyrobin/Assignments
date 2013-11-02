@@ -5,7 +5,7 @@
 
 \title{Amazon Web Services}
 \author{T-110.5150 - Applications and Services in Internet}
-\date{Deadline: 30th of November 2013, 23:59 Helsinki Time}
+\date{Deadline: 4th December 2013, 23:59 Helsinki Time}
 \begin{document}
 \maketitle
 \section{Introduction}
@@ -34,7 +34,7 @@ Although we found some way to resolve it, please try your best to avoid it.
 \subsection{Basic features}
 You must complete all of them to pass the assignment.
 
-\subsubsection{Amazon S3 (10 pts)}
+\subsubsection{Amazon S3 (15 pts)}
 Create an Amazon S3 bucket in the EU West (Ireland) Region.
 Upload files of different sizes (1KiB, 10KiB, 100KiB, 1MiB, 10MiB, etc) into your bucket and investigate the transfer throughput between your local machine and the EU West (Ireland) Region.
 Use \emph{s3cmd}\footnote{\url{http://s3tools.org/s3cmd}} as the benchmark tool.In addition, you may also use other tools with which you are familiar.
@@ -79,16 +79,16 @@ Plot two figures out of the data: one for TCP throughput and one for UDP through
 Then calculate the average throughput for the whole transmission.
 Compare the difference between the Micro-Micro pair and the Small-Small pair.
 Explain your findings and how this is related to the results from the previous CPU utilisation experiment.
-
-
 \subsection{Additional features}
 Choose at most two of them.
 
 \subsubsection{MapReduce (25 pts)}
-Test Amazon Elastic MapReduce as shown in the example.\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}}
-Report the completion time for the task.
-Some benchmark tool for recording the completion time should be used.
+Test Amazon Elastic MapReduce with the sample job named "WordCount (Streaming)".\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}} Instead of using the predefined input, upload the Ulysses by James Joyce\footnote{http://www.gutenberg.org/ebooks/4300} to one of your buckets.
+Run the job in small and large instances. Report the completion time for the tasks (you should enable and check the logs) and the most recurrent word.
 
+Check the code for the splitter\footnote{https://s3.amazonaws.com/elasticmapreduce/samples/wordcount/wordSplitter.py}. Write a new splitter that counts the different bigrams\footnote{http://en.wikipedia.org/wiki/Bigram} present in the Ulysses. You don't need to write your splitter in Python, Amazon Elastic MapReduce Streaming jobs supports the following languages: Ruby, Perl, Python, PHP, R, Bash, or C++.
+
+Run the job in small and large instances. Report the completion time for the tasks (you should enable and check the logs) and the most recurrent bigram.
 \subsubsection{Create your own AMI (25 pts)}
 Experiment with the process of creating your own AMI.\footnote{\url{http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami.html}}
 
@@ -103,21 +103,13 @@ Do you have your own idea?
 Use Amazon API to develop your own service.
 Note that you may be requested for a demo of your own service.
 
-\subsection{Survey (10 pts)}
-Complete two questionnaires which include some general questions regarding cloud computing and Amazon Web Services.
-The survey should be finished after you have completed the exercise work and the report.
-Links to the survey will be sent to you by e-mail.
-The motivation behind the survey is to have you express your opinions after having some experience with real-life commercial services.
-
-The survey shall be completed by every student who undertake the second assignment.
-Even though you are in groups of two, you will complete them individually.
-
 \section{Submission}
 The final report shall include the following elements:
 
 \begin{itemize}
 \item The process of the experiment, results, and analysis for each basic feature.
 \item The process of the experiment and other related contents (mentioned in the requirement) for the additional features.
+\item Feedback about the assignment.
 \end{itemize}
 
 Please create a new directory called ``\texttt{assignment\_2}'' in your repository and submit the final report and all source code of the programs used in this assignment into this directory.
@@ -132,27 +124,27 @@ The basic features are rather fixed, but you have free hands to try out addition
 With freedom comes responsibility, you should report your experience with proper documentation.
 
 \begin{itemize}
-\item Basic features: 70 points.
+\item Basic features: 75 points.
 \item Additional features: 25 points each (maximum 2 features).
-\item Final report: 15 points.
+\item Final report: 20 points.
 \item Finishing the surveys: 10 points.
 \end{itemize}
 
-fail --- $<$ 70 points \emph{or} a missing basic feature.
+fail --- $<$ 75 points, a missing basic feature \emph{or} no report.
 
-1 --- $\ge$ 70 points.
+1 --- $\ge$ 75 points.
 
-2 --- $\ge$ 90 points.
+2 --- $\ge$ 95 points.
 
-3 --- $\ge$ 110 points.
+3 --- $\ge$ 115 points.
 
-4 --- $\ge$ 125 points.
+4 --- $\ge$ 130 points.
 
-5 --- $\ge$ 140 points.
+5 --- $\ge$ 145 points.
 
 \vskip 20pt
 
-Total: 155 points
+Total: 160 points
 
 \vskip 20pt
 
