@@ -103,10 +103,13 @@ Experiment with the process of creating your own AMI.\footnote{\url{http://docs.
 Others should be able to launch new instances with your AMI.
 
 \subsubsection{P2P integration (25 pts)}
-If you implemented a full feature P2P application in the first assignment you can deploy the application to some EC2 nodes.
+If you implemented a full feature P2P application in the first assignment or if you are interested in further developing it you can deploy the application to some EC2 nodes.
 For example, five peers in each of the five EC2 instances.
 Analyse the topology and the search behaviour in your P2P network by varying parameters of the P2P application, such as max number of peers, max number of Pong entries in one Pong message, or different algorithms to select peers to be filled in a Pong message.
 Describe your experiment setup and your findings.
+
+You can work directly on the existing repository for first assignment.
+There is no need to duplicate the code or anything.
 
 \subsubsection{Amazon API and your own idea (25 pts)}
 Do you have your own idea?
@@ -118,12 +121,28 @@ The final report shall include the following elements:
 
 \begin{itemize}
 \item The process of the experiment, results, and analysis for each basic feature.
-\item The process of the experiment and other related contents (mentioned in the requirement) for each choosen additional features.
-\item How many time did you spend on this assignment.
+\item The process of the experiment and other related contents (mentioned in the requirement) for each chosen additional features.
+\item How much time did you spend on this assignment.
 \item Feedback about the assignment.
 \end{itemize}
 
-Please create a new directory called ``\texttt{assignment\_2}'' in your Git repository and submit the final report in a PDF file and all source code of the programs used in this assignment into this directory.
+Please create a new directory called ``\texttt{assignment\_2}'' in your Git repository.
+The contents of the directory are:
+\begin{verbatim}
+assignment_2/
+  src/
+  README
+  Report.pdf
+\end{verbatim}
+
+\texttt{Report.pdf} is your report in PDF format.
+All source code of the programs used in this assignment go into \texttt{src/}.
+Please describe briefly in \texttt{README} each file in \texttt{src/}.
+Failure to comply with submission instruction may have a negative effect on your grade.
+
+We encourage you to work with Git throughout the assignment.
+Avoid doing a big commit right before the deadline.
+You are advised to reorganise your repository if your submission for first assignment did not follow the submission instruction.
 
 There is no demo for this assignment except possibly for your own idea with Amazon API.
 
@@ -132,8 +151,6 @@ Experimenting with basic features is enough to pass the assignment.
 You gain more points by trying some additional features.
 The basic features are rather fixed, but you have free hands to try out additional features.
 With freedom comes responsibility, you should report your experience with proper documentation.
-
-Note that failure to comply with submission instruction may have a negative effect on your grade.
 
 \vskip 20pt
 
