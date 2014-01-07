@@ -13,6 +13,7 @@ CONTENTS
           reference.
   *.tex : Assignment instructions.
   group.csv : Group sign-up book.
+  keys.csv : Amazon EC2 credentials.
 
 
   TeX -> PDF
@@ -41,6 +42,7 @@ FOR FUTURE COURSE STAFF
     them to do the transfer.
  2. Review and update materials in 'opastus' repository.
     Re-create the reference header p2pn/p2p.h if necessary.
- 3. Create repositories for this year's students.
- 4. P2P: Search criteria of a Query should be NUL terminated.
-    Clarify this in the instructions.
+ 3. Update groups.csv according to the sign up list of this year.
+ 4. Create repositories for this year's students.
+ 5. EC2: Create accounts for students and update keys.csv .
+

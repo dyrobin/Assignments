@@ -203,7 +203,7 @@ Since a Pong message responds to a Ping message, its message ID is identical to 
 
 
 \subsubsection{0x80 Query}
-A Query Message contains a query key in the message body.
+A Query Message contains a NUL-terminated query key in the message body.
 It is propagated in the network according to its TTL.
 A node receiving this message SHOULD look up its own sharing data, and return the matched entries, if any, in a Query Hit message.
 It SHOULD also forward this message to its neighbours, if TTL is greater than one, no matter the query is a hit or not among its local shared files.
