@@ -1,3 +1,3 @@
 .PHONY: clean
 clean:
-	@$(RM) *.pdf *.aux *.log *.bbl *~ *.blg *.dvi
+	@$(RM) *.pdf *.aux *.log *.bbl *~ *.blg *.dvi *.out
