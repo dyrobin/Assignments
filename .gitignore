@@ -23,6 +23,6 @@
 *.synctex.gz
 *.o
 *.pdf
-pmon
-p2pn
+p2pn/pmon
+p2pn/p2pn
 *.swp
