@@ -8,10 +8,18 @@
 
 \title{Peer-to-Peer Network}
 \author{T-110.5150 - Applications and Services in Internet}
-\date{Deadline: 31st of October 2013, 23:59 Helsinki Time}
+\date{Deadline: 00th of Month 201Y, 23:59 Helsinki Time}
 \begin{document}
 \maketitle
 \section{Description}
+
+\textbf{TODO}: check all TODOs and suggestions they made in their reports in previous year!! (in Niksula Git)
+
+\textbf{TODO}: We tried to follow RFC2119\cite{rfc2119} in this document, but obviously some students were not familiar with it and thus misunderstood the requirements.
+
+\textbf{TODO}: Check if this assignment overlaps with T-110.4100.
+\vskip 15pt
+
 In this assignment, you will form a small team (maximum 2 members) to implement a peer-to-peer (P2P) application based on a simple protocol.
 The major functionalities of this application include:
 
@@ -237,6 +245,12 @@ The first 2 bytes of a Query Hit message body contains the total number of entri
 
 A Query Hit message is routed back to the Query sender using the reverse path of the Query message.
 
+\vskip 15pt
+\textbf{TODO}: think about the TTL for a Query Hit, what value is appropriate?
+If you have no idea about the network topology, then probably it should be fixed at 5.
+In Gnutella, there is a hop count field and thus exact TTL is possible.
+\vskip 15pt
+
 \begin{verbbox}
 0                          16                        32
 +------------+------------+------------+------------+
@@ -264,7 +278,7 @@ A Query Hit message is routed back to the Query sender using the reverse path of
 
 \textbf{SBZ}: Should be zero.
 
-\textbf{Resource ID (Xnd)}: The ID of the resource.
+\textbf{Resource ID (Xnd)}: The ID of the resource. (\textbf{TODO}: what is this for?)
 
 \textbf{Resource Value}: The value of the resource.
 
@@ -361,6 +375,10 @@ assignment_1/
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
+\vskip 15pt
+\textbf{TODO}: should we allow \TeX source or plain text format for report?
+\vskip 15pt
+
 The deadline is strict.
 Commits after the deadline will not be graded.
 Please plan early your workload and test early the features which you are implementing.
@@ -377,12 +395,19 @@ Should they become unavailable please send us an e-mail so we can fix it as soon
 The demo session is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application, and 5 minutes for questions.
 You must check out the source code from the Git and build your application from source onsite during the demo session.
 Both team members shall be present at the demo session.
+
 The basic requirements are:
 \begin{itemize}
 \item Show the application is able to search for a given key in the network and retrieve the corresponding value(s).
 \item Show the application is able to publish a given key to the network.
 \end{itemize}
-You are free to decide how to present other features of your application, but remember to make a plan and finish your demo within allotted time.
+
+You are free to decide how to present the features of your application.
+Note, however, that the key operations of your features must be \textbf{visible} on the screen.
+The existence of the code which executes silently in the background is insufficient.
+We advise you to prepare your own demo machine.
+You may also use a workstation provided by either Aalto IT or Niksula.
+Please plan and practice your demo in advance and finish your demo within allotted time.
 Detailed arrangements of the demo sessions will be announced later.
 
 
@@ -479,6 +504,9 @@ Extra points for constructive comments on this assignment, a good implementation
 \FloatBarrier
 
 \begin{thebibliography}{1}
+
+\bibitem{rfc2119}
+RFC 2119, \url{http://www.ietf.org/rfc/rfc2119.txt}.
 
 \bibitem{gnutella}
 Gnutella Protocol v0.6, \url{http://rfc-gnutella.sourceforge.net/src/rfc-0\_6-draft.html}.

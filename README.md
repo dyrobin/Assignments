@@ -42,6 +42,7 @@ FOR FUTURE COURSE STAFF
     them to do the transfer.
  2. Review and update materials in 'opastus' repository.
     Re-create the reference header p2pn/p2p.h if necessary.
+    Check TODOs in individual documents.
  3. Update groups.csv according to the sign up list of this year.
  4. Create repositories for this year's students.
  5. EC2: Create accounts for students and update keys.csv .
