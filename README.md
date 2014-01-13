@@ -46,4 +46,6 @@ FOR FUTURE COURSE STAFF
  3. Update groups.csv according to the sign up list of this year.
  4. Create repositories for this year's students.
  5. EC2: Create accounts for students and update keys.csv .
-
+ 6. P2P: Apply for virtual machines for bootstrap servers from Niksula.
+ 7. Verify assignment instructions and sample implementations.
+ 8. If you took the course before, verify also your previous experiences and solutions.
