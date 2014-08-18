@@ -69,7 +69,7 @@ On VM2:
 (Node3) $ ./p2pn -l 0.0.0.0:10002 -f k3.txt -b IP1:10001 -s testkey
 ```
 
-Format of -f input files:
+Format of `-f` input files:
 
 ```
 <key:string> <value:hex>
@@ -77,11 +77,13 @@ Format of -f input files:
 
 One pair per line. See `kv.txt` for an example.
 
+ - Make sure, by testing, that the bootstrap network (VM1 and VM2 in above example) is accessible from outside Aalto network.
+
 
 KNOWN ISSUES
 -----
 
- - The implementation is based on single-process single-thread I/O demultiplexing (the `select()` function in POSIX).
+ - The implementation is based on single process, single thread I/O demultiplexing (`select()` function).
    However, `connect\_pto()` will temporarily block the whole process for establishing a new connection.
  - No IPv6 support.
  - Resource value must not be zero.
