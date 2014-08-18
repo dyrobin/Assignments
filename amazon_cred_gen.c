@@ -1,3 +1,7 @@
+/*
+ * This program generates the e-mail used to notify
+ * students of their AWS credentials.
+ */
 #include <stdio.h>
 #include <string.h>
 

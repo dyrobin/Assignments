@@ -5,8 +5,8 @@ for the course Application and services in Internet (T-110.5150).
 
 COMPILATION
 ==================================
-Use "make" to compile source codes.
-Use "make clean && make" for a clean build.
+Use `make` to compile source codes.
+Use `make clean && make` for a clean build.
 
 Some code are inlined in the header files.
 If they are changed, a clean build is required.
@@ -15,23 +15,29 @@ If they are changed, a clean build is required.
 USAGE
 ==================================
 Two executables are provided after the compilation:
-    ./p2pn
-    ./pmon
 
-The p2pn application is the implementation of a p2p node.
-The pmon application is a guard application to restart the p2pn if it crashes.
+```
+ ./p2pn
+ ./pmon
+```
+
+The `p2pn` application is the implementation of a P2P node.
+The `pmon` application is a guard application to restart `p2pn` if it crashes.
 The usage of each executable will be given when input the above commands.
 
 If run within GDB, you must tell GDB to not stop on SIGPIPE.
 
+```
   $ gdb p2pn
   (gdb) handle SIGPIPE nostop pass
   (gdb) run -l ....
+```
 
 SCENARIO
 ==================================
 Assume that we are to deploy the following network:
 
+```
   VM1(IP1)              VM2(IP2)
  -----------           -----------
 
@@ -45,26 +51,37 @@ Assume that we are to deploy the following network:
  127.0.0.1:10003
  key2:0x43219876
  NO AUTO JOIN
+```
 
-VM1:
+On VM1:
+```
 (Node1) $ ./p2pn -l 0.0.0.0:10001 -f k1.txt
 (Node2) $ ./p2pn -l 127.0.0.1:10003 -f k2.txt -b 127.0.0.1:10001 -j
+```
 
-VM2:
+On VM2:
+```
 (Node3) $ ./p2pn -l 0.0.0.0:10002 -f k3.txt -b IP1:10001 -s testkey
+```
 
 Format of -f input files:
+
+```
 <key:string> <value:hex>
-One pair per line. See kv.txt for an example.
+```
+
+One pair per line. See `kv.txt` for an example.
 
 
 KNOWN ISSUES
 ==================================
+
 1. The implementation is based on single-process single-thread I/O
-demultiplexing (the "select()" function in POSIX), but the function
-"connect_pto()" will temporarily block the whole process for establishing
+demultiplexing (the `select()` function in POSIX), but the function
+`connect_pto()` will temporarily block the whole process for establishing
 a new connection.
 2. No IPv6 support.
 3. Resource value must not be zero.
 3. Does not send Bye Message.
-5. Does not actually handle Bye Messages. The connection is disconnected because remote closed the TCP link and we had a read() error.
+5. Does not actually handle Bye Messages. The connection is disconnected because remote closed the TCP link and we had a `read()` error.
+
