@@ -4,9 +4,9 @@ Grading Criteria of the Exam
 1. (4p)
   - 1p Taxonomy
   - 1p Advantages/Disadvantages
-  - Strength/Weakness
-    - 1p Technical
-    - 1p Non-technical
+  - Strength/Weakness:
+     - 1p Technical
+     - 1p Non-technical
 
 2. (4p)
   - 1.5p Application scenarios of SIP
@@ -40,16 +40,16 @@ Grading Criteria of the Exam
 6. (4p)
   - 0.5p Similarities among cloud and data centres
   - 0.5p Differences between cloud and data centres
-  - Application scenarios for
-    - 1p IaaS
-    - 1p PaaS
-    - 1p SaaS
+  - Application scenarios for:
+     - 1p IaaS
+     - 1p PaaS
+     - 1p SaaS
 
 7. (10p)
   - 1p Story
   - 6p **Design**
-  - Analysis
-    - 1p Security
-    - 1p Efficiency
+  - Analysis:
+     - 1p Security
+     - 1p Efficiency
   - 1p Business model
 
