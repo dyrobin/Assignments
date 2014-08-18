@@ -1,10 +1,12 @@
 Peer-to-Peer Node (p2pn) Application
+=====
 
-The p2pn is an reference implementation of the home-brew peer-to-peer protocol
-for the course Application and services in Internet (T-110.5150).
+`p2pn` is an reference implementation of the custom peer-to-peer protocol for the course Application and Services in Internet (T-110.5150).
 
-COMPILATION
-==================================
+
+BUILDING
+-----
+
 Use `make` to compile source codes.
 Use `make clean && make` for a clean build.
 
@@ -13,7 +15,8 @@ If they are changed, a clean build is required.
 
 
 USAGE
-==================================
+-----
+
 Two executables are provided after the compilation:
 
 ```
@@ -33,8 +36,10 @@ If run within GDB, you must tell GDB to not stop on SIGPIPE.
   (gdb) run -l ....
 ```
 
-SCENARIO
-==================================
+
+CONFIGURATION
+-----
+
 Assume that we are to deploy the following network:
 
 ```
@@ -74,14 +79,13 @@ One pair per line. See `kv.txt` for an example.
 
 
 KNOWN ISSUES
-==================================
+-----
 
-1. The implementation is based on single-process single-thread I/O
-demultiplexing (the `select()` function in POSIX), but the function
-`connect_pto()` will temporarily block the whole process for establishing
-a new connection.
-2. No IPv6 support.
-3. Resource value must not be zero.
-3. Does not send Bye Message.
-5. Does not actually handle Bye Messages. The connection is disconnected because remote closed the TCP link and we had a `read()` error.
+ - The implementation is based on single-process single-thread I/O demultiplexing (the `select()` function in POSIX).
+   However, `connect\_pto()` will temporarily block the whole process for establishing a new connection.
+ - No IPv6 support.
+ - Resource value must not be zero.
+ - Does not send Bye Message.
+ - Does not actually handle Bye Messages.
+   The connection is disconnected because remote closed the TCP link and we had a `read()` error.
 
