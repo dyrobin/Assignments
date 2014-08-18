@@ -86,7 +86,7 @@ KNOWN ISSUES
 -----
 
  - The implementation is based on single process, single thread I/O demultiplexing (`select()` function).
-   However, `connect\_pto()` will temporarily block the whole process for establishing a new connection.
+   However, `connect\_pto()` will temporarily block the whole process when establishing a new connection.
  - No IPv6 support.
  - Resource value must not be zero.
  - Does not send Bye Message.
