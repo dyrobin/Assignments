@@ -35,6 +35,7 @@ Grading Criteria of the Exam
   - 1.5p Non-technical comparison
 
   - 1p  Additional mobile OS
+
   **OR** in depth analysis
 
 6. (4p)
