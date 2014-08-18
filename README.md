@@ -1,5 +1,5 @@
 T-110.5150 Application and Services in Internet
-===========================
+=====
 Materials for Assignments and Course Staff
 
 Repositories for student assugnments and course materials are hosted using Niksula Git (http://www.niksula.hut.fi/git).
@@ -16,7 +16,7 @@ Repositories for student assugnments and course materials are hosted using Niksu
 
 
 FOR COURSE STAFF
-===========================
+-----
 
   - Please contact Niksula Guru (http://www.niksula.hut.fi/staff) to transfer the ownership of course Git group (the group, not individual repositories) to you.
     If the previous course staff is still reachable you may also ask them to do the transfer.
@@ -40,7 +40,7 @@ FOR COURSE STAFF
 
 
 CONTENTS
-===========================
+-----
 
   - `p2pn/` : Sample implementation of Peer-to-Peer assignment.
           Including stripped headers that are supplied to students as
@@ -61,7 +61,7 @@ CONTENTS
 
 
 AT THE END OF THE SEMESTER
-===========================
+-----
 
  - Clean up and revise this repository.
 
