@@ -2,7 +2,16 @@
 \usepackage{hyperref}
 \usepackage{indentfirst}
 \usepackage{graphicx}
+\usepackage{verbatimbox}
+\usepackage[section]{placeins}
 \usepackage[top=2.33cm, bottom=2.33cm, left=2.33cm, right=2.33cm]{geometry}
+\usepackage{color}
+\definecolor{aaltoYellow}{RGB}{254,203,0}
+\newcommand{\TODO}[1]{\noindent\colorbox{aaltoYellow}{\color{black} TODO: #1}}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
 
 \title{Amazon Web Services}
 \author{T-110.5150 - Applications and Services in Internet}
@@ -11,11 +20,7 @@
 \maketitle
 \section{Introduction}
 
-\textbf{TODO}: Check all TODOs and suggestions they made in their reports in previous year!! (in Niksula Git)
-
-\textbf{TODO}: Articulate the requirements for Additional features.
-Emphasise especially the documentation in the report since this is a report-based assignment.
-\vskip 15pt
+\TODO{} Articulate the requirements for Additional features. Emphasise especially the documentation in the report since this is a report-based assignment.
 
 This assignment aims to introduce you to the cloud based Amazon Web Services (AWS)\footnote{\url{http://aws.amazon.com/}}, specifically Amazon Elastic Compute Cloud (EC2), Amazon Simple Storage Service (S3), and Amazon Elastic MapReduce.
 
@@ -91,10 +96,9 @@ Choose at most two of them.
 
 \subsubsection{MapReduce (25 pts)}
 
-\textbf{TODO}: This demo film might be outdated.
+\TODO{} This demo film might be outdated.
 
-\textbf{TODO}: Articulate which bigram we are asking for.
-\vskip 15pt
+\TODO{} Articulate which bigram we are asking for.
 
 First, test Amazon Elastic MapReduce with the sample job named ``WordCount (Streaming)''.\footnote{\url{http://s3.amazonaws.com/awsVideos/AmazonElasticMapReduce/AmazonElasticMapReduce.html}}
 Instead of using the predefined input, upload the \emph{Ulysses} by James Joyce\footnote{\url{http://www.gutenberg.org/ebooks/4300}} to one of your buckets.

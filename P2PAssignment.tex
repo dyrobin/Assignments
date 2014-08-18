@@ -3,8 +3,15 @@
 \usepackage{indentfirst}
 \usepackage{graphicx}
 \usepackage{verbatimbox}
-\usepackage{placeins}
+\usepackage[section]{placeins}
 \usepackage[top=2.33cm, bottom=2.33cm, left=2.33cm, right=2.33cm]{geometry}
+\usepackage{color}
+\definecolor{aaltoYellow}{RGB}{254,203,0}
+\newcommand{\TODO}[1]{\noindent\colorbox{aaltoYellow}{\color{black} TODO: #1}}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
 
 \title{Peer-to-Peer Network}
 \author{T-110.5150 - Applications and Services in Internet}
@@ -13,12 +20,9 @@
 \maketitle
 \section{Description}
 
-\textbf{TODO}: check all TODOs and suggestions they made in their reports in previous year!! (in Niksula Git)
+\TODO{} We tried to follow RFC2119~\cite{rfc2119} in this document, but obviously some students were not familiar with it and thus misunderstood the requirements.
 
-\textbf{TODO}: We tried to follow RFC2119\cite{rfc2119} in this document, but obviously some students were not familiar with it and thus misunderstood the requirements.
-
-\textbf{TODO}: Check if this assignment overlaps with T-110.4100.
-\vskip 15pt
+\TODO{} Check if this assignment overlaps with T-110.4100.
 
 In this assignment, you will form a small team (maximum 2 members) to implement a peer-to-peer (P2P) application based on a simple protocol.
 The major functionalities of this application include:
@@ -40,7 +44,7 @@ See the grading section for more information.
 
 
 \section{Protocol Specification}
-The protocol for this assignment is a binary protocol and originated from Gnutella 0.6 \cite{gnutella}.
+The protocol for this assignment is a binary protocol and originated from Gnutella 0.6~\cite{gnutella}.
 This protocol works on top of TCP and contains a 16 bytes fixed header.
 Similar to other binary network protocols, all value fields are in network byte order.
 In order to differentiate from TCP packets, we use the term \emph{message} in our protocol.
@@ -245,11 +249,9 @@ The first 2 bytes of a Query Hit message body contains the total number of entri
 
 A Query Hit message is routed back to the Query sender using the reverse path of the Query message.
 
-\vskip 15pt
-\textbf{TODO}: think about the TTL for a Query Hit, what value is appropriate?
+\TODO{} think about the TTL for a Query Hit, what value is appropriate?
 If you have no idea about the network topology, then probably it should be fixed at 5.
 In Gnutella, there is a hop count field and thus exact TTL is possible.
-\vskip 15pt
 
 \begin{verbbox}
 0                          16                        32
@@ -278,7 +280,7 @@ In Gnutella, there is a hop count field and thus exact TTL is possible.
 
 \textbf{SBZ}: Should be zero.
 
-\textbf{Resource ID (Xnd)}: The ID of the resource. (\textbf{TODO}: what is this for?)
+\textbf{Resource ID (Xnd)}: The ID of the resource. \TODO{what is this for?}
 
 \textbf{Resource Value}: The value of the resource.
 
@@ -288,7 +290,9 @@ The receiver MUST close the TCP connection immediately.
 The sender SHOULD wait for the termination of the connection.
 A Bye message carries no payload.
 
+
 \section{Frequently Asked Questions}
+
 \subsection*{Which development environment and programming language can I use?}
 We highly recommend you to use C under Linux/Unix environment.
 If you are not familiar with network programming, learning it in C enables full grasp of the network programming concepts.
@@ -303,10 +307,10 @@ The P2P protocol is a binary protocol, and like other network protocol, it follo
 The network byte order is big-endian.
 However, your workstation is most likely of x86 architecture.
 In other words, it is little-endian.
-Keep the endianness \footnote{\url{http://en.wikipedia.org/wiki/Endianness}} in mind.
+Keep the endianness\footnote{\url{http://en.wikipedia.org/wiki/Endianness}} in mind.
 
 \subsection*{How to bootstrap?}
-Information regarding the bootstrap network will be announced later through Noppa \footnote{\url{https://noppa.aalto.fi/}}.
+Information regarding the bootstrap network will be announced later through Noppa\footnote{\url{https://noppa.aalto.fi/}}.
 The bootstrap information contains the IP address and the listening port of existing nodes in the network.
 A new node can send a Join Message to an IP and port combination to participate in the network.
 We will also provide some test keys so you can search for them in the network.
@@ -351,8 +355,8 @@ Understand all features and have a clear design increase your productivity.
 
 
 \section{Submission}
-Each team will be provided a Niksula Git \footnote{\url{https://git.niksula.hut.fi/}} repository for version control and submission.
-You may find the Git documentation \footnote{\url{http://git-scm.com/doc}} useful.
+Each team will be provided a Niksula Git\footnote{\url{https://git.niksula.hut.fi/}} repository for version control and submission.
+You may find the Git documentation\footnote{\url{http://git-scm.com/doc}} useful.
 If this is your first time working with Git please invest some time experimenting with it.
 It takes some practice to master it.
 We suggest that you spread your work among the time and commit frequently to your repository.
@@ -375,9 +379,7 @@ assignment_1/
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
 
-\vskip 15pt
-\textbf{TODO}: should we allow \TeX source or plain text format for report?
-\vskip 15pt
+\TODO{should we allow \TeX\ source or plain text format for report?}
 
 The deadline is strict.
 Commits after the deadline will not be graded.
@@ -393,7 +395,7 @@ Should they become unavailable please send us an e-mail so we can fix it as soon
 
 \section{Demo}
 The demo session is 30 minutes sharp, which includes 5 minutes for setup, 20 minutes for presenting the application, and 5 minutes for questions.
-You must check out the source code from the Git and build your application from source onsite during the demo session.
+You must check out the source code from the Git and build your application from source on the site during the demo session.
 Both team members shall be present at the demo session.
 
 The basic requirements are:
