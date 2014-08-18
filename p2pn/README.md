@@ -59,12 +59,14 @@ Assume that we are to deploy the following network:
 ```
 
 On VM1:
+
 ```
 (Node1) $ ./p2pn -l 0.0.0.0:10001 -f k1.txt
 (Node2) $ ./p2pn -l 127.0.0.1:10003 -f k2.txt -b 127.0.0.1:10001 -j
 ```
 
 On VM2:
+
 ```
 (Node3) $ ./p2pn -l 0.0.0.0:10002 -f k3.txt -b IP1:10001 -s testkey
 ```
