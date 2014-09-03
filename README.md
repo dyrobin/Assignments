@@ -37,6 +37,9 @@ FOR COURSE STAFF
     Create accounts for students and update `keys.csv`.
   - Verify assignment instructions and sample implementations.
   - If you took the course before, verify also your previous experiences and solutions.
+  - Time reservation sheet, for example for demo(s), can be made with Foodle (https://foodl.org/).
+    Users can log in with their Aalto account.
+    See https://wiki.aalto.fi/display/aaltocloudinfo/Foodle for more information.
 
 
 CONTENTS
