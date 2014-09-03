@@ -17,7 +17,7 @@ If they are changed, a clean build is required.
 USAGE
 -----
 
-Two executables are provided after the compilation:
+Two executables are generated after the compilation:
 
 ```
  ./p2pn
@@ -26,7 +26,7 @@ Two executables are provided after the compilation:
 
 The `p2pn` application is the implementation of a P2P node.
 The `pmon` application is a guard application to restart `p2pn` if it crashes.
-The usage of each executable will be given when input the above commands.
+The usage of each executable will be given when invoked with no arguments.
 
 If run within GDB, you must tell GDB to not stop on SIGPIPE.
 
@@ -35,6 +35,8 @@ If run within GDB, you must tell GDB to not stop on SIGPIPE.
   (gdb) handle SIGPIPE nostop pass
   (gdb) run -l ....
 ```
+
+`pmon` was not used during 2013 Autumn term and instances of `p2pn` were run withing GDB to facilitate debugging.
 
 
 CONFIGURATION
