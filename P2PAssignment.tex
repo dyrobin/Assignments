@@ -20,10 +20,6 @@
 \maketitle
 \section{Description}
 
-\TODO{} We tried to follow RFC2119~\cite{rfc2119} in this document, but obviously some students were not familiar with it and thus misunderstood the requirements.
-
-\TODO{} Check if this assignment overlaps with T-110.4100.
-
 In this assignment, you will form a small team (maximum 2 members) to implement a peer-to-peer (P2P) application based on a simple protocol.
 The major functionalities of this application include:
 
@@ -113,7 +109,7 @@ A node which has already joined the network MAY also send a Join Request to anot
 By connecting with more nodes, the reliability is enhanced.
 Join Request carries no payload.
 
-A Join Response carries a 2 bytes body, which contains the result of Join Request.
+A Join Response carries a 2 bytes body (Figure \ref{joinresponse}), which contains the result of Join Request.
 If a node accepts a Join Request, it MUST respond with a Join Response message with the same message ID and a 0x0200 status code in the message body.
 After that, both nodes consider each other as a normal peer and keep the TCP connection for message exchange.
 
@@ -205,9 +201,9 @@ Fields of the body of a Type B Pong message (Figure \ref{bpong}):
 
 \textbf{SBZ}: Should be zero. These bits are reserved.
 
-\textbf{IP address of Xnd Entry}: The IP address of Xnd Entry.
+\textbf{IP address of Nth Entry}: The IP address of Xnd Entry.
 
-\textbf{Port of Xnd Entry}: The listening port number of Xnd Entry.
+\textbf{Port of Nth Entry}: The listening port number of Xnd Entry.
 
 \vskip 12pt
 
@@ -249,8 +245,7 @@ The first 2 bytes of a Query Hit message body contains the total number of entri
 
 A Query Hit message is routed back to the Query sender using the reverse path of the Query message.
 
-\TODO{} think about the TTL for a Query Hit, what value is appropriate?
-If you have no idea about the network topology, then probably it should be fixed at 5.
+Think about the TTL for a Query Hit, what value is appropriate? If you have no idea about the network topology, then probably it should be fixed at 5.
 In Gnutella, there is a hop count field and thus exact TTL is possible.
 
 \begin{verbbox}
@@ -280,7 +275,7 @@ In Gnutella, there is a hop count field and thus exact TTL is possible.
 
 \textbf{SBZ}: Should be zero.
 
-\textbf{Resource ID (Xnd)}: The ID of the resource. \TODO{what is this for?}
+\textbf{Resource ID (Xnd)}: The ID of the resource.
 
 \textbf{Resource Value}: The value of the resource.
 
@@ -378,8 +373,6 @@ assignment_1/
 \item Please follow the directory structure and naming convention, otherwise your submission will be ignored.
 \item If you have other files that need to be included, please explain why you need them in the \texttt{README} file.
 \end{itemize}
-
-\TODO{should we allow \TeX\ source or plain text format for report?}
 
 The deadline is strict.
 Commits after the deadline will not be graded.
