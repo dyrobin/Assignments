@@ -4,3 +4,11 @@ Harika Satharasi,463715
 Toni Mustajarvi,84026K (niksula account expires, need to set up the access of aalto account)
 Eduardo Castellanos,397182
 Harika Satharasi,463715  
+
+fatal: user tahuttun already exists
+fatal: user rajenda3 already exists
+fatal: user anamalh1 already exists
+fatal: user tmustaja already exists
+adding new entry uid=castele1,ou=People,dc=niksula,dc=hut,dc=fi
+
+Above students have now a valid account.
