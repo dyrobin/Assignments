@@ -1,9 +1,8 @@
-toni huttunen, 84599N
-Ashok Rajendran,466550
-Harika Satharasi,463715
+toni huttunen, 84599N -added
+Ashok Rajendran,466550 -added
+Harika Satharasi,463715 -cannot find in git
 Toni Mustajarvi,84026K (niksula account expires, need to set up the access of aalto account)
 Eduardo Castellanos,397182
-Harika Satharasi,463715  
 
 fatal: user tahuttun already exists
 fatal: user rajenda3 already exists
