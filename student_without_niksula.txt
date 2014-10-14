@@ -11,3 +11,7 @@ fatal: user tmustaja already exists
 adding new entry uid=castele1,ou=People,dc=niksula,dc=hut,dc=fi
 
 Above students have now a valid account.
+
+
+12.10.2014
+Morteza Neishaboori,466055
