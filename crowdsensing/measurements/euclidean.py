@@ -3,7 +3,8 @@ import glob
 import sys
 import math
 
-directories= ["A116", "A126", "A137"]
+directories = ["A116", "A126", "A137"]
+defaultSS = -99
 
 def readToDict(fileName):
 	sum=defaultdict(float)
@@ -28,10 +29,30 @@ def makeLibrary(directoryList):
 			library[file]=readToDict(file)
 	return library
 
+def unifyDicts(dictA,dictB):
+	separation = dictA.viewkeys() - dictB.viewkeys()
+	for key in separation:
+		 dictB[key]=defaultSS
+
+	separation = dictB.viewkeys() - dictA.viewkeys()
+	for key in separation:
+		 dictA[key]=defaultSS
+	return ( dictA, dictB)
+
+def euclideanDistance(locationToMatch, referencePoint):
+	unifiedDicts = unifyDicts(locationToMatch,referencePoint)
+	dictA=unifiedDicts[1]
+	dictB=unifiedDicts[2]
+	for key in dictA:
+		sum+=math.pow((dictA[key]-dictB[key]),2)
+	return math.sqrt(sum)
 
 library = makeLibrary(directories)
-
-
 locationToMatch = sys.argv[1]
+
+for key in library:
+	distances[key]=euclideanDistance(locationToMatch, library[key])
+
+	
 
 print "Finding location for measurements from file "+str(file)
