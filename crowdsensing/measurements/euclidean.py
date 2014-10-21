@@ -40,19 +40,21 @@ def unifyDicts(dictA,dictB):
 	return ( dictA, dictB)
 
 def euclideanDistance(locationToMatch, referencePoint):
-	unifiedDicts = unifyDicts(locationToMatch,referencePoint)
-	dictA=unifiedDicts[1]
-	dictB=unifiedDicts[2]
+	euclideanSum=0.0
+	unifiedDicts = unifyDicts(readToDict(locationToMatch),referencePoint)
+	dictA=unifiedDicts[0]
+	dictB=unifiedDicts[1]
 	for key in dictA:
-		sum+=math.pow((dictA[key]-dictB[key]),2)
-	return math.sqrt(sum)
+		euclideanSum+=float(math.pow((dictA[key]-dictB[key]),2))
+	return float(math.sqrt(euclideanSum))
 
 library = makeLibrary(directories)
 locationToMatch = sys.argv[1]
+distances = defaultdict(float)
 
 for key in library:
 	distances[key]=euclideanDistance(locationToMatch, library[key])
-
+	print key+" distance "+str(distances[key])
 	
 
 print "Finding location for measurements from file "+str(file)
