@@ -1,0 +1,3 @@
+Measure four directions in the same location. 
+Measurement time: 10
+Measurement interval: 10s
