@@ -2,8 +2,10 @@ from collections import defaultdict
 import glob
 import sys
 import math
+import operator
 
-directories = ["A116", "A126", "A137"]
+
+directories = ["A116", "A126", "A137", "A141"]
 defaultSS = -99
 
 def readToDict(fileName):
@@ -52,9 +54,12 @@ library = makeLibrary(directories)
 locationToMatch = sys.argv[1]
 distances = defaultdict(float)
 
-for key in library:
+print "Finding location for measurements from file "+str(locationToMatch)
+
+
+
+for key in sorted(library.iterkeys()):
 	distances[key]=euclideanDistance(locationToMatch, library[key])
-	print key+" distance "+str(distances[key])
+	print key+" distance "+str(round(distances[key],2))
 	
 
-print "Finding location for measurements from file "+str(file)
