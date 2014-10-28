@@ -1,0 +1,306 @@
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-74
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-62
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-66
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-79
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-78
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-82
+BSSID,00:27:0d:08:c2:11,SSID,eduroam,level,-82
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-86
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-69
+BSSID,00:27:0d:08:c2:10,SSID,aalto open,level,-81
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-87
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-84
+BSSID,00:24:36:a6:e0:13,SSID,marjonverkko,level,-88
+BSSID,00:27:0d:30:2a:61,SSID,eduroam,level,-96
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-77
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-79
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-82
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-91
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-78
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-79
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-82
+BSSID,a0:cf:5b:ca:b0:30,SSID,aalto open,level,-82
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-85
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-87
+BSSID,00:27:0d:08:bf:10,SSID,aalto open,level,-92
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-93
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-75
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-66
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-59
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-83
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-86
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-86
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-63
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-77
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-76
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-82
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-91
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-78
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-79
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-82
+BSSID,a0:cf:5b:ca:b0:30,SSID,aalto open,level,-82
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-85
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-87
+BSSID,00:27:0d:08:bf:10,SSID,aalto open,level,-92
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-93
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-87
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-67
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-48
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-57
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-86
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-81
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-63
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-75
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-79
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-82
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-88
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-79
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-73
+BSSID,a0:cf:5b:ca:b0:30,SSID,aalto open,level,-82
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-85
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-85
+BSSID,00:27:0d:08:bf:10,SSID,aalto open,level,-92
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-93
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-87
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-91
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-64
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-66
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-54
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-86
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-91
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-81
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-84
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-73
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-82
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-88
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-79
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-75
+BSSID,a0:cf:5b:ca:b0:30,SSID,aalto open,level,-82
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-85
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-85
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-87
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-83
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-86
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-66
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-49
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-58
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-90
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-86
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-91
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-79
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-74
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-93
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-79
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-73
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-85
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-84
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-93
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-86
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-89
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-71
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-51
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-57
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-79
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-82
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-89
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-91
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-74
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-80
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-75
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-93
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-84
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-83
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-80
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:27:0d:08:be:80,SSID,aalto open,level,-85
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-84
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-92
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-86
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-89
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-58
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-70
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-53
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-70
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-83
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-79
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-80
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-78
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-93
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-79
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-83
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-80
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-85
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-92
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-86
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-89
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-64
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-73
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-58
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-78
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-83
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-86
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-82
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-80
+BSSID,00:22:55:df:65:11,SSID,eduroam,level,-93
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-79
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-83
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-81
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-85
+BSSID,24:01:c7:b8:d4:e1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-85
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-88
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-89
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-64
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-63
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-55
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-85
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-83
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-87
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-58
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-86
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-78
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-83
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-79
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-85
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-87
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-88
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-90
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-60
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-63
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-64
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-70
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-83
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-87
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-59
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-86
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-78
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-83
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-79
+BSSID,24:01:c7:b8:d4:e0,SSID,aalto open,level,-87
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-85
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-87
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-88
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-90
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-60
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-77
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-55
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-87
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-85
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-83
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-83
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-86
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-91
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-79
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-92
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-87
+BSSID,ee:43:f6:71:d2:a0,SSID,cloudlet_test_2g,level,-88
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-90
+BSSID,a0:cf:5b:ca:b0:31,SSID,eduroam,level,-85
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-62
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-73
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-60
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-83
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-84
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-87
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-66
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-82
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-83
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-82
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-91
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-80
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-92
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-84
+BSSID,00:22:55:df:65:10,SSID,aalto open,level,-90
+BSSID,a0:cf:5b:ca:b0:31,SSID,eduroam,level,-85
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-73
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-72
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-62
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-83
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-81
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-69
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-79
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-77
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-82
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-91
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-78
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-92
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-84
+BSSID,a0:cf:5b:ca:b0:31,SSID,eduroam,level,-85
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-88
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-73
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-70
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-56
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-83
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-85
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-69
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-79
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-77
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-77
+BSSID,00:27:0d:2d:d0:70,SSID,aalto open,level,-91
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-81
+BSSID,00:90:4c:91:00:03,SSID,dd-wrt,level,-92
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-84
+BSSID,a0:cf:5b:ca:b0:31,SSID,eduroam,level,-85
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-87
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-85
+BSSID,08:1f:f3:b2:d0:a1,SSID,eduroam,level,-70
+BSSID,f8:5f:2a:5f:5c:a8,SSID,NOKIA Lumia 900_5438,level,-70
+BSSID,00:18:84:88:bf:88,SSID,MyPlace,level,-67
+BSSID,00:27:0d:2d:dd:c0,SSID,aalto open,level,-81
+BSSID,00:27:0d:2d:dd:c1,SSID,eduroam,level,-87
+BSSID,00:27:0d:2e:79:f1,SSID,eduroam,level,-83
+BSSID,08:1f:f3:b2:d0:a0,SSID,aalto open,level,-75
+BSSID,00:27:0d:2d:d0:71,SSID,eduroam,level,-82
+BSSID,a4:56:30:e8:17:61,SSID,eduroam,level,-81
+BSSID,a0:cf:5b:fa:34:e1,SSID,eduroam,level,-79
+BSSID,a4:56:30:e8:17:60,SSID,aalto open,level,-86
+BSSID,a0:cf:5b:fa:34:e0,SSID,aalto open,level,-82
+BSSID,00:27:0d:2e:79:f0,SSID,aalto open,level,-83
+BSSID,00:1d:7e:fc:31:06,SSID,NFC,level,-90
+BSSID,00:27:0d:08:c3:21,SSID,eduroam,level,-85
+BSSID,00:27:0d:08:c2:10,SSID,aalto open,level,-85
