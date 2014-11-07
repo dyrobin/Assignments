@@ -1,0 +1,2 @@
+random_location1: data from A126
+random_location2: data from A150
