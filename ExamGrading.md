@@ -8,44 +8,29 @@ Grading Criteria of the Exam
      - 1p Technical
      - 1p Non-technical
 
-2. (4p)
-  - 1.5p Application scenarios of SIP
-  - 1.5p Application scenarios of P2PSIP
-  - 1p Future of Real-Time Web
 
-3. (4p)
+2. (4p)
   - 1.5p radio use scheduling
   - 1.5p CPU usage, off-loading, proxy
   - 1p others, such as hardware improvement, display ...
 
   **OR** only one or two but in depth
 
+3. (4p)
+  - 2p streaming content distribution, such as CDN, CNN
+  - 2p non streaming content distribution, such as p2p.
+
 4. (4p)
-  - 1p Porting required, such as new data structures.
-  - 1p IPv6 mapped IPv4 addresses should not be used in wire,
-    they are dropped by routers/firewalls and ACLs fail on it.
-    IPV6_V6ONLY
-  - 1p getaddrinfo() instead of gethostbyname() / DNS; AAAA first, then A
-  - 1p sendmsg(),connect() / address selection, multihoming, parallel v4/v6 connection
+  - 2p principal of nano commnication, such as molecular communicaiton, diffisuion communication and etc. 
+  - 2p application of Internet of Nano things.
 
-  **OR** only one or two but in depth
+5. (8p)
+  - 2p outdoor navigation technology.
+  - 2p outdoor weakness and strength.
+  - 2p indoor navigation technology.
+  - 2p indoor weakness and strength.
 
-5. (4p)
-  - 1.5p Technical comparison
-  - 1.5p Non-technical comparison
-  - 1p  Additional mobile OS
-
-  **OR** in depth analysis
-
-6. (4p)
-  - 0.5p Similarities among cloud and data centres
-  - 0.5p Differences between cloud and data centres
-  - Application scenarios for:
-     - 1p IaaS
-     - 1p PaaS
-     - 1p SaaS
-
-7. (10p)
+6. (10p)
   - 1p Story
   - 6p **Design**
   - Analysis:
