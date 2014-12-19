@@ -21,8 +21,9 @@ Grading Criteria of the Exam
   - 2p non streaming content distribution, such as p2p.
 
 4. (4p)
-  - 2p principal of nano commnication, such as molecular communicaiton, diffisuion communication and etc. 
-  - 2p application of Internet of Nano things.
+  - 1p Electromagnetic
+  - 1.5p molecular communicaiton, diffisuion communication and etc. 
+  - 1.5p application of Internet of Nano things, including human body and environment usage
 
 5. (8p)
   - 2p outdoor navigation technology.
