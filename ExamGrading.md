@@ -22,7 +22,7 @@ Grading Criteria of the Exam
 
 4. (4p)
   - 1p Electromagnetic
-  - 1.5p molecular communicaiton, diffisuion communication and etc. 
+  - 1.5p molecular communication, diffusion communication and etc. 
   - 1.5p application of Internet of Nano things, including human body and environment usage
 
 5. (8p)
