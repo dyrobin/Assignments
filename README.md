@@ -2,7 +2,7 @@ T-110.5150 Application and Services in Internet
 =====
 Materials for Assignments and Course Staff
 
-Repositories for student assugnments and course materials are hosted using Niksula Git (http://www.niksula.hut.fi/git).
+Repositories for student assignments and course materials are hosted using Niksula Git (http://www.niksula.hut.fi/git).
 
 - URL to course Git group:
  https://git.niksula.hut.fi/groups/t-110-5150
@@ -26,15 +26,13 @@ FOR COURSE STAFF
     Check TODOs in individual documents.
   - Update `groups.csv` according to the sign up list of this year.
   - Create repositories for this year's students.
-  - P2P: Apply for virtual machines for bootstrap servers from Niksula.
+  - P2P: Request virtual machines for bootstrap servers from guru@cs.hut.fi
     See http://rtfm.cs.hut.fi/virtual-machines (Intranet web site).
-    Note that there are two IT systems in the CSE department, **cs.hut** for *work* and **Niksula** for students.
+    Note that there are two IT systems in the CSE department, **cs.hut** for *work* and **Niksula** for *students*.
     Once you signed the work contract for course assistant, you became an employee of the department.
     Check if you have an account for *work*: http://rtfm.cs.hut.fi/unix-guide .
     Plan the firewall access requirements carefully.
     P2P service ports need to be globally accessible.
-  - EC2: Request Amazon management credentials from the teacher.
-    Create accounts for students and update `keys.csv`.
   - Verify assignment instructions and sample implementations.
   - If you took the course before, verify also your previous experiences and solutions.
   - Time reservation sheet, for example for demo(s), can be made with Foodle (https://foodl.org/).
@@ -50,9 +48,6 @@ CONTENTS
           reference.
   - `*.tex` : Assignment instructions and demo sheet.
   - `group.csv` : Group sign-up book.
-  - `keys.csv` : Amazon EC2 credentials.
-
-
   - TeX -> PDF
 
   To typeset the TeX files, clone this repository on any

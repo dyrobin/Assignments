@@ -1,0 +1,17 @@
+1. purpose
+    Three virtual servers are used for the first assignment of course T-110.5150 (Applications and Services in Internet). Our P2P nodes will run on the servers and other P2P nodes will be developed by students and run on their workstations. Students are able to test and examine their nodes by connecting to our nodes.
+
+2. generic
+    name:          aps1.cs.hut.fi; aps2.cs.hut.fi; aps3.cs.hut.fi
+    course:        T-110.5150 (Applications and Services in Internet)
+    admins:        Yang Deng <yang.deng@aalto.fi>
+    expiration:    2016-01-31
+    os:            Ubuntu 12.04 LTS
+    when:          2015-09-28 or earlier
+
+3. resources
+    There might be tens of (but should be less than 50) connections simultaneously for each server as we have more than 20 groups and each group might have 1 or 2 nodes.
+
+4. networking
+    ssh from department
+    port 6346 (Gnutella) for tcp and udp, accessible from world wide as students may connect from anywhere.
