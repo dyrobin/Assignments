@@ -1,43 +1,33 @@
 #ifndef SOCK_UTIL_H
 #define SOCK_UTIL_H
 
-#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 
 
 typedef struct sockaddr SA;
 
-int
-connect_pto(int fd, SA * addr, socklen_t size, int timeout_sec);
+int Socket(int domain, int type, int protocol);
 
-int
-Socket(int family, int type, int protocol);
+int Bind(int sockfd, const SA *addr, socklen_t addrlen);
 
-int
-Bind(int fd, const SA *addr, socklen_t addrlen);
+int Listen(int sockfd, int backlog);
 
-int
-Listen(int sockfd, int backlog);
+int Accept(int sockfd, SA *addr, socklen_t *addrlen);
 
-int
-Accept(int sockfd, SA *addr, socklen_t *addrlen);
+int Connect(int sockfd, const SA *addr, socklen_t addrlen);
 
-int
-Close(int sockfd);
+int ConnectWithin(int sockfd, const SA *addr, socklen_t salen, int time);
 
-ssize_t
-Read(int fd, void *ptr, size_t nbytes);
+int Close(int fd);
 
-void
-Write(int fd, void *ptr, ssize_t nbytes);
+ssize_t Read(int fd, void *buf, size_t count);
 
-int
-GetSockName(int sock, struct sockaddr *addr, socklen_t *addrlen);
+ssize_t Write(int fd, const void *buf, size_t count);
 
-char *
-sock_ntop(struct sockaddr_in *addr);
+int GetSockName(int sockfd, SA *addr, socklen_t *addrlen);
 
-char *
-sock_ntop2(struct in_addr *ip, int port);
+const char *sock_ntop(const struct sockaddr_in *addr_ip, 
+                      char *dst, socklen_t size);
 
 #endif
