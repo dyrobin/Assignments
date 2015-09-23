@@ -1,19 +1,40 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <sys/time.h>
 
-#include "p2pn.h"
+#include "list.h"
+#include "proto.h"
+#include "util.h"
+
+
+extern struct node_meta neighbors;  /* The list of neighbor nodes */
+extern int nm_size;                 /* The size of the neighbor node list */
+
+extern struct wtnode_meta waiting_nodes;    /* The list of waiting nodes */
+extern int wt_size;                 /* The size of the waiting node list */
+
+extern struct peer_cache pr_cache;  /* Cache received data to distinguish the 
+                                       message boundary */
+extern struct msgstore g_recvmsgs;  /* Save messages to prevent loop in 
+                                       forwarding */
+extern struct keyval localdata;     /* The key/value pairs in current node */
+
+extern enum DLEVEL debuglv;
+
+#define SLEN    128
+#define MLEN    256
 
 void
 p2plog_all(enum DLEVEL lv, const char *file, const int line,
-	   const char *function, char *fmt, ...)
+	       const char *function, char *fmt, ...)
 {
     va_list ap;
     FILE *target = (lv == ERROR) ? stderr : stdout;
 
     if (lv >= debuglv) {
         va_start(ap, fmt);
-	fprintf(target, "%s:%d::%s() ",
-		file, line, function);
+        fprintf(target, "%s:%d::%s() ", file, line, function);
         vfprintf(target, fmt, ap);
         va_end(ap);
     }
@@ -26,21 +47,12 @@ Malloc(size_t size)
 {
     void *res;
 
-    if ( (res = malloc(size)) == NULL) {
+    if ((res = malloc(size)) == NULL) {
         perror("malloc error");
         exit(1);
     }
 
     return res;
-}
-
-/* Get the message id from a P2P message */
-uint32_t
-get_msgid(struct msgstore *ms)
-{
-    struct P2P_h *ph;
-    ph = (struct P2P_h *) (ms->msg);
-    return ph->msg_id;
 }
 
 /* Initialize a waiting node */
@@ -107,6 +119,23 @@ wtn_contains(struct in_addr *addr, int lport)
     return match;
 }
 
+/* Add a new waiting node to the waiting node list */
+void
+wt_list_add(struct wtnode_meta *new_wt)
+{
+    list_add(&new_wt->list, &waiting_nodes.list);
+    wt_size++;
+}
+
+/* Delete the waiting node from the waiting node list */
+void
+wt_list_del(struct wtnode_meta *wt)
+{
+    list_del(&wt->list);
+    wt_size--;
+    free(wt);
+}
+
 /* Initialize a neighbor(peer) node */
 void
 nm_init(struct node_meta *nm)
@@ -155,54 +184,6 @@ nm_contains(struct in_addr *addr, int lport)
     return match;
 }
 
-/* A utility function to conver a 'sockaddr' structure to string */
-int
-sock_pton(struct sockaddr_in *addr, char *addstr)
-{
-    int read_fail, iplen;
-    char *sp;
-    char buf[SLEN];
-
-    memset(addr, 0, sizeof(struct sockaddr_in));
-    addr->sin_family = AF_INET;
-    read_fail = 0;
-    if (addstr != NULL) {
-        if((sp = strstr(addstr, ":")) != NULL) {
-            iplen = sp - addstr;
-            if (iplen < 50 && iplen > 0 && iplen < (int)strlen(addstr)) {
-                strncpy(buf, addstr, iplen);
-                buf[iplen] = '\0';
-                if ((inet_pton(AF_INET, buf, &addr->sin_addr)) == -1)
-                    read_fail = 1;
-                addr->sin_port = htons(atoi(sp+1));
-            } else
-                read_fail = 1;
-        } else
-            read_fail = 1;
-    } else {
-        read_fail = 1;
-    }
-
-    return read_fail;
-}
-
-/* Add a new waiting node to the waiting node list */
-void
-wt_list_add(struct wtnode_meta *new_wt)
-{
-    list_add(&new_wt->list, &waiting_nodes.list);
-    wt_size++;
-}
-
-/* Delete the waiting node from the waiting node list */
-void
-wt_list_del(struct wtnode_meta *wt)
-{
-    list_del(&wt->list);
-    wt_size--;
-    free(wt);
-}
-
 /* Add a new neighbor node to the neighbor node list */
 void
 nm_list_add(struct node_meta *new_nm)
@@ -217,15 +198,15 @@ nm_list_del(struct node_meta *nm)
 {
     if (nm != NULL)
     {
-      if (nm->list.next != NULL && nm->list.prev != NULL) {
-        list_del(&nm->list);
-      } else {
-        p2plog(ERROR, "nm->list contains NULL\n");
-      }
-      nm_size--;
-      free(nm);
+        if (nm->list.next != NULL && nm->list.prev != NULL) {
+            list_del(&nm->list);
+        } else {
+            p2plog(ERROR, "nm->list contains NULL\n");
+        }
+        nm_size--;
+        free(nm);
     } else {
-      p2plog(ERROR, "nm = NULL\n");
+        p2plog(ERROR, "nm = NULL\n");
     }
 }
 
@@ -280,7 +261,7 @@ gc_msgstore(struct msgstore *head)
     gettimeofday(&tv, NULL);
     list_for_each_entry_safe(ms, mstp, &head->list, list) {
         if (tv.tv_sec - ms->ts.tv_sec > 10) {
-	    p2plog(DEBUG, "free msg %08X in the msg storage\n", get_msgid(ms));
+            p2plog(DEBUG, "free msg %08X in the msg storage\n", get_msgid(ms));
             list_del(&ms->list);
             free_msg(ms);
         }
@@ -297,6 +278,15 @@ push_g_recv_msg(int connfd, void *msg, unsigned int len)
     list_add(&ms->list, &g_recvmsgs.list);
 
     return 0;
+}
+
+/* Get the message id from a P2P message */
+uint32_t
+get_msgid(struct msgstore *ms)
+{
+    struct P2P_h *ph;
+    ph = (struct P2P_h *) (ms->msg);
+    return ph->msg_id;
 }
 
 /* Create a new peer cache for a new socket descriptor */
@@ -320,10 +310,10 @@ remove_peer_cache(int connfd)
 
     list_for_each_entry(pc, &pr_cache.list, list) {
         if (pc->connfd == connfd) {
-	    p2plog(DEBUG, "delete cache for socket fd %d\n", connfd);
-	    list_del(&pc->list);
-	    free(pc);
-	    break;
+	       p2plog(DEBUG, "delete cache for socket fd %d\n", connfd);
+	       list_del(&pc->list);
+	       free(pc);
+	       break;
         }
     }
     return 0;
@@ -342,3 +332,25 @@ get_peer_cache(int connfd)
     return NULL;
 }
 
+uint32_t
+search_localdata(struct P2P_h *ph, unsigned int msglen)
+{
+    char buf[MLEN];
+    unsigned int kylen;
+    struct keyval *kv;
+    kylen = msglen - HLEN;
+    if (kylen > KEYLEN) {
+        return 0;
+    }
+
+    memcpy(buf, ((char*)ph) + HLEN, kylen);
+    buf[kylen] = '\0';
+
+    list_for_each_entry(kv, &localdata.list, list) {
+        p2plog(DEBUG, "buf = %s, key = %s, cmp = %d\n",
+               buf, kv->key, strcmp(kv->key, buf));
+        if (strcmp(kv->key, buf) == 0)
+            return kv->value;
+    }
+    return 0;
+}

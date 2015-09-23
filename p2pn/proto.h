@@ -2,11 +2,10 @@
 #define PROTO_H
 
 #include <stdint.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 
 /* Default listening port */
-#define PORT_DEFAULT    8601
+#define PORT_DEFAULT    6346
 
 /* definition of protocol message type */
 #define MSG_PING        0x00
@@ -93,28 +92,25 @@ struct P2P_qhit_entry {
     uint32_t    res_val;
 };
 
-uint32_t search_localdata(struct P2P_h *ph, unsigned int msglen);
 
 uint32_t send_join_message(int connfd);
 
-void handle_join_message(int connfd, const void *msg, unsigned int len);
+int handle_join_message(int connfd, void *msg, unsigned int len);
 
-void send_ping_message(int connfd, int ttl);
+int send_ping_message(int connfd, int ttl);
 
-void handle_ping_message(int connfd, const void *msg, unsigned int len);
+int handle_ping_message(int connfd, void *msg, unsigned int len);
 
-void handle_pong_message(void *msg, unsigned int len);
+int handle_pong_message(void *msg, unsigned int len);
 
-void handle_bye_message(int connfd);
+int send_query_message(char *search);
+
+int handle_query_message(int connfd, void *msg, unsigned int len);
 
 int send_query_hit(int connfd, void *msg, uint32_t val);
 
 int handle_query_hit(void *msg, unsigned int len);
 
-int forward_p2p_message(int connfd, void *msg, unsigned int len);
-
-int flood_msg(int fromfd, void *msg, unsigned int len);
-
-int send_query_message(char *search);
+int handle_bye_message(int connfd);
 
 #endif

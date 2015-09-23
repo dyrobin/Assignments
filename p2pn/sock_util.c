@@ -251,22 +251,56 @@ GetSockName(int sockfd, SA *addr, socklen_t *addrlen)
 
 /**
  * @c inet_ntop() extension that converts port as well into presentation
+ * Note that only IPv4 address is supported
  */
 #define SOCK_ADDRSTRLEN (16 + 6) /* Format ddd.ddd.ddd.ddd:ddddd */
 const char *
-sock_ntop(const struct sockaddr_in *addr_ip, char *dst, socklen_t size)
+sock_ntop(const struct in_addr *addr, const uint16_t port)
 {
-    if (size < SOCK_ADDRSTRLEN) {
-        perror("sock_ntop(), no enough dst");
-        return NULL;
-    }
+    static char str[SOCK_ADDRSTRLEN];
 
-    const char *n;
-    if ((n = inet_ntop(AF_INET, &addr_ip->sin_addr, dst, size)) == NULL) {
+    
+    if (inet_ntop(AF_INET, addr, str, SOCK_ADDRSTRLEN) == NULL) {
         perror("sock_ntop(), inet_ntop");
         return NULL;
     }
 
-    sprintf(dst + strlen(n), ":%d", ntohs(addr_ip->sin_port));
-    return dst;
+    sprintf(str + strlen(str), ":%d", ntohs(port));
+    return str;
+}
+
+
+/**
+ * @c inet_pton() extension that converts a string into address and port
+ * Note that only IPv4 address is supported
+ */
+int
+sock_pton(const char *str, struct in_addr *addr, uint16_t *port)
+{
+    int len;
+    char *sp;
+    char tmp[32];
+
+    memset(addr, 0, sizeof(struct sockaddr_in));
+
+    if (str != NULL) {
+        if((sp = strstr(str, ":")) != NULL) {
+            len = sp - str;
+            strncpy(tmp, str, len);
+            tmp[len] = 0;
+            if ((inet_pton(AF_INET, tmp, addr)) != 1) {
+                perror("sock_pton(), inet_pton");
+                return -1;
+            }
+            *port = htons(atoi(sp + 1));
+        } else {
+            perror("sock_pton(), format");
+            return -1;
+        }
+    } else {
+        perror("sock_pton(), NULL");
+        return -1;
+    }
+
+    return 0;
 }

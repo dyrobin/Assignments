@@ -2,21 +2,36 @@
 #define _BSD_SOURCE       /* timercmp -- check if host is not Linux */
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <signal.h>
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/select.h>
-#include <signal.h>
+#include <sys/time.h>
 
+#include "list.h"
+#include "sock_util.h"
+#include "util.h"
 #include "proto.h"
-#include "p2pn.h"
 
-#define TICK_SELECT    3
-#define TICK_HEARTBEAT 5
-#define TICK_NGHQUERY  8
-#define TICK_SEARCH    5
+
+#define LISTENQ             5
+/* Maximum neighborhood size */
+#define MAX_NEIB            8
+/* Number of retries to join a 'waiting' peer */
+#define JOIN_RETRY          3
+
+#define TICK_SELECT         3
+#define TICK_HEARTBEAT      5
+#define TICK_NGHQUERY       8
+#define TICK_SEARCH         5
+
+#define SLEN    128
+#define MLEN    256
 
 /* the listening fd of this p2p node */
 int listen_fd;
@@ -101,19 +116,19 @@ debug_env()
     p2plog(DEBUG, "\n::::Waiting List::::[%d]\n", wt_size);
     list_for_each_entry(wtn, &waiting_nodes.list, list) {
         p2plog(DEBUG, "%10d | %16s:%5d | nq = %5d | urgent = %5d\n",
-	       wtn->connfd,
-	       inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
-	       ntohs(wtn->lport),
-	       wtn->nrequest,
-	       wtn->urgent);
+           wtn->connfd,
+           inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
+           ntohs(wtn->lport),
+           wtn->nrequest,
+           wtn->urgent);
     }
 
     p2plog(DEBUG, "::::Neighbor List::::[%d]\n", nm_size);
     list_for_each_entry(nm, &neighbors.list, list) {
         p2plog(DEBUG, "%10d | %16s:%5d\n",
-	       nm->connfd,
-	       inet_ntop(AF_INET, &nm->ip, buf, sizeof(buf)),
-	       ntohs(nm->lport));
+           nm->connfd,
+           inet_ntop(AF_INET, &nm->ip, buf, sizeof(buf)),
+           ntohs(nm->lport));
     }
     p2plog(DEBUG, "\n\n");
 }
@@ -132,7 +147,7 @@ recv_msg(struct peer_cache *pc)
     struct wtnode_meta *wtn;
     struct node_meta *nm;
 
-    uint32_t kval;
+    
     int from_neigh, connfd;
     unsigned int msglen, remain_len, i;
     char mmbuf[SLEN];
@@ -150,19 +165,12 @@ recv_msg(struct peer_cache *pc)
     nm = nm_find_by_connfd(connfd);
     if (nm != NULL) {
         set_from_neigh();
-        p2plog(DEBUG, "Receive from neighbor: %s:%d\n",
-	       inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
-	       ntohs(nm->lport));
     } else {
         wtn = wtn_find_by_connfd(connfd);
-        if (wtn != NULL)
-            p2plog(DEBUG, "Receive from waiting list: %s:%d\n",
-		   inet_ntop(AF_INET, &wtn->ip, mmbuf, 128),
-		   ntohs(wtn->lport));
-        else {
+        if (wtn == NULL) {
             p2plog(ERROR, "Received a msg from an unknown sender.\n");
             return 0;
-            }
+        }
     }
 
     if (pc->bp < HLEN) {
@@ -179,7 +187,7 @@ recv_msg(struct peer_cache *pc)
 
     if (ph->version != P_VERSION) {
         p2plog(ERROR, "Invalid version number: %d\n",
-	       ph->version);
+           ph->version);
         goto CLEAR_CACHE;
     }
 
@@ -193,17 +201,27 @@ recv_msg(struct peer_cache *pc)
         return 0;
     }
 
-    p2plog(DEBUG, "MSG: [%08X], msg_type = %02X, len = %d\n",
-	   ph->msg_id, ph->msg_type, ntohs(ph->length));
+    if (from_neigh()) {
+        p2plog(DEBUG, "From neighbor: %s:%d\n",
+                inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
+                ntohs(nm->lport));
+    } else {
+        p2plog(DEBUG, "From waiting node: %s:%d\n",
+                inet_ntop(AF_INET, &wtn->ip, mmbuf, 128),
+                ntohs(wtn->lport));
+    }
+    p2plog(DEBUG, "In MSG: [%08x], msg_type = %02x, len = %d, ttl = %d\n",
+            ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
 
     if (!from_neigh() &&
-            ((ph->msg_type & MSG_JOIN) != MSG_JOIN)){
+        ((ph->msg_type & MSG_JOIN) != MSG_JOIN)){
         /* msg is not from a established neighbor,
            and it is not a JOIN type message, we should
            not allow this message */
            p2plog(ERROR, "Unexpected msg type from a non-neigh\n");
            goto CLEAR_CACHE;
     }
+
     switch(ph->msg_type) {
         case MSG_PING:
         handle_ping_message(connfd, ph, msglen);
@@ -222,37 +240,19 @@ recv_msg(struct peer_cache *pc)
         break;
 
         case MSG_QUERY:
-
         p2plog(INFO, "Receive QUERY MSG: [%08X], len = %d, from: %s:%d\n",
-	       ph->msg_id,
-	       ntohs(ph->length),
-	       inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
-	       ntohs(nm->lport));
-
-        if (find_stored_msg(&g_recvmsgs, ph->msg_id) != NULL) {
-                p2plog(ERROR, "dupplicated msg found in our message storage\n");
-                break;
-        }
-        gc_msgstore(&g_recvmsgs);
-        push_g_recv_msg(connfd, ph, msglen);
-        /* match local keys */
-        if ((kval = search_localdata(ph, msglen)) != 0) {
-            send_query_hit(connfd, ph, kval);
-            p2plog(INFO, "QUERY matches local key, QUERY HIT sent.\n");
-        }
-        /* still forward msg to find more result */
-        ph->ttl --;
-        flood_msg(connfd, ph, msglen);
-        p2plog(INFO, "flood query message\n");
+                ph->msg_id, ntohs(ph->length),
+                inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
+                ntohs(nm->lport));
+        handle_query_message(connfd, ph, msglen);
         break;
 
         case MSG_QHIT:
-
         p2plog(INFO, "Receive QHIT MSG: [%08X], len = %d, from: %s:%d\n",
-	       ph->msg_id,
-	       ntohs(ph->length),
-	       inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
-	       ntohs(nm->lport));
+           ph->msg_id,
+           ntohs(ph->length),
+           inet_ntop(AF_INET, &nm->ip, mmbuf, SLEN),
+           ntohs(nm->lport));
 
         handle_query_hit(ph, msglen);
         break;
@@ -288,7 +288,7 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
 
     if((pc = get_peer_cache(connfd)) == NULL) {
         p2plog(ERROR, "cannot find peer cache, connfd = %d\n",
-		connfd);
+        connfd);
         handle_peer_error = 2;
         return;
     }
@@ -297,7 +297,7 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
     if (pc->bp >= MAXLINE || bufsize < 0
         || (MAXLINE - pc->bp) < (unsigned)bufsize) {
         p2plog(ERROR, "buffer is full in the peer cache for connfd = %d\n",
-	       connfd);
+           connfd);
         handle_peer_error = 3;
         return;
     }
@@ -330,14 +330,14 @@ handle_waiting_list()
 
             if ((connfd = socket(AF_INET, SOCK_STREAM, 0)) >= 0) {
                 wtn->connfd = connfd;
-                if (connect_pto(connfd, (SA *)&addr,
-				     sizeof(addr), 2) >= 0) {
+                if (ConnectWithin(connfd, (SA *)&addr, sizeof(addr), 2) >= 0) {
                     wtn->join_msgid = send_join_message(connfd);
-                    wtn->nrequest++;
+                    /* Set 1: Join Request sent.*/
+                    wtn->nrequest = 1;
                     wtn_urgent_reset(wtn);
                     create_peer_cache(connfd);
                 } else {
-                    perror("connect_pto error");
+                    perror("ConnectWithin() error");
                     wt_list_del(wtn);
                 }
             } else {
@@ -352,10 +352,11 @@ handle_waiting_list()
     if (nm_size < MAX_NEIB) {
         list_for_each_entry(wtn, &waiting_nodes.list, list) {
             /* Here we pick one such peer at a time. */
-            if (!wtn_conn_established(wtn)
-                    && !wtn_urgent(wtn) && !wtn_requested(wtn)) {
-              wtn_urgent_set(wtn);
-              break;
+            if (!wtn_conn_established(wtn) && 
+                !wtn_urgent(wtn) && 
+                !wtn_requested(wtn)) {
+                wtn_urgent_set(wtn);
+                break;
             }
         }
     }
@@ -393,17 +394,17 @@ network_maintain()
         }
         /* kick off those who neither send a Join Request or accept our Join */
         list_for_each_entry_safe(wtn, wtn_tmp, &waiting_nodes.list, list) {
-          if (wtn_conn_established(wtn)) {
-            if (wtn->nrequest == 2) {
-              Close(wtn->connfd);
-              wt_list_del(wtn);
-            }
+            if (wtn_conn_established(wtn)) {
+                if (wtn->nrequest == 2) {
+                    Close(wtn->connfd);
+                    wt_list_del(wtn);
+                }
             /* = 0: new peer that connected to us, but no Join Request yet.
                = 1: discovered peer, Join Request sent.
                = 2: we are waiting for Join Request/Accept. */
-            wtn->nrequest = 2;
-          } /* if conn established */
-        } /* list wtn */
+                wtn->nrequest = 2;
+            }
+        }
 
         prev_hbeat = now;
     }
@@ -479,14 +480,28 @@ node_loop()
             if (setsockopt(connfd, SOL_SOCKET, SO_RCVLOWAT, &opt_recv_low, sizeof(int)) != 0) {
                 p2plog(ERROR, "Failed to set socket OPT: SO_RCVLOWAT");
             }
+            /** 
+             * TODO: Fix bug here! 
+             * Should not always create a waiting node when receving a new
+             * connection (Normally the JOIN Request is coming). The reason
+             * for this is that the node sending JOIN Request by creating a 
+             * new connection might have been already in the waiting list 
+             * or even in the neighbour list. This happens when a node is added 
+             * to the waiting list by handling PONG and later on that node 
+             * starts to send JOIN. Therefore, a new waiting node can only be
+             * created when it is not in either waiting list or neighbor list.
+             */
             wtn = (struct wtnode_meta *)Malloc(sizeof(struct wtnode_meta));
             wtn_init(wtn);
             wtn->connfd = connfd;
             wtn->ip = cliaddr.sin_addr;
+            wtn->lport = cliaddr.sin_port;
+            /* set to 0: new peer that connected to us, 
+             *           but no Join Request yet */
+            wtn->nrequest = 0;
             p2plog(DEBUG, "Connection from %s:%d, fd = %d\n",
-		   inet_ntop(AF_INET, &cliaddr.sin_addr, sbuf, sizeof(sbuf)),
-		   ntohs(cliaddr.sin_port),
-		   wtn->connfd);
+                    inet_ntop(AF_INET, &cliaddr.sin_addr, sbuf, sizeof(sbuf)),
+                    ntohs(cliaddr.sin_port), wtn->connfd);
             /* save to waiting list */
             wt_list_add(wtn);
             create_peer_cache(connfd);
@@ -498,15 +513,17 @@ node_loop()
                 handle_peer_error = 0;
                 if ((n = Read(tempn->connfd, buf, MAXLINE)) <= 0) {
                     if (n == 0) {
-                        p2plog(WARN, "Disconnect from neighbor: %s:%d, fd = %d\n",
-			       inet_ntop(AF_INET, &tempn->ip, sbuf, sizeof(sbuf)),
-			       ntohs(tempn->lport),
-			       tempn->connfd);
+                        p2plog(WARN, 
+                            "Disconnect from neighbor: %s:%d, fd = %d\n",
+                            inet_ntop(AF_INET, &tempn->ip, sbuf, sizeof(sbuf)),
+                            ntohs(tempn->lport),
+                            tempn->connfd);
                     } else {
-                        p2plog(ERROR, "Read error, drop neighbor: %s:%d, fd = %d\n",
-			       inet_ntop(AF_INET, &tempn->ip, sbuf, sizeof(sbuf)),
-			       ntohs(tempn->lport),
-			       tempn->connfd);
+                        p2plog(ERROR, 
+                            "Read error, drop neighbor: %s:%d, fd = %d\n",
+                            inet_ntop(AF_INET, &tempn->ip, sbuf, sizeof(sbuf)),
+                            ntohs(tempn->lport),
+                            tempn->connfd);
                     }
                     handle_peer_error = 1;
                 } else {
@@ -528,15 +545,17 @@ node_loop()
                 handle_peer_error = 0;
                 if ((n = Read(wtn->connfd, buf, MAXLINE)) <= 0) {
                     if (n == 0) {
-                    p2plog(WARN, "Disconnect from waiting node: %s:%d, fd = %d\n",
-                        inet_ntop(AF_INET, &wtn->ip, sbuf, sizeof(sbuf)),
-                        ntohs(wtn->lport),
-                        wtn->connfd);
+                        p2plog(WARN, 
+                            "Disconnect from waiting node: %s:%d, fd = %d\n",
+                            inet_ntop(AF_INET, &wtn->ip, sbuf, sizeof(sbuf)),
+                            ntohs(wtn->lport),
+                            wtn->connfd);
                     } else {
-                    p2plog(ERROR, "Read error, drop waiting node: %s:%d, fd = %d\n",
-                        inet_ntop(AF_INET, &wtn->ip, sbuf, sizeof(sbuf)),
-                        ntohs(wtn->lport),
-                        wtn->connfd);
+                        p2plog(ERROR, 
+                            "Read error, drop waiting node: %s:%d, fd = %d\n",
+                            inet_ntop(AF_INET, &wtn->ip, sbuf, sizeof(sbuf)),
+                            ntohs(wtn->lport),
+                            wtn->connfd);
                     }
                     handle_peer_error = 1;
                 } else {
@@ -566,7 +585,7 @@ node_loop()
 static int
 start_node()
 {
-    struct sockaddr_in socktmp;
+    
     struct wtnode_meta *wtn;
     int on;
 
@@ -579,7 +598,8 @@ start_node()
     Bind(listen_fd, (SA *)&ltn_addr, sizeof(ltn_addr));
 
     Listen(listen_fd, LISTENQ);
-    p2plog(INFO, "P2P node starts on  %s\n", sock_ntop(&ltn_addr));
+    p2plog(INFO, "P2P node starts on  %s\n", 
+           sock_ntop(&ltn_addr.sin_addr, ltn_addr.sin_port));
 
     /* init local node database */
     memset(&neighbors, 0, sizeof(neighbors));
@@ -600,10 +620,11 @@ start_node()
 
     /* If there is bootstrap code provided, read it and put
        the information in the waiting list */
+    struct sockaddr_in socktmp;
+    memset(&socktmp, 0, sizeof(socktmp));
     if (bsp_code != NULL) {
-        if ((sock_pton(&socktmp, bsp_code)) == 1) {
-            p2plog(ERROR, "invalid bootstrap information: %s\n",
-                   bsp_code);
+        if ((sock_pton(bsp_code, &socktmp.sin_addr, &socktmp.sin_port)) < 0) {
+            p2plog(ERROR, "invalid bootstrap information: %s\n", bsp_code);
             exit(1);
         }
         wtn = Malloc(sizeof(struct wtnode_meta));
@@ -668,8 +689,7 @@ main(int argc, char **argv)
     laddr = NULL;
     bsp_code = NULL;
     maxp = NULL;
-    memset(&ltn_addr, 0, sizeof(ltn_addr));
-    ltn_addr.sin_family = AF_INET;
+
     setbuf(stdout, NULL);
 
     srand(time(NULL));
@@ -711,8 +731,8 @@ main(int argc, char **argv)
         exit(1);
     }
 
-    p2plog(DEBUG, "l:%s\nb:%s\ns:%s\nf:%s\np:%s\n",
-	   laddr, bsp_code, search, kvfile, maxp);
+    p2plog(DEBUG, "\nl:%s\nb:%s\ns:%s\nf:%s\np:%s\n",
+       laddr, bsp_code, search, kvfile, maxp);
 
     /* set max neighbor entiries in PONG */
     if (maxp != NULL) {
@@ -721,10 +741,13 @@ main(int argc, char **argv)
             n_peer_ad = n;
         else
             p2plog(WARN, "Invalid peer_ad number:%d, set to DEFAULT:%d\n",
-		   n, MAX_PEER_AD);
+                   n, MAX_PEER_AD);
     }
+
     /* Read port number from argv */
-    if (sock_pton(&ltn_addr, laddr) != 0) {
+    memset(&ltn_addr, 0, sizeof(ltn_addr));
+    ltn_addr.sin_family = AF_INET;
+    if (sock_pton(laddr, &ltn_addr.sin_addr, &ltn_addr.sin_port) < 0) {
         p2plog(ERROR, "Incorrect listening addr:port\n");
         usage();
         exit(1);
@@ -746,8 +769,8 @@ main(int argc, char **argv)
     memset(&act, 0, sizeof(struct sigaction));
     act.sa_handler = sig_pipe;
     if (sigaction(SIGPIPE, &act, NULL) != 0) {
-      perror("sigaction failed");
-      exit(1);
+        perror("sigaction failed");
+        exit(1);
     }
 
     /* Start the p2p node */

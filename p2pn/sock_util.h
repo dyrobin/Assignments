@@ -27,7 +27,8 @@ ssize_t Write(int fd, const void *buf, size_t count);
 
 int GetSockName(int sockfd, SA *addr, socklen_t *addrlen);
 
-const char *sock_ntop(const struct sockaddr_in *addr_ip, 
-                      char *dst, socklen_t size);
+const char *sock_ntop(const struct in_addr *addr, const unsigned short port);
+
+int sock_pton(const char *str, struct in_addr *addr, uint16_t *port);
 
 #endif
