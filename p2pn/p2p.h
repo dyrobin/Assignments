@@ -1,12 +1,12 @@
-#ifndef PROTO_H
-#define PROTO_H
+#ifndef P2P_H
+#define P2P_H
 
 #include <stdint.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
 /* Default listening port */
-#define PORT_DEFAULT    8601
+#define PORT_DEFAULT    6346
 
 /* definition of protocol message type */
 #define MSG_PING        0x00
