@@ -80,6 +80,7 @@ wtn_find_by_connfd(int connfd)
     return wtn_tgt;
 }
 
+/*
 struct wtnode_meta *
 wtn_find_by_joinid(uint32_t msgid)
 {
@@ -94,12 +95,13 @@ wtn_find_by_joinid(uint32_t msgid)
     }
     return wtn_tgt;
 }
+*/
 
 /* Check if the waiting node with given IP and port number exists
  * in the waiting node list.
  */
 int
-wtn_contains(struct in_addr *addr, int lport)
+wtn_contains(struct in_addr *addr, uint16_t lport)
 {
     struct wtnode_meta *wtn;
     struct wtnode_meta tmp;
@@ -164,7 +166,7 @@ nm_find_by_connfd(int connfd)
  * in the neighbor node list.
  */
 int
-nm_contains(struct in_addr *addr, int lport)
+nm_contains(struct in_addr *addr, uint16_t lport)
 {
     struct node_meta *nm;
     struct node_meta tmp;

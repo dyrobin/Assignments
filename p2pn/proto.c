@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h> 
 #include <time.h>
+#include <ifaddrs.h>
 #include <arpa/inet.h>
 
 #include "list.h"
@@ -16,6 +17,8 @@
 
 extern int listen_fd;               /* The listening socket for the P2PN */
 extern struct sockaddr_in ltn_addr; /* Current the listening address */
+
+extern struct ifaddrs *if_addrs;
 
 extern struct node_meta neighbors;  /* The list of neighbor nodes */
 
@@ -129,6 +132,29 @@ gen_msgid(char *prefix)
 }
 
 static uint32_t
+is_myself(struct in_addr *addr, uint16_t port)
+{
+    if (port != ltn_addr.sin_port)
+        return 0;
+
+    struct ifaddrs *ifa;
+    for (ifa = if_addrs; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            struct in_addr *tmp;
+            tmp = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            if (memcmp(addr, tmp, sizeof(struct in_addr)) == 0)
+                return 1;
+        }
+   }
+
+   return 0;
+}
+
+
+static uint32_t
 gen_msgid_wrap()
 {
     char buf[SLEN];
@@ -180,7 +206,12 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
                         &addrlen) == 0) {
             ph->org_ip = outgoing_addr.sin_addr.s_addr;
         } else {
-            ph->org_ip = ltn_addr.sin_addr.s_addr;
+            if (ltn_addr.sin_addr.s_addr != INADDR_ANY)
+                ph->org_ip = ltn_addr.sin_addr.s_addr;
+            else {
+                p2plog(ERROR, "Orginal IP set failed");
+                return -1;
+            }
         }
         ph->org_port = ltn_addr.sin_port;
     }
@@ -281,53 +312,71 @@ handle_join_message(int connfd, void *msg, unsigned int len)
        len, ntohs(ph_in->length));
 
     if (len == HLEN) { /* JOIN REQUEST */
-        /*start to check local database for peer information */
-        wtn = wtn_find_by_connfd(connfd);
-        if (wtn == NULL) {
-        /* JOIN message is not from a waiting node.
-           This is not allowed, so we drop this message */
-            p2plog(ERROR, "JOIN from an unknown node, connfd = %d\n", connfd);
-            return -1;
-        }
-
-        /* This is a self-loop */
-        if (wtn_find_by_joinid(ph_in->msg_id) != NULL) {
-            p2plog(WARN, "JOIN from ourself - loop detected.\n");
-            return -1;
-        }
-
+        /* JOIN message is sent normally after a node connects another one
+         * successfully. However, we also allow an established neighbor to 
+         * send JOIN in case the response is somehow lost. */
         nm = nm_find_by_connfd(connfd);
         if (nm == NULL) {
-        /* The normal case, JOIN message is from a waiting node,
-           and no record for this node is in our neighbors list.
-           We should remove record form waiting list and add
-           it to neighbor list. Finally, send the JOIN accept msg.*/
-
-            /* this is the first time a peer send us a P2P_h header!
-               we should save the identifier of the peer: its ip and
-               listening port */
+            /* The normal case, JOIN message is from incoming list (merged 
+             * with waiting list here) */
+            wtn = wtn_find_by_connfd(connfd);
+            if (wtn == NULL) {
+                /* JOIN message is neither from neighbor list nor incoming list
+                 * This is not allowed, so we drop this message */
+                p2plog(ERROR, "JOIN from an unknown node, connfd = %d\n", 
+                       connfd);
+                return -1;
+            }
+            /* Check again if it comes from incoming list */
+            if (wtn->nrequest != 0) {
+                p2plog(ERROR, "JOIN STATE error, connfd = %d\n", 
+                       connfd);
+                remove_peer_cache(wtn->connfd);
+                Close(wtn->connfd);
+                return -1;
+            }
+            /* JOIN message comes from incoming list and this should be the 
+             * first time a peer send a P2P message so wtn->lport should be
+             * updated to the listening port embedded in the header.
+             */
             wtn->lport = ph_in->org_port;
-            nm = (struct node_meta*) Malloc(sizeof(struct node_meta));
-            nm_init(nm);
-            nm->connfd = wtn->connfd;
-            nm->ip = wtn->ip;
-            nm->lport = wtn->lport;
-            nm_list_add(nm);
+
+            /* This is a self-loop */
+            /*
+            if (wtn_find_by_joinid(ph_in->msg_id) != NULL) {
+                p2plog(WARN, "JOIN from ourself - loop detected.\n");
+                return -1;
+            }
+            */
+
+            /* Check if waiting list or neighbor list has already contains 
+             * it by indentifying its IP address and listening port. */
+            if (!wtn_contains(&wtn->ip, wtn->lport) && 
+                !nm_contains(&wtn->ip, wtn->lport)) {
+                /* This is a new neighbor, insert it into neighbor list */
+                nm = (struct node_meta*) Malloc(sizeof(struct node_meta));
+                nm_init(nm);
+                nm->connfd = wtn->connfd;
+                nm->ip = wtn->ip;
+                nm->lport = wtn->lport;
+                nm_list_add(nm);                
+                p2plog(INFO, "NEW NEIGHBOR: Accept a new neighbor, %s\n",
+                       sock_ntop(&nm->ip, nm->lport));                
+            } else {
+                /* The neighborhood of peer has been established or will be 
+                 * established later on in handle_waiting_list(). Thus, we
+                 * close current connect and remove cache for it. */
+                remove_peer_cache(wtn->connfd);
+                Close(wtn->connfd);
+                return -1;
+            }
+            /* wtn is tranfered to nm as needed, free it anyway */
             wt_list_del(wtn);
-            p2plog(INFO, "NEW NEIGHBOR: Accept a new neighbor, %s\n",
-                   sock_ntop(&nm->ip, nm->lport));
-        } else {
-        /* JOIN request message from a neighbor node.
-           Perhaps there are something wrong with my
-           JOIN accept message, or the neighbor wants
-           to reassure the connection, so we resend the
-           accept message */
         }
         /* common action: send JOIN_ACC */
         pj = (struct P2P_join *) (buf + HLEN);
         pj->status = htons(JOIN_ACC);
         send_p2p_message(connfd, buf, HLEN + JOINLEN);
-
     } else if (len == HLEN + JOINLEN
                 && ntohs(ph_in->length) == JOINLEN) { /* JOIN RESPONSE */
         pj = (struct P2P_join *) ((char *)msg + HLEN);
@@ -469,10 +518,13 @@ handle_pong_message(void *msg, unsigned int len)
         pe = (struct P2P_pong_entry *)
                 ((char *)msg + HLEN + PONG_MINLEN + PONG_ENTRYLEN * i);
 
-        /** 
-         * TODO: self-loop check
-         * If the entry contains a self address, ignore it.
-         */
+        /* If the entry contains a self address, ignore it. */
+        if (is_myself(&pe->ip, pe->port)) {
+            p2plog(INFO, "Self loop detected: %s", 
+                   sock_ntop(&pe->ip, pe->port));
+            continue;
+        }
+
         if (!wtn_contains(&pe->ip, pe->port) && 
             !nm_contains(&pe->ip, pe->port)) {
             new_wt = (struct wtnode_meta *)Malloc(sizeof(struct wtnode_meta));

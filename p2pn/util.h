@@ -71,7 +71,7 @@ struct wtnode_meta {
                                        1: discovered peer, Join Request sent.
                                        2: we are waiting for Join 
                                           Request/Accept. */
-    uint32_t            join_msgid; /* For self loop detection. Not a good 
+/*    uint32_t            join_msgid;*/ /* For self loop detection. Not a good 
                                        solution and the better one is to detect
                                        loop in handle_pong_message(). */
     struct list_head    list;
@@ -99,12 +99,12 @@ void wtn_init(struct wtnode_meta *wtn);
 struct wtnode_meta *wtn_find_by_connfd(int connfd);
 
 /* Search a waiting node by our Join Message ID */
-struct wtnode_meta *wtn_find_by_joinid(uint32_t msgid);
+/* struct wtnode_meta *wtn_find_by_joinid(uint32_t msgid); */
 
 /* Check if the waiting node with given IP and port number exists
  * in the waiting node list.
  */
-int wtn_contains(struct in_addr *addr, int lport);
+int wtn_contains(struct in_addr *addr, uint16_t lport);
 
 /* Add a new waiting node to the waiting node list */
 void wt_list_add(struct wtnode_meta *new_wt);
@@ -139,7 +139,7 @@ struct node_meta *nm_find_by_connfd(int connfd);
 /* Check if the neighbor node with given IP and port number exists
  * in the neighbor node list.
  */
-int nm_contains(struct in_addr *addr, int lport);
+int nm_contains(struct in_addr *addr, uint16_t lport);
 
 /* Add a new neighbor node to the neighbor node list */
 void nm_list_add(struct node_meta *new_nm);

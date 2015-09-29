@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <signal.h>
+#include <ifaddrs.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -38,6 +39,8 @@ int listen_fd;
 
 /* the sock addr of the listening fd */
 struct sockaddr_in ltn_addr;
+
+struct ifaddrs *if_addrs;
 
 /* neighbor database */
 struct node_meta neighbors;
@@ -331,7 +334,7 @@ handle_waiting_list()
             if ((connfd = socket(AF_INET, SOCK_STREAM, 0)) >= 0) {
                 wtn->connfd = connfd;
                 if (ConnectWithin(connfd, (SA *)&addr, sizeof(addr), 2) >= 0) {
-                    wtn->join_msgid = send_join_message(connfd);
+                    send_join_message(connfd);
                     /* Set 1: Join Request sent.*/
                     wtn->nrequest = 1;
                     wtn_urgent_reset(wtn);
@@ -471,6 +474,7 @@ node_loop()
 
         if (nready == -1) {
           p2plog(ERROR, "select() failed\n");
+          perror("select failed");
           return 1;
         }
 
@@ -480,16 +484,29 @@ node_loop()
             if (setsockopt(connfd, SOL_SOCKET, SO_RCVLOWAT, &opt_recv_low, sizeof(int)) != 0) {
                 p2plog(ERROR, "Failed to set socket OPT: SO_RCVLOWAT");
             }
-            /** 
-             * TODO: Fix bug here! 
-             * Should not always create a waiting node when receving a new
+            /**
+             * Should not always create a waiting node when receiving a new
              * connection (Normally the JOIN Request is coming). The reason
              * for this is that the node sending JOIN Request by creating a 
              * new connection might have been already in the waiting list 
-             * or even in the neighbour list. This happens when a node is added 
+             * or even in the neighbor list. This happens when a node is added 
              * to the waiting list by handling PONG and later on that node 
              * starts to send JOIN. Therefore, a new waiting node can only be
              * created when it is not in either waiting list or neighbor list.
+             * 
+             * Solution: The new incoming connection should be stored in 
+             * the third list different from neither waiting list nor neighbor 
+             * list. When the following JOIN comes, we should check if waiting
+             * list or neighbor list has already contained the node by 
+             * identifying both IP address and listening port. If nothing in 
+             * the lists, then a new entry of neighbor list can be allocated. 
+             * Note that listening port is different from the port returned by
+             * accept(). Therefore, wtn->lport will be updated when JOIN
+             * message is handled. See handle_join_message() in detail.
+             *
+             * Bug is fixed here by merging the third list with waiting list, 
+             * then separating them from each other when handling JOIN request 
+             * message in handle_join_message().
              */
             wtn = (struct wtnode_meta *)Malloc(sizeof(struct wtnode_meta));
             wtn_init(wtn);
@@ -638,6 +655,7 @@ start_node()
     /* Init other global data */
     memset(&prev_hbeat, 0, sizeof(prev_hbeat));
     memset(&prev_nghquery, 0, sizeof(prev_nghquery));
+    memset(&prev_search, 0, sizeof(prev_search));
 
     node_loop();
 
@@ -753,6 +771,11 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    if (ltn_addr.sin_port == 0) {
+        p2plog(ERROR, "Listening port should not be zero\n");
+        exit(1);
+    }
+
     search_key = search;
 
     /* init local key value data store */
@@ -761,7 +784,7 @@ main(int argc, char **argv)
 
     if (kvfile != NULL) {
         if(read_kvfile(kvfile) != 0) {
-            p2plog(ERROR, "Fail to read kvfile!\n");
+            p2plog(ERROR, "Fail to read kvfile\n");
             exit(1);
         }
     }
@@ -772,6 +795,23 @@ main(int argc, char **argv)
         perror("sigaction failed");
         exit(1);
     }
+
+
+    if (getifaddrs(&if_addrs) == -1) {
+        perror("getifaddrs falied");
+        exit(1);
+    }
+    struct ifaddrs *ifa;
+    for (ifa = if_addrs; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            struct in_addr *tmp;
+            tmp = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            p2plog(INFO, "Available: %s\n", sock_ntop(tmp, ltn_addr.sin_port));
+        }
+   }
 
     /* Start the p2p node */
     start_node();
