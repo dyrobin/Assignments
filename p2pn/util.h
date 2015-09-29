@@ -9,6 +9,8 @@
 
 #include "proto.h"
 
+void debug_env();
+
 /* wrapper of the malloc() */
 void *Malloc(size_t size);
 

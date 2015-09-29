@@ -107,36 +107,6 @@ usage()
     printf("    -j: Suppress auto join behaviour\n");
 }
 
-#if 0
-static void
-debug_env()
-{
-    struct node_meta *nm;
-    struct wtnode_meta *wtn;
-
-    char buf[128];
-
-    p2plog(DEBUG, "\n::::Waiting List::::[%d]\n", wt_size);
-    list_for_each_entry(wtn, &waiting_nodes.list, list) {
-        p2plog(DEBUG, "%10d | %16s:%5d | nq = %5d | urgent = %5d\n",
-           wtn->connfd,
-           inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
-           ntohs(wtn->lport),
-           wtn->nrequest,
-           wtn->urgent);
-    }
-
-    p2plog(DEBUG, "::::Neighbor List::::[%d]\n", nm_size);
-    list_for_each_entry(nm, &neighbors.list, list) {
-        p2plog(DEBUG, "%10d | %16s:%5d\n",
-           nm->connfd,
-           inet_ntop(AF_INET, &nm->ip, buf, sizeof(buf)),
-           ntohs(nm->lport));
-    }
-    p2plog(DEBUG, "\n\n");
-}
-#endif
-
 /**
  * handle messages in the peer_cache
  *

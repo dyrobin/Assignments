@@ -327,19 +327,13 @@ handle_join_message(int connfd, void *msg, unsigned int len)
                        connfd);
                 return -1;
             }
+
             /* Check again if it comes from incoming list */
             if (wtn->nrequest != 0) {
                 p2plog(ERROR, "JOIN STATE error, connfd = %d\n", 
                        connfd);
-                remove_peer_cache(wtn->connfd);
-                Close(wtn->connfd);
                 return -1;
             }
-            /* JOIN message comes from incoming list and this should be the 
-             * first time a peer send a P2P message so wtn->lport should be
-             * updated to the listening port embedded in the header.
-             */
-            wtn->lport = ph_in->org_port;
 
             /* This is a self-loop */
             /*
@@ -351,27 +345,27 @@ handle_join_message(int connfd, void *msg, unsigned int len)
 
             /* Check if waiting list or neighbor list has already contains 
              * it by indentifying its IP address and listening port. */
-            if (!wtn_contains(&wtn->ip, wtn->lport) && 
-                !nm_contains(&wtn->ip, wtn->lport)) {
+            if (!wtn_contains(&wtn->ip, ph_in->org_port) && 
+                !nm_contains(&wtn->ip, ph_in->org_port)) {
                 /* This is a new neighbor, insert it into neighbor list */
                 nm = (struct node_meta*) Malloc(sizeof(struct node_meta));
                 nm_init(nm);
                 nm->connfd = wtn->connfd;
                 nm->ip = wtn->ip;
-                nm->lport = wtn->lport;
+                nm->lport = ph_in->org_port;
                 nm_list_add(nm);                
                 p2plog(INFO, "NEW NEIGHBOR: Accept a new neighbor, %s\n",
-                       sock_ntop(&nm->ip, nm->lport));                
+                       sock_ntop(&nm->ip, nm->lport));
+                wt_list_del(wtn);
             } else {
                 /* The neighborhood of peer has been established or will be 
                  * established later on in handle_waiting_list(). Thus, we
                  * close current connect and remove cache for it. */
                 remove_peer_cache(wtn->connfd);
                 Close(wtn->connfd);
+                wt_list_del(wtn);
                 return -1;
             }
-            /* wtn is tranfered to nm as needed, free it anyway */
-            wt_list_del(wtn);
         }
         /* common action: send JOIN_ACC */
         pj = (struct P2P_join *) (buf + HLEN);

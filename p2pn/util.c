@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <arpa/inet.h>
 #include <sys/time.h>
 
 #include "list.h"
@@ -24,6 +25,35 @@ extern enum DLEVEL debuglv;
 
 #define SLEN    128
 #define MLEN    256
+
+
+void
+debug_env()
+{
+    struct node_meta *nm;
+    struct wtnode_meta *wtn;
+
+    char buf[SLEN];
+
+    p2plog(DEBUG, "\n::::Waiting List::::[%d]\n", wt_size);
+    list_for_each_entry(wtn, &waiting_nodes.list, list) {
+        p2plog(DEBUG, "%10d | %16s:%5d | nq = %5d | urgent = %5d\n",
+           wtn->connfd,
+           inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
+           ntohs(wtn->lport),
+           wtn->nrequest,
+           wtn->urgent);
+    }
+
+    p2plog(DEBUG, "::::Neighbor List::::[%d]\n", nm_size);
+    list_for_each_entry(nm, &neighbors.list, list) {
+        p2plog(DEBUG, "%10d | %16s:%5d\n",
+           nm->connfd,
+           inet_ntop(AF_INET, &nm->ip, buf, sizeof(buf)),
+           ntohs(nm->lport));
+    }
+    p2plog(DEBUG, "\n\n");
+}
 
 void
 p2plog_all(enum DLEVEL lv, const char *file, const int line,
