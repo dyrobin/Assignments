@@ -1,0 +1,2 @@
+vm3testkey      0x33333333
+commonkey       0x110A5150

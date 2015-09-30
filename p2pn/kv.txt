@@ -1,3 +1,0 @@
-testkey 0x01105150
-key2    0x11112222
-thisisalongkey 0x98765432

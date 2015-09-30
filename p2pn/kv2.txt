@@ -1,0 +1,2 @@
+vm2testkey      0x22222222
+commonkey       0x110A5150

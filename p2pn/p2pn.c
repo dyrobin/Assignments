@@ -614,7 +614,7 @@ start_node()
  * @param file the file to read key/value pairs.
  * @return     0 on success, 1 otherwise.
  */
-int
+static int
 read_kvfile(char *file)
 {
     FILE *fp;
