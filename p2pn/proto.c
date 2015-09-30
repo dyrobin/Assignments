@@ -175,19 +175,16 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     socklen_t addrlen;
 
     struct node_meta *nm_tmp; 
-    struct wtnode_meta *wtn_tmp; 
-    char buf_tmp[SLEN];
+    struct wtnode_meta *wtn_tmp;
     nm_tmp = nm_find_by_connfd(connfd);
     wtn_tmp = wtn_find_by_connfd(connfd);
 
     if (nm_tmp != NULL && wtn_tmp == NULL) {
-        p2plog(DEBUG, "To neighbor %s:%d\n", 
-            inet_ntop(AF_INET, &nm_tmp->ip, buf_tmp, SLEN), 
-            ntohs(nm_tmp->lport));
+        p2plog(DEBUG, "To neighbor %s\n", 
+            sock_ntop(&nm_tmp->ip, nm_tmp->lport));
     } else if (nm_tmp == NULL && wtn_tmp != NULL) {
-        p2plog(DEBUG, "To waiting node %s:%d\n", 
-            inet_ntop(AF_INET, &wtn_tmp->ip, buf_tmp, SLEN), 
-            ntohs(wtn_tmp->lport));
+        p2plog(DEBUG, "To waiting node %s\n", 
+            sock_ntop(&wtn_tmp->ip, wtn_tmp->lport));
     } else if (nm_tmp == NULL && wtn_tmp == NULL) {
         p2plog(ERROR, "No destination found in lists");
         return -1;
@@ -235,10 +232,10 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
         if ((nbytes = Write(connfd, (char*)msg + nsent, nleft)) < 0) {
         /* TODO: Check errno == EINTR */
             p2plog(ERROR, "Write error, close fd = %d\n", connfd);
-            if (nm_tmp) nm_list_del(nm_tmp);
-            if (wtn_tmp) wt_list_del(wtn_tmp);
             remove_peer_cache(connfd);
             Close(connfd);
+            if (nm_tmp) nm_list_del(nm_tmp);
+            if (wtn_tmp) wt_list_del(wtn_tmp);
             return -1;
         }
         nsent += nbytes;
@@ -328,21 +325,6 @@ handle_join_message(int connfd, void *msg, unsigned int len)
                 return -1;
             }
 
-            /* Check again if it comes from incoming list */
-            if (wtn->nrequest != 0) {
-                p2plog(ERROR, "JOIN STATE error, connfd = %d\n", 
-                       connfd);
-                return -1;
-            }
-
-            /* This is a self-loop */
-            /*
-            if (wtn_find_by_joinid(ph_in->msg_id) != NULL) {
-                p2plog(WARN, "JOIN from ourself - loop detected.\n");
-                return -1;
-            }
-            */
-
             /* Check if waiting list or neighbor list has already contains 
              * it by indentifying its IP address and listening port. */
             if (!wtn_contains(&wtn->ip, ph_in->org_port) && 
@@ -353,14 +335,16 @@ handle_join_message(int connfd, void *msg, unsigned int len)
                 nm->connfd = wtn->connfd;
                 nm->ip = wtn->ip;
                 nm->lport = ph_in->org_port;
-                nm_list_add(nm);                
-                p2plog(INFO, "NEW NEIGHBOR: Accept a new neighbor, %s\n",
-                       sock_ntop(&nm->ip, nm->lport));
+                nm_list_add(nm);
                 wt_list_del(wtn);
+                p2plog(INFO, "NEW NEIGHBOR: Accept from, %s\n",
+                       sock_ntop(&nm->ip, nm->lport));
             } else {
                 /* The neighborhood of peer has been established or will be 
                  * established later on in handle_waiting_list(). Thus, we
                  * close current connect and remove cache for it. */
+                p2plog(DEBUG, "JOIN Ingore: already in lists: , %s\n", 
+                       sock_ntop(&wtn->ip, ph_in->org_port));
                 remove_peer_cache(wtn->connfd);
                 Close(wtn->connfd);
                 wt_list_del(wtn);
@@ -374,7 +358,7 @@ handle_join_message(int connfd, void *msg, unsigned int len)
     } else if (len == HLEN + JOINLEN
                 && ntohs(ph_in->length) == JOINLEN) { /* JOIN RESPONSE */
         pj = (struct P2P_join *) ((char *)msg + HLEN);
-        p2plog(DEBUG, "join response: 0x%04X\n", ntohs(pj->status));
+        p2plog(DEBUG, "JOIN response: 0x%04X\n", ntohs(pj->status));
         if (ntohs(pj->status) != JOIN_ACC) {
             p2plog(ERROR, "JOIN Refused\n");
             return -1;
@@ -397,7 +381,7 @@ handle_join_message(int connfd, void *msg, unsigned int len)
             nm->lport = wtn->lport;
             nm_list_add(nm);
             wt_list_del(wtn);
-            p2plog(INFO, "NEW NEIGHBOR: JOIN request is accepted by %s\n",
+            p2plog(INFO, "NEW NEIGHBOR: Accepted by %s\n",
                    sock_ntop(&nm->ip, nm->lport));
         }
     }
@@ -473,7 +457,6 @@ handle_pong_message(void *msg, unsigned int len)
     struct P2P_pong_entry *pe;
     struct wtnode_meta *new_wt;
     int i, entry_size;
-    char buf[128];
 
     if (len == HLEN) {
     /* This is a pong message reacting to heartbeat */
@@ -514,7 +497,7 @@ handle_pong_message(void *msg, unsigned int len)
 
         /* If the entry contains a self address, ignore it. */
         if (is_myself(&pe->ip, pe->port)) {
-            p2plog(INFO, "Self loop detected: %s", 
+            p2plog(WARN, "Self loop detected: %s\n", 
                    sock_ntop(&pe->ip, pe->port));
             continue;
         }
@@ -526,11 +509,11 @@ handle_pong_message(void *msg, unsigned int len)
             new_wt->ip = pe->ip;
             new_wt->lport = pe->port;
             wt_list_add(new_wt);
-            p2plog(DEBUG, "ENTRY: %s: %d, inserted\n",
-                   inet_ntop(AF_INET, &pe->ip, buf, 128), ntohs(pe->port));
+            p2plog(DEBUG, "ENTRY: %s, inserted\n",
+                   sock_ntop(&pe->ip, pe->port));
         } else {
-            p2plog(DEBUG, "ENTRY: %s: %d, dupplicate entry, discarded\n",
-                   inet_ntop(AF_INET, &pe->ip, buf, 128), ntohs(pe->port));
+            p2plog(DEBUG, "ENTRY: %s, discarded\n",
+                   sock_ntop(&pe->ip, pe->port));
         }
     }
 
@@ -573,7 +556,7 @@ handle_query_message(int connfd, void *msg, unsigned int len)
     ph = (struct P2P_h *) msg;
 
     if (find_stored_msg(&g_recvmsgs, ph->msg_id) != NULL) {
-        p2plog(INFO, "discard dupplicated msg.\n");
+        p2plog(DEBUG, "discard duplicated msg.\n");
         return -1;
     }
 
@@ -588,7 +571,7 @@ handle_query_message(int connfd, void *msg, unsigned int len)
     /* still forward msg to find more result */
     ph->ttl --;
     flood_msg(connfd, ph, len);
-    p2plog(INFO, "flood query message\n");
+    p2plog(DEBUG, "flood query message\n");
 
     return 0;
 }
@@ -655,15 +638,14 @@ handle_query_hit(void *msg, unsigned int len)
             /* This QHIT has reached the QUERY initiator. */
             memcpy(buf, (char *)ms->msg + HLEN, ms->len - HLEN);
             buf[ms->len - HLEN] = '\0';
-            p2plog(INFO, "query: %s hit, at %s:%d\n", buf,
-                   inet_ntop(AF_INET, &ph->org_ip, buf, MLEN), 
-                   ntohs(ph->org_port));
+            p2plog(INFO, "Query: \"%s\" hit at %s\n", 
+                   buf, sock_ntop((struct in_addr*)&ph->org_ip, ph->org_port));
 
             for (i = 0; i < nEntry; i++) {
                 qe = (struct P2P_qhit_entry *)
-                        ((char *)msg + HLEN + QHIT_MINLEN + QHIT_ENTRYLEN * i);
-                p2plog(INFO, "resource ID: %08x = %08X\n", ntohs(qe->res_id), 
-                       ntohl(qe->res_val));
+                     ((char *)msg + HLEN + QHIT_MINLEN + QHIT_ENTRYLEN * i);
+                p2plog(INFO, "Resource: %08x = %08X\n", 
+                       ntohs(qe->res_id), ntohl(qe->res_val));
             }
         } else {
             /* This QHIT is for a previously forwarded QUERY. */
@@ -672,12 +654,12 @@ handle_query_hit(void *msg, unsigned int len)
                 /* Relay it back. */
                 forward_p2p_message(nm->connfd, msg, len);
             } else {
-                p2plog(INFO, "no matched peer\n");
+                p2plog(ERROR, "no matched peer\n");
                 return -1;
             }
         }
     } else {
-        p2plog(INFO, "no matched message\n");
+        p2plog(ERROR, "no matched message\n");
         return -1;
     }
 
@@ -694,6 +676,7 @@ handle_bye_message(int connfd)
         return -1;
     }
 
+    remove_peer_cache(nm->connfd);
     Close(nm->connfd);
     nm_list_del(nm);
 

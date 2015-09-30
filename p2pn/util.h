@@ -68,14 +68,11 @@ struct wtnode_meta {
     struct in_addr      ip;
     uint16_t            lport;
     int                 urgent;     /* Is it an urgent one? eg. for bootstrap */
-    int                 nrequest;   /* 0: new peer that connected to us, 
-                                          but no Join Request yet.
-                                       1: discovered peer, Join Request sent.
-                                       2: we are waiting for Join 
+    int                 status;     /* 0: new peer that connected to us, 
+                                          but no JOIN Request yet.
+                                       1: peer discovered, JOIN Request sent.
+                                       2: we are waiting for JOIN 
                                           Request/Accept. */
-/*    uint32_t            join_msgid;*/ /* For self loop detection. Not a good 
-                                       solution and the better one is to detect
-                                       loop in handle_pong_message(). */
     struct list_head    list;
 };
 
@@ -92,7 +89,7 @@ struct wtnode_meta {
 #define wtn_urgent_reset(wtn)   ((wtn)->urgent = 0)
 
 /* Check if the JOIN message has been sent to the waiting node */
-#define wtn_requested(wtn)      ((wtn)->nrequest > -1)
+#define wtn_requested(wtn)      ((wtn)->status == 1)
 
 /* Initialize a waiting node */
 void wtn_init(struct wtnode_meta *wtn);

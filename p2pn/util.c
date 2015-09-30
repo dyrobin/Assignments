@@ -41,7 +41,7 @@ debug_env()
            wtn->connfd,
            inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
            ntohs(wtn->lport),
-           wtn->nrequest,
+           wtn->status,
            wtn->urgent);
     }
 
@@ -90,7 +90,7 @@ void
 wtn_init(struct wtnode_meta *wtn)
 {
     memset(wtn, 0, sizeof(struct wtnode_meta));
-    wtn->nrequest = -1;
+    wtn->status = -1;
 }
 
 /* Search a waiting node by its socket descriptor */
