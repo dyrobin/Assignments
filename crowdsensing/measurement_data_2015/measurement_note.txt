@@ -1,0 +1,5 @@
+In these repository, there are measurements result from 6 positions. The position is in a long corridor and each position is about 7-10 meters away from the adjacent one. 
+
+At each position, there are three test data sets with both csv and json format measured from different time. Each data set includes 15 times measurements of the wifi information with 5 seconds interval. In json file, all the information of a wifi is included and each measurement is marked with “measurement xx” while in the csv format, there is only BSSID, SSID with the signal level value, and there is no measurement id inside.
+
+
