@@ -436,10 +436,14 @@ node_loop()
         if (FD_ISSET(listen_fd, &aset)) { /* New connection arrives */
             clisize = sizeof(cliaddr);
             connfd = Accept(listen_fd, (SA *) &cliaddr, &clisize);
-            if (setsockopt(connfd, SOL_SOCKET, SO_RCVLOWAT, &opt_recv_low, 
-                           sizeof(int)) != 0) {
-                p2plog(ERROR, "Failed to set socket OPT: SO_RCVLOWAT");
-            }
+
+            if (connfd < 0) {
+                p2plog(ERROR, "Accept() failed\n");
+            } else {
+                if (setsockopt(connfd, SOL_SOCKET, SO_RCVLOWAT, &opt_recv_low,
+                               sizeof(int)) != 0) {
+                    p2plog(ERROR, "Failed to set socket OPT: SO_RCVLOWAT");
+                } else {
             /**
              * Should not always create a waiting node when receiving a new
              * connection (Normally the JOIN Request is coming). The reason
@@ -464,19 +468,21 @@ node_loop()
              * then separating them from each other when handling JOIN request 
              * message in handle_join_message().
              */
-            wtn = (struct wtnode_meta *)Malloc(sizeof(struct wtnode_meta));
-            wtn_init(wtn);
-            wtn->connfd = connfd;
-            wtn->ip = cliaddr.sin_addr;
-            wtn->lport = cliaddr.sin_port;
-            wtn->status = 0;   /* set to 0: new peer that connected to us, 
-                                * but no Join Request yet */
-            p2plog(INFO, "Connection from %s, fd = %d\n",
-                    sock_ntop(&cliaddr.sin_addr, cliaddr.sin_port),
-                    wtn->connfd);
-            /* save to waiting list */
-            wt_list_add(wtn);
-            create_peer_cache(connfd);
+                    wtn = (struct wtnode_meta *)Malloc(sizeof(struct wtnode_meta));
+                    wtn_init(wtn);
+                    wtn->connfd = connfd;
+                    wtn->ip = cliaddr.sin_addr;
+                    wtn->lport = cliaddr.sin_port;
+                    wtn->status = 0;   /* set to 0: new peer that connected to us,
+                                        * but no Join Request yet */
+                    p2plog(INFO, "Connection from %s, fd = %d\n",
+                            sock_ntop(&cliaddr.sin_addr, cliaddr.sin_port),
+                            wtn->connfd);
+                    /* save to waiting list */
+                    wt_list_add(wtn);
+                    create_peer_cache(connfd);
+                }
+            }
         } /* if FD_ISSET listen_fd */
 
         /* Check all neighbor nodes if they are readable */
