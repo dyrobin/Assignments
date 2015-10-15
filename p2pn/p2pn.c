@@ -300,6 +300,7 @@ handle_waiting_list()
                     create_peer_cache(connfd);
                 } else {
                     p2plog(ERROR, "ConnectWithin() error\n");
+                    Close(connfd);
                     wt_list_del(wtn);
                 }
             } else {
