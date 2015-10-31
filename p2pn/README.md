@@ -94,10 +94,5 @@ KNOWN ISSUES
  - Does not actually handle Bye Messages. 
    The connection is disconnected because remote closes the TCP link and we have a `read()` error.
  - Nodes started on the same VM should not send message using localhost (127.0.0.1). 
-   In that case, there will exist two connections between the same two nodes. 
+   In that case, there will exist two connections between the two nodes. 
    Ideally, only one connection should exist between two nodes. 
- - Nodes cannot get started within a short interval. One node should wait for a period before it runs.
-   The reason for it is that if multiple nodes get started simultaneously or within a very short interval,
-   they may send JOIN to each other at the same time, which leads to collision. 
-   A possible solution for this could be back-off for a random time if collision is detected. However,
-   We do not handle this here.
