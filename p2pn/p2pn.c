@@ -52,8 +52,8 @@ static struct sigaction act;
 #define  QUERY_SECONDS      10
 #define ZOMBIE_SECONDS      30
 
-#define LISTEN_QUEUE        5
-#define NEIGHBOUR_MAX       8
+#define LISTEN_QUEUE         5
+#define NEIGHBOUR_MAX        8
 
 
 static void sig_pipe(int s)

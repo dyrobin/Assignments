@@ -5,8 +5,7 @@
 #include <netinet/in.h>
 
 /* Default listening port */
-//#define PORT_DEFAULT    6346
-#define PORT_DEFAULT    10001
+#define PORT_DEFAULT    6346
 
 /* definition of protocol message type */
 #define MSG_PING        0x00
