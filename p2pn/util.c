@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <time.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
 
@@ -8,71 +9,21 @@
 #include "proto.h"
 #include "util.h"
 
+extern enum LOGLEVEL        g_loglv;        /* Logging level */
 
-extern struct node_meta neighbors;  /* The list of neighbor nodes */
-extern int nm_size;                 /* The size of the neighbor node list */
+extern struct key_value     g_kv_list;      /* List of key/value pairs */
+extern struct peer_cache    g_pc_list;      /* List of peer caches */
+extern struct message       g_msg_list;     /* List of messages */
 
-extern struct wtnode_meta waiting_nodes;    /* The list of waiting nodes */
-extern int wt_size;                 /* The size of the waiting node list */
+extern struct nb_node       g_nb_list;      /* List of neighbor nodes */
+extern int                  g_nb_list_size; /* Size of neighbor node list */
 
-extern struct peer_cache pr_cache;  /* Cache received data to distinguish the 
-                                       message boundary */
-extern struct msgstore g_recvmsgs;  /* Save messages to prevent loop in 
-                                       forwarding */
-extern struct keyval localdata;     /* The key/value pairs in current node */
+extern struct wt_node       g_wt_list;      /* List of waiting nodes */
+extern int                  g_wt_list_size; /* Size of waiting node list */
 
-extern enum DLEVEL debuglv;
-
-#define SLEN    128
-#define MLEN    256
-
-
-void
-debug_env()
-{
-    struct node_meta *nm;
-    struct wtnode_meta *wtn;
-
-    char buf[SLEN];
-
-    p2plog(DEBUG, "\n::::Waiting List::::[%d]\n", wt_size);
-    list_for_each_entry(wtn, &waiting_nodes.list, list) {
-        p2plog(DEBUG, "%10d | %16s:%5d | nq = %5d | urgent = %5d\n",
-           wtn->connfd,
-           inet_ntop(AF_INET, &wtn->ip, buf, sizeof(buf)),
-           ntohs(wtn->lport),
-           wtn->status,
-           wtn->urgent);
-    }
-
-    p2plog(DEBUG, "::::Neighbor List::::[%d]\n", nm_size);
-    list_for_each_entry(nm, &neighbors.list, list) {
-        p2plog(DEBUG, "%10d | %16s:%5d\n",
-           nm->connfd,
-           inet_ntop(AF_INET, &nm->ip, buf, sizeof(buf)),
-           ntohs(nm->lport));
-    }
-    p2plog(DEBUG, "\n\n");
-}
-
-void
-p2plog_all(enum DLEVEL lv, const char *file, const int line,
-	       const char *function, char *fmt, ...)
-{
-    va_list ap;
-    FILE *target = (lv == ERROR) ? stderr : stdout;
-
-    if (lv >= debuglv) {
-        va_start(ap, fmt);
-        fprintf(target, "%s:%d::%s() ", file, line, function);
-        vfprintf(target, fmt, ap);
-        va_end(ap);
-    }
-    return;
-}
 
 /* wrapper of the malloc() */
-void *
+static void *
 Malloc(size_t size)
 {
     void *res;
@@ -85,304 +36,405 @@ Malloc(size_t size)
     return res;
 }
 
-/* Initialize a waiting node */
+/******************************************************************************/
+/* Logging */
 void
-wtn_init(struct wtnode_meta *wtn)
+p2plog_all(enum LOGLEVEL lv, const char *file, const int line,
+	       const char *function, char *fmt, ...)
 {
-    memset(wtn, 0, sizeof(struct wtnode_meta));
-    wtn->status = -1;
+    va_list ap;
+    FILE *target = (lv == ERROR) ? stderr : stdout;
+
+    if (lv >= g_loglv) {
+        va_start(ap, fmt);
+        fprintf(target, "%s:%d::%s() ", file, line, function);
+        vfprintf(target, fmt, ap);
+        va_end(ap);
+    }
+    return;
 }
 
-/* Search a waiting node by its socket descriptor */
-struct wtnode_meta *
-wtn_find_by_connfd(int connfd)
+void
+p2plog_env()
 {
-    struct wtnode_meta *wtn, *wtn_tgt;
+    struct nb_node *nb;
+    struct wt_node *wt;
 
-    wtn_tgt = NULL;
-    list_for_each_entry(wtn, &waiting_nodes.list, list) {
-        if (wtn->connfd == connfd) {
-            wtn_tgt = wtn;
-            break;
-        }
+    char buf[XS_LEN];
+
+    p2plog(DEBUG, "::::Waiting List::::[%d]\n", g_wt_list_size);
+    list_for_each_entry(wt, &g_wt_list.list, list) {
+        p2plog(DEBUG, "%10d | %16s:%5d | nq = %5d | urgent = %5d\n",
+           wt->connfd,
+           inet_ntop(AF_INET, &wt->ip, buf, sizeof(buf)),
+           ntohs(wt->lport),
+           wt->status,
+           wt->urgent);
     }
 
-    return wtn_tgt;
-}
-
-/*
-struct wtnode_meta *
-wtn_find_by_joinid(uint32_t msgid)
-{
-    struct wtnode_meta *wtn, *wtn_tgt;
-
-    wtn_tgt = NULL;
-    list_for_each_entry(wtn, &waiting_nodes.list, list) {
-        if (wtn->join_msgid == msgid) {
-            wtn_tgt = wtn;
-            break;
-        }
+    p2plog(DEBUG, "::::Neighbor List::::[%d]\n", g_nb_list_size);
+    list_for_each_entry(nb, &g_nb_list.list, list) {
+        p2plog(DEBUG, "%10d | %16s:%5d\n",
+           nb->connfd,
+           inet_ntop(AF_INET, &nb->ip, buf, sizeof(buf)),
+           ntohs(nb->lport));
     }
-    return wtn_tgt;
+    p2plog(DEBUG, "\n\n");
 }
-*/
 
-/* Check if the waiting node with given IP and port number exists
- * in the waiting node list.
- */
+
+/******************************************************************************/
+/* key/value pairs */
+
 int
-wtn_contains(struct in_addr *addr, uint16_t lport)
+g_kv_list_load_from_file(char *filename)
 {
-    struct wtnode_meta *wtn;
-    struct wtnode_meta tmp;
-    int match;
+    FILE *fp;
 
-    match = 0;
-    tmp.ip = *addr;
-    tmp.lport = lport;
+    if((fp = fopen(filename, "r")) == NULL) {
+        p2plog(ERROR, "Failed to open file: %s\n", filename);
+        return -1;
+    }
 
-    list_for_each_entry(wtn, &waiting_nodes.list, list) {
-        if (node_eq(wtn, &tmp)) {
-            match = 1;
-            break;
+    char buf[MSG_MAX];
+    char *key, *value;
+    int keylen;
+    while (fgets(buf, MSG_MAX, fp)) {
+        if (buf[strlen(buf) - 1] != '\n') {
+            /* Too long line*/
+            p2plog(ERROR, "Line too long in file: %s\n", filename);
+            fclose(fp);
+            return -1;
         }
-    }
 
-    return match;
-}
+        key = strtok(buf, " ");
+        value = strtok(NULL, " ");
 
-/* Add a new waiting node to the waiting node list */
-void
-wt_list_add(struct wtnode_meta *new_wt)
-{
-    list_add(&new_wt->list, &waiting_nodes.list);
-    wt_size++;
-}
-
-/* Delete the waiting node from the waiting node list */
-void
-wt_list_del(struct wtnode_meta *wt)
-{
-    list_del(&wt->list);
-    wt_size--;
-    free(wt);
-}
-
-/* Initialize a neighbor(peer) node */
-void
-nm_init(struct node_meta *nm)
-{
-    memset(nm, 0, sizeof(struct node_meta));
-    INIT_LIST_HEAD(&nm->msgs.list);
-}
-
-/* Search a neighbor node by its socket descriptor */
-struct node_meta *
-nm_find_by_connfd(int connfd)
-{
-    struct node_meta *nm, *nm_tgt;
-
-    nm_tgt = NULL;
-    list_for_each_entry(nm, &neighbors.list, list) {
-        if (nm->connfd == connfd) {
-            nm_tgt = nm;
-            break;
+        keylen = strlen(key);
+        if (keylen > KEY_MAX - 1) {
+            p2plog(ERROR, "Key too long in file: %s\n", filename);
+            continue;
         }
-    }
-    return nm_tgt;
-}
 
-/* Check if the neighbor node with given IP and port number exists
- * in the neighbor node list.
- */
-int
-nm_contains(struct in_addr *addr, uint16_t lport)
-{
-    struct node_meta *nm;
-    struct node_meta tmp;
-    int match;
+        struct key_value *kv;
+        kv = (struct key_value *) Malloc(sizeof(struct key_value));
+        memcpy(kv->key, key, keylen);
+        kv->key[keylen] = '\0';
+        kv->value = (uint32_t)strtoul(value, NULL, 16);
 
-    match = 0;
-    tmp.ip = *addr;
-    tmp.lport = lport;
-
-    list_for_each_entry(nm, &neighbors.list, list) {
-        if (node_eq(nm, &tmp)) {
-            match = 1;
-            break;
-        }
+        list_add(&kv->list, &g_kv_list.list);
+        p2plog(INFO, "Add key/value %s = 0x%08X\n", kv->key, kv->value);
     }
 
-    return match;
-}
-
-/* Add a new neighbor node to the neighbor node list */
-void
-nm_list_add(struct node_meta *new_nm)
-{
-    list_add(&new_nm->list, &neighbors.list);
-    nm_size++;
-}
-
-/* Delete the neighbor node from the neighbor node list */
-void
-nm_list_del(struct node_meta *nm)
-{
-    if (nm != NULL)
-    {
-        if (nm->list.next != NULL && nm->list.prev != NULL) {
-            list_del(&nm->list);
-        } else {
-            p2plog(ERROR, "nm->list contains NULL\n");
-        }
-        nm_size--;
-        free(nm);
-    } else {
-        p2plog(ERROR, "nm = NULL\n");
-    }
-}
-
-/* Create a new item for the msgstore list */
-struct msgstore *
-msg_new(void *msg, unsigned int len, int fromfd)
-{
-    struct msgstore *nwmsg;
-
-    nwmsg = (struct msgstore *) Malloc(sizeof(struct msgstore));
-    memset(nwmsg, 0, sizeof(struct msgstore));
-
-    gettimeofday(&nwmsg->ts, NULL);
-    nwmsg->len = len;
-    nwmsg->fromfd = fromfd;
-    nwmsg->msg = (unsigned char *) Malloc(len);
-    memcpy(nwmsg->msg, msg, len);
-
-    return nwmsg;
-}
-
-/* Free the memory of a msgstore item */
-void
-free_msg(struct msgstore *ms)
-{
-    free(ms->msg);
-    free(ms);
-}
-
-/* Find a stored message in a given msgstore list by its message id */
-struct msgstore *
-find_stored_msg(struct msgstore *head, uint32_t msgid)
-{
-    struct msgstore *ms;
-
-    list_for_each_entry(ms, &head->list, list) {
-        if (get_msgid(ms) == msgid)
-            return ms;
-    }
-    return NULL;
-}
-
-/* Garbage Collect (gc) a msgstore list.
- * Messages received for more than 10 seconds will be freed.
- */
-void
-gc_msgstore(struct msgstore *head)
-{
-    struct msgstore *ms, *mstp;
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    list_for_each_entry_safe(ms, mstp, &head->list, list) {
-        if (tv.tv_sec - ms->ts.tv_sec > 10) {
-            p2plog(DEBUG, "free msg %08X in the msg storage\n", get_msgid(ms));
-            list_del(&ms->list);
-            free_msg(ms);
-        }
-    }
-}
-
-/* Add a message to the global msgstore for incoming messages */
-int
-push_g_recv_msg(int connfd, void *msg, unsigned int len)
-{
-    struct msgstore *ms;
-
-    ms = msg_new(msg, len, connfd);
-    list_add(&ms->list, &g_recvmsgs.list);
-
+    fclose(fp);
     return 0;
 }
 
-/* Get the message id from a P2P message */
+/* search value by key obtained from QUERY message */
 uint32_t
-get_msgid(struct msgstore *ms)
+g_kv_list_search(void *msg, unsigned int len)
 {
-    struct P2P_h *ph;
-    ph = (struct P2P_h *) (ms->msg);
-    return ph->msg_id;
-}
-
-/* Create a new peer cache for a new socket descriptor */
-int
-create_peer_cache(int connfd)
-{
-    struct peer_cache *pc;
-    p2plog(DEBUG, "create new cache for socket fd %d\n", connfd);
-    pc = (struct peer_cache *)Malloc(sizeof(struct peer_cache));
-    memset(pc, 0, sizeof(struct peer_cache));
-    pc->connfd = connfd;
-    list_add(&pc->list, &pr_cache.list);
-    return 0;
-}
-
-/* Remove a peer cache for a given socket descriptor */
-int
-remove_peer_cache(int connfd)
-{
-    struct peer_cache *pc;
-
-    list_for_each_entry(pc, &pr_cache.list, list) {
-        if (pc->connfd == connfd) {
-	       p2plog(DEBUG, "delete cache for socket fd %d\n", connfd);
-	       list_del(&pc->list);
-	       free(pc);
-	       break;
-        }
-    }
-    return 0;
-}
-
-/* Find the peer cache by the given socket descriptor */
-struct peer_cache *
-get_peer_cache(int connfd)
-{
-    struct peer_cache *pc;
-
-    list_for_each_entry(pc, &pr_cache.list, list) {
-        if (pc->connfd == connfd)
-            return pc;
-    }
-    return NULL;
-}
-
-uint32_t
-search_localdata(struct P2P_h *ph, unsigned int msglen)
-{
-    char buf[MLEN];
-    unsigned int kylen;
-    struct keyval *kv;
-    kylen = msglen - HLEN;
-    if (kylen > KEYLEN) {
+    unsigned int keylen;
+    keylen = len - HLEN;
+    if (keylen > KEY_MAX) {
+        p2plog(ERROR, "key is too long, length %d\n", keylen);
         return 0;
     }
 
-    memcpy(buf, ((char*)ph) + HLEN, kylen);
-    buf[kylen] = '\0';
+    char buf[M_LEN];
+    memcpy(buf, ((char*)msg) + HLEN, keylen);
+    buf[keylen] = '\0';
 
-    list_for_each_entry(kv, &localdata.list, list) {
-        p2plog(DEBUG, "buf = %s, key = %s, cmp = %d\n",
-               buf, kv->key, strcmp(kv->key, buf));
-        if (strcmp(kv->key, buf) == 0)
+    struct key_value *kv;
+    list_for_each_entry(kv, &g_kv_list.list, list) {
+        p2plog(DEBUG, "buf = %s, key = %s\n", buf, kv->key);
+        if (strcmp(kv->key, buf) == 0) {
+            p2plog(INFO, "QUERY \"%s\" matches\n", buf);
             return kv->value;
+        }
     }
+
     return 0;
+}
+
+
+/******************************************************************************/
+/* Peer cache */
+
+/* Create a new peer cache for a new socket descriptor */
+struct peer_cache *
+pc_new(int connfd)
+{
+    struct peer_cache *pc;
+
+    pc = (struct peer_cache *)Malloc(sizeof(struct peer_cache));
+    memset(pc, 0, sizeof(struct peer_cache));
+
+    pc->connfd = connfd;
+    
+    return pc;
+}
+
+/* Add a new peer cache to global peer cache list */
+void
+g_pc_list_add(struct peer_cache *pc)
+{
+    if (pc) list_add(&pc->list, &g_pc_list.list);
+}
+
+/* Delete a peer cache from global peer cache list */
+void
+g_pc_list_del(struct peer_cache *pc)
+{
+    if (pc) {
+        list_del(&pc->list);
+        free(pc);        
+    }
+}
+
+/* Search a peer cache by its socket descriptor in global peer cache list */
+struct peer_cache *
+g_pc_list_find_by_connfd(int connfd)
+{
+    struct peer_cache *pc;
+
+    list_for_each_entry(pc, &g_pc_list.list, list) {
+        if (pc->connfd == connfd) return pc;
+    }
+
+    return NULL;
+}
+
+/* Delete a peer cache found by socket descriptor from global peer cache list */
+void
+g_pc_list_remove_by_connfd(int connfd)
+{
+    struct peer_cache *pc;
+    pc = g_pc_list_find_by_connfd(connfd);
+    g_pc_list_del(pc);
+}
+
+/******************************************************************************/
+/* Messages */
+
+/* Get the message id from a P2P message */
+static uint32_t
+get_msgid(struct message *msg)
+{
+    struct P2P_h *ph;
+    ph = (struct P2P_h *) (msg->content);
+    return ph->msg_id;
+}
+
+/* Create a new message */
+struct message *
+msg_new(void *content, unsigned int len, int fromfd)
+{
+    struct message *msg;
+
+    msg = (struct message *) Malloc(sizeof(struct message));
+    memset(msg, 0, sizeof(struct message));
+
+    msg->content = (unsigned char *) Malloc(len);
+    memcpy(msg->content, content, len);
+    msg->len = len;
+    msg->fromfd = fromfd;
+    gettimeofday(&msg->tv, NULL);
+    
+    return msg;
+}
+
+/* Free the memory of a message */
+void
+msg_free(struct message *msg)
+{
+    if (msg) {
+        free(msg->content);
+        free(msg);        
+    }
+}
+
+/* Add a message to global message list */
+void
+g_msg_list_add(struct message *msg)
+{
+    if (msg) list_add(&msg->list, &g_msg_list.list);
+}
+
+/* Garbage Collect (gc) global message list.
+ * Messages received for more than 10 seconds will be freed.
+ */
+void
+g_msg_list_gc()
+{
+    struct message *msg, *msgtmp;
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    list_for_each_entry_safe(msg, msgtmp, &g_msg_list.list, list) {
+        if (tv.tv_sec - msg->tv.tv_sec > 10) {
+            p2plog(DEBUG, "free msg %08X in the msg list\n", get_msgid(msg));
+            list_del(&msg->list);
+            msg_free(msg);
+        }
+    }
+}
+
+/* Find a message by its message id in global message list */
+struct message *
+g_msg_list_find_by_id(uint32_t msgid)
+{
+    struct message *msg;
+
+    list_for_each_entry(msg, &g_msg_list.list, list) {
+        if (get_msgid(msg) == msgid)
+            return msg;
+    }
+    return NULL;
+}
+
+
+/******************************************************************************/
+/* Waiting nodes */
+
+/* Create a new waiting node */
+struct wt_node *
+wt_new(int connfd, struct in_addr *ipaddr, uint16_t lport)
+{
+    struct wt_node * wt;
+
+    wt = (struct wt_node *)Malloc(sizeof(struct wt_node));
+    memset(wt, 0, sizeof(struct wt_node));
+
+    wt->connfd = connfd;
+    wt->ip = *ipaddr;
+    wt->lport = lport;
+    wt->urgent = 0;
+    wt->status = -1;
+    wt->ts = time(NULL);
+
+    return wt;
+}
+
+/* Add a new waiting node to global waiting list */
+void
+g_wt_list_add(struct wt_node *wt)
+{
+    if (wt) {
+        list_add(&wt->list, &g_wt_list.list);
+        g_wt_list_size++;
+    }
+}
+
+/* Delete the waiting node from global waiting list */
+void
+g_wt_list_del(struct wt_node *wt)
+{
+    if (wt) {
+        list_del(&wt->list);
+        g_wt_list_size--;
+        free(wt);
+    }
+}
+
+/* Search a waiting node by its socket descriptor in global waiting list*/
+struct wt_node *
+g_wt_list_find_by_connfd(int connfd)
+{
+    struct wt_node *wt;
+
+    list_for_each_entry(wt, &g_wt_list.list, list) {
+        if (wt->connfd == connfd) return wt;
+    }
+
+    return NULL;
+}
+
+/* Search a waiting node by peer's IP address and port in global waiting list */
+struct wt_node *
+g_wt_list_find_by_peer(struct in_addr *ipaddr, uint16_t lport)
+{
+    struct wt_node *wt;
+    struct wt_node tgt;
+
+    tgt.ip = *ipaddr;
+    tgt.lport = lport;
+
+    list_for_each_entry(wt, &g_wt_list.list, list) {
+        if (node_eq(wt, &tgt)) return wt;
+    }
+
+    return NULL;
+}
+
+
+/******************************************************************************/
+/* Neighbour nodes */
+
+/* Create a new neighbour node */
+struct nb_node *
+nb_new(int connfd, struct in_addr *ipaddr, uint16_t lport)
+{
+    struct nb_node * nb;
+
+    nb = (struct nb_node *)Malloc(sizeof(struct nb_node));
+    memset(nb, 0, sizeof(struct nb_node));
+
+    nb->connfd = connfd;
+    nb->ip = *ipaddr;
+    nb->lport = lport;
+    nb->ts = time(NULL);
+
+    return nb;
+}
+
+/* Add a new neighbor to global neighbor list */
+void
+g_nb_list_add(struct nb_node *nb)
+{
+    if (nb) {
+        list_add(&nb->list, &g_nb_list.list);
+        g_nb_list_size++;
+    }
+}
+
+/* Delete the neighbor from global neighbor list */
+void
+g_nb_list_del(struct nb_node *nb)
+{
+    if (nb) {
+        list_del(&nb->list);
+        g_nb_list_size--;
+        free(nb);
+    }
+}
+
+/* Search a neighbor by its socket descriptor in global neighbour list */
+struct nb_node *
+g_nb_list_find_by_connfd(int connfd)
+{
+    struct nb_node *nb;
+
+    list_for_each_entry(nb, &g_nb_list.list, list) {
+        if (nb->connfd == connfd) return nb;
+    }
+
+    return NULL;
+}
+
+/* Search a neighbour by peer's IP address and port in global neighbour list */
+struct nb_node *
+g_nb_list_find_by_peer(struct in_addr *ipaddr, uint16_t lport)
+{
+    struct nb_node *nb;
+    struct nb_node tgt;
+
+    tgt.ip = *ipaddr;
+    tgt.lport = lport;
+
+    list_for_each_entry(nb, &g_nb_list.list, list) {
+        if (node_eq(nb, &tgt)) return nb;
+    }
+
+    return NULL;
 }

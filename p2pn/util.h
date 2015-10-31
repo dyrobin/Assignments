@@ -9,61 +9,104 @@
 
 #include "proto.h"
 
-void debug_env();
+#define  XS_LEN      32
+#define   S_LEN      64
+#define   M_LEN     128
+#define   L_LEN     256
 
-/* wrapper of the malloc() */
-void *Malloc(size_t size);
+#define KEY_MAX      64
+#define MSG_MAX    2048
+#define BUF_MAX    4096
 
-
-/* Debug Level */
-enum DLEVEL {
+/******************************************************************************/
+/* Logging Level */
+enum LOGLEVEL {
     DEBUG,
     INFO,
     WARN,
     ERROR
 };
 /* Logging */
-#define p2plog(debug_level, ...) \
-        p2plog_all(debug_level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-void p2plog_all(enum DLEVEL lv, const char *file, const int line,
+#define p2plog(log_level, ...) \
+        p2plog_all(log_level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+void p2plog_all(enum LOGLEVEL lv, const char *file, const int line,
                 const char *function, char *fmt, ...);
+void p2plog_env();
 
 
-/* A list to store P2P messages */
-struct msgstore {
-    int fromfd;
-    void *msg;
-    int len;
-    struct timeval ts;
+/******************************************************************************/
+/* The structure of key/value pairs */
+struct key_value {
+    char key[KEY_MAX];
+    uint32_t value;
     struct list_head list;
 };
 
-/* Create a new item for the msgstore list */
-struct msgstore *msg_new(void *msg, unsigned int len, int fromfd);
+int g_kv_list_load_from_file(char *filename);
 
-/* Free the memory of a msgstore item */
-void free_msg(struct msgstore *ms);
+/* search value by key obtained from QUERY message */
+uint32_t g_kv_list_search(void *msg, unsigned int len);
 
-/* Find a stored message in a given msgstore list by its message id */
-struct msgstore *find_stored_msg(struct msgstore *head, uint32_t msgid);
 
-/* Garbage Collect (gc) a msgstore list.
+/******************************************************************************/
+/* The structure of peer cache */
+struct peer_cache {
+    int                 connfd;
+    unsigned char       recvbuf[BUF_MAX];
+    unsigned int        bp;
+    struct list_head    list;
+};
+
+/* Create a new peer cache for a new socket descriptor */
+struct peer_cache * pc_new(int connfd);
+
+/* Add a new peer cache to global peer cache list */
+void g_pc_list_add(struct peer_cache *pc);
+
+/* Delete a peer cache from global peer cache list */
+void g_pc_list_del(struct peer_cache *pc);
+
+/* Search a peer cache by its socket descriptor in global peer cache list */
+struct peer_cache * g_pc_list_find_by_connfd(int connfd);
+
+/* Delete a peer cache found by socket descriptor from global peer cache list */
+void g_pc_list_remove_by_connfd(int connfd);
+
+/******************************************************************************/
+/* The structure of stored messages */
+struct message {
+    void *content;
+    int len;
+    int fromfd;                         /* zero:     from itself. 
+                                         * Non-zero: from others. */
+    struct timeval tv;
+    struct list_head list;
+};
+
+/* Create a new message */
+struct message * msg_new(void *content, unsigned int len, int fromfd);
+
+/* Free the memory of a message */
+void msg_free(struct message *msg);
+
+/* Add a message to global message list */
+void g_msg_list_add(struct message *msg);
+
+/* Garbage Collect (gc) global message list.
  * Messages received for more than 10 seconds will be freed.
  */
-void gc_msgstore(struct msgstore *head);
+void g_msg_list_gc();
 
-/* Add a message to the global msgstore for incoming messages */
-int push_g_recv_msg(int connfd, void *msg, unsigned int len);
-
-/* Get the message id from a P2P message */
-uint32_t get_msgid(struct msgstore *ms);
+/* Find a message by its message id in global message list*/
+struct message * g_msg_list_find_by_id(uint32_t msgid);
 
 
-/* The information of nodes which are in waiting list.
- * These nodes are not neighbors yet, but can be
- * pick and establish connection.
+/******************************************************************************/
+/* The structure of waiting node
+ * These nodes are not neighbors yet, but can be picked and to establish 
+ * connection.
  */
-struct wtnode_meta {
+struct wt_node {
     int                 connfd;
     struct in_addr      ip;
     uint16_t            lport;
@@ -73,54 +116,48 @@ struct wtnode_meta {
                                        1: peer discovered, JOIN Request sent.
                                        2: we are waiting for JOIN 
                                           Request/Accept. */
+    time_t              ts;         /* Timestamp */
     struct list_head    list;
 };
 
 /* Check if the waiting node is connected */
-#define wtn_conn_established(wtn) ((wtn)->connfd != 0)
+#define wt_connected(wt) ((wt)->connfd > 0)
 
 /* Check if the waiting node requires a urgent connection */
-#define wtn_urgent(wtn)         ((wtn)->urgent == 1)
+#define wt_urgent(wt)         ((wt)->urgent == 1)
 
 /* Turn on the urgent flag of the waiting node */
-#define wtn_urgent_set(wtn)     ((wtn)->urgent = 1)
+#define wt_urgent_set(wt)     ((wt)->urgent = 1)
 
 /* Turn off the urgent flag of the waiting node */
-#define wtn_urgent_reset(wtn)   ((wtn)->urgent = 0)
+#define wt_urgent_reset(wt)   ((wt)->urgent = 0)
 
 /* Check if the JOIN message has been sent to the waiting node */
-#define wtn_requested(wtn)      ((wtn)->status == 1)
+#define wt_requested(wt)      ((wt)->status > 0)
 
-/* Initialize a waiting node */
-void wtn_init(struct wtnode_meta *wtn);
+/* Create a new waiting node */
+struct wt_node * wt_new(int connfd, struct in_addr *ipaddr, uint16_t lport);
 
-/* Search a waiting node by its socket descriptor */
-struct wtnode_meta *wtn_find_by_connfd(int connfd);
+/* Add a new waiting node to global waiting list */
+void g_wt_list_add(struct wt_node *wt);
 
-/* Search a waiting node by our Join Message ID */
-/* struct wtnode_meta *wtn_find_by_joinid(uint32_t msgid); */
+/* Delete the waiting node from global waiting list */
+void g_wt_list_del(struct wt_node *wt);
 
-/* Check if the waiting node with given IP and port number exists
- * in the waiting node list.
- */
-int wtn_contains(struct in_addr *addr, uint16_t lport);
+/* Search a waiting node by its socket descriptor in global waiting list*/
+struct wt_node * g_wt_list_find_by_connfd(int connfd);
 
-/* Add a new waiting node to the waiting node list */
-void wt_list_add(struct wtnode_meta *new_wt);
-
-/* Delete the waiting node from the waiting node list */
-void wt_list_del(struct wtnode_meta *wt);
+/* Search a waiting node by peer's IP address and port in global waiting list */
+struct wt_node * g_wt_list_find_by_peer(struct in_addr *ipaddr, uint16_t lport);
 
 
-
-/* The information of connected nodes
- * which are neighbors (or peers)
- */
-struct node_meta {
+/******************************************************************************/
+/* The structure of neighbour nodes */
+struct nb_node {
     int                 connfd;
     struct in_addr      ip;
     uint16_t            lport;
-    struct msgstore     msgs;
+    time_t              ts;
     struct list_head    list;
 };
 
@@ -129,53 +166,19 @@ struct node_meta {
     (memcmp(&(n1)->ip, &(n2)->ip, sizeof(struct in_addr)) == 0 && \
      memcmp(&(n1)->lport, &(n2)->lport, sizeof(uint16_t)) == 0)
 
-/* Initialize a neighbor(peer) node */
-void nm_init(struct node_meta *nm);
+/* Create a new neighbour node */
+struct nb_node * nb_new(int connfd, struct in_addr *ipaddr, uint16_t lport);
 
-/* Search a neighbor node by its socket descriptor */
-struct node_meta *nm_find_by_connfd(int connfd);
+/* Add a new neighbor to global neighbor list */
+void g_nb_list_add(struct nb_node *nb);
 
-/* Check if the neighbor node with given IP and port number exists
- * in the neighbor node list.
- */
-int nm_contains(struct in_addr *addr, uint16_t lport);
+/* Delete the neighbor from global neighbor list */
+void g_nb_list_del(struct nb_node *nb);
 
-/* Add a new neighbor node to the neighbor node list */
-void nm_list_add(struct node_meta *new_nm);
+/* Search a neighbor by its socket descriptor in global neighbour list */
+struct nb_node * g_nb_list_find_by_connfd(int connfd);
 
-/* Delete the neighbor node from the neighbor node list */
-void nm_list_del(struct node_meta *nm);
-
-
-#define MAXLINE 4096
-/* Store received bytes for each peer */
-struct peer_cache {
-    int                 connfd;
-    struct in_addr      ip;
-    uint16_t            lport;
-    unsigned char       recvbuf[MAXLINE];
-    unsigned int        bp;
-    struct list_head    list;
-};
-
-/* Create a new peer cache for a new socket descriptor */
-int create_peer_cache(int connfd);
-
-/* Remove a peer cache for a given socket descriptor */
-int remove_peer_cache(int connfd);
-
-/* Find the peer cache by the given socket descriptor */
-struct peer_cache *get_peer_cache(int connfd);
-
-
-#define KEYLEN  128
-/* store local key/value pairs */
-struct keyval {
-    char key[KEYLEN];
-    uint32_t value;
-    struct list_head list;
-};
-
-uint32_t search_localdata(struct P2P_h *ph, unsigned int msglen);
+/* Search a neighbour by peer's IP address and port in global neighbour list */
+struct nb_node * g_nb_list_find_by_peer(struct in_addr *ipaddr, uint16_t lport);
 
 #endif

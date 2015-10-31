@@ -150,7 +150,7 @@ ConnectWithin(int sockfd, const SA *addr, socklen_t salen, int time)
 
     if ((n = select(sockfd + 1, NULL, &wset, NULL,
                     time ? &tv : NULL)) == 0) {
-        perror("ConnectWithin(), select timeout");
+        fprintf(stderr, "ConnectWithin(), timeout\n");
         return -1;
     }
 
@@ -172,7 +172,7 @@ ConnectWithin(int sockfd, const SA *addr, socklen_t salen, int time)
 
         if (error) {
             errno = error;
-            perror("ConnectWithin(), socket error");
+            perror("ConnectWithin()");
             return -1;
         }
 

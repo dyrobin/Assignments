@@ -5,7 +5,8 @@
 #include <netinet/in.h>
 
 /* Default listening port */
-#define PORT_DEFAULT    6346
+//#define PORT_DEFAULT    6346
+#define PORT_DEFAULT    10001
 
 /* definition of protocol message type */
 #define MSG_PING        0x00
@@ -93,7 +94,7 @@ struct P2P_qhit_entry {
 };
 
 
-uint32_t send_join_message(int connfd);
+int send_join_message(int connfd);
 
 int handle_join_message(int connfd, void *msg, unsigned int len);
 
@@ -101,9 +102,9 @@ int send_ping_message(int connfd, int ttl);
 
 int handle_ping_message(int connfd, void *msg, unsigned int len);
 
-int handle_pong_message(void *msg, unsigned int len);
+int handle_pong_message(int connfd, void *msg, unsigned int len);
 
-int send_query_message(char *search);
+int send_query_message(char *search_key);
 
 int handle_query_message(int connfd, void *msg, unsigned int len);
 
