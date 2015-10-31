@@ -101,7 +101,7 @@ int send_ping_message(int connfd, int ttl);
 
 int handle_ping_message(int connfd, void *msg, unsigned int len);
 
-int handle_pong_message(int connfd, void *msg, unsigned int len);
+int handle_pong_message(void *msg, unsigned int len);
 
 int send_query_message(char *search_key);
 

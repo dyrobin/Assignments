@@ -4,7 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
+#include <errno.h> 
 #include <time.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
@@ -229,13 +230,22 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
 
     while (nleft) {
         if ((nbytes = Write(connfd, (char*)msg + nsent, nleft)) < 0) {
-        /* TODO: Check errno == EINTR */
-            p2plog(ERROR, "Write error, close fd = %d\n", connfd);
-            Close(connfd);
-            g_pc_list_remove_by_connfd(connfd);
-            if (nb) g_nb_list_del(nb);
-            if (wt) g_wt_list_del(wt);
-            p2plog(ERROR, "PASS\n");
+            if (errno == EINTR) continue;
+
+            if (nb) {
+                p2plog(ERROR, "Write error, drop neighbour node %s, fd = %d\n", 
+                       sock_ntop(&nb->ip, nb->lport), connfd);
+                Close(connfd);
+                g_pc_list_remove_by_connfd(connfd);
+                g_nb_list_del(nb);
+            } else if (wt) {
+                p2plog(ERROR, "Write error, drop waiting node %s, fd = %d\n", 
+                       sock_ntop(&wt->ip, wt->lport), connfd);
+                Close(connfd);
+                g_pc_list_remove_by_connfd(connfd);
+                g_wt_list_del(wt);
+            }
+
             return -1;
         }
         nsent += nbytes;
@@ -297,7 +307,7 @@ handle_join_message(int connfd, void *msg, unsigned int len)
     struct nb_node *nb;
 
     ph_in = (struct P2P_h *) msg;
-    ipaddr = (struct in_addr *)&ph_in->org_ip;
+//    ipaddr = (struct in_addr *)&ph_in->org_ip;
     lport = ph_in->org_port;
 
     if (len == HLEN) { /* JOIN REQUEST */
@@ -312,13 +322,16 @@ handle_join_message(int connfd, void *msg, unsigned int len)
             if (wt_in == NULL) {
                 /* JOIN message is neither from neighbor list nor incoming list
                  * This is not allowed, so we drop this message */
-                p2plog(ERROR, "JOIN from an unknown node, connfd = %d\n", 
+                p2plog(ERROR, 
+                       "JOIN from unknown node, drop connection, fd = %d\n", 
                        connfd);
                 Close(connfd);
                 g_pc_list_remove_by_connfd(connfd);
                 return -1;
             }
-
+            /* For NAT reason, we should use incoming connection IP address
+             * instead of original address. But we should use original port.*/
+            ipaddr = &wt_in->ip;
             /* Check if neighbour list contains the duplicated peer that has
              * been already a neighbour. This is the case where an established 
              * neightbour wants to send JOIN using a different socket. */
@@ -330,27 +343,27 @@ handle_join_message(int connfd, void *msg, unsigned int len)
 
             if (nb_dup == NULL && wt_dup == NULL) {
                 /* This is a new neighbor, insert it into neighbor list */
+                p2plog(INFO, "NEW NEIGHBOR, accept from %s\n",
+                       sock_ntop(ipaddr, lport));
                 g_nb_list_add(nb_new(connfd, ipaddr, lport));
                 g_wt_list_del(wt_in);
-                p2plog(INFO, "NEW NEIGHBOR: Accept from %s\n",
-                       sock_ntop(ipaddr, lport));                
             } else if (nb_dup == NULL && 
                        !wt_requested(wt_dup) && !wt_connected(wt_dup)) {
                 /* The peer has been inserted by PONG handler but we haven't 
                  * sent JOIN request yet, we can also accept the peer. */
+                p2plog(INFO, "NEW NEIGHBOR, accept from %s\n",
+                       sock_ntop(ipaddr, lport));
                 g_nb_list_add(nb_new(connfd, ipaddr, lport));
                 g_wt_list_del(wt_in);
                 /* We can't delete two entries at the same time. Therefore, 
                  * mark it zombie to be deleted later. */
                 wt_dup->ts = 0;
-                p2plog(INFO, "NEW NEIGHBOR: Accept from %s\n",
-                       sock_ntop(ipaddr, lport));
             } else {
                 /* Either the neighbourhood has been establised or JOIN request 
                  * has already been sent. Thus, ignore incoming JOIN request
                  * and close connection. */
-                p2plog(INFO, "Drop JOIN request coming from %s\n", 
-                       sock_ntop(ipaddr, lport));
+                p2plog(INFO, "JOIN in-progress, drop %s, fd = %d\n", 
+                       sock_ntop(ipaddr, lport), connfd);
                 Close(connfd);
                 g_pc_list_remove_by_connfd(connfd);
                 g_wt_list_del(wt_in);
@@ -374,7 +387,8 @@ handle_join_message(int connfd, void *msg, unsigned int len)
         wt_in = g_wt_list_find_by_connfd(connfd);
         if (wt_in == NULL) {
             p2plog(ERROR, 
-                "JOIN request accepted by a non-wtn node, connfd=%d\n", connfd);
+                "JOIN request accepted by a non-wt node, "
+                "drop connection, fd = %d\n", connfd);
             Close(connfd);
             g_pc_list_remove_by_connfd(connfd);
             return -1;
@@ -383,7 +397,8 @@ handle_join_message(int connfd, void *msg, unsigned int len)
         pj = (struct P2P_join *) ((char *)msg + HLEN);
         p2plog(DEBUG, "JOIN response: 0x%04X\n", ntohs(pj->status));
         if (ntohs(pj->status) != JOIN_ACC) {
-            p2plog(ERROR, "JOIN Refused\n");
+            p2plog(ERROR, "JOIN refused, drop connection %s, fd = %d\n", 
+                   sock_ntop(&wt_in->ip, wt_in->lport), connfd);
             Close(connfd);
             g_pc_list_remove_by_connfd(connfd);
             g_wt_list_del(wt_in);
@@ -394,10 +409,10 @@ handle_join_message(int connfd, void *msg, unsigned int len)
          * the record in the waiting list and put it into our neighbor list. */
         nb = g_nb_list_find_by_connfd(connfd);
         if (nb == NULL) {
-            nb = nb_new(connfd, ipaddr, lport);
+            nb = nb_new(connfd, &wt_in->ip, wt_in->lport);
             g_nb_list_add(nb);
             g_wt_list_del(wt_in);
-            p2plog(INFO, "NEW NEIGHBOR: Accepted by %s\n",
+            p2plog(INFO, "NEW NEIGHBOR, accepted by %s\n",
                    sock_ntop(&nb->ip, nb->lport));
         }
     }
@@ -468,12 +483,10 @@ handle_ping_message(int connfd, void *msg, unsigned int len)
 /* TODO: send_pong_message() */
 
 int
-handle_pong_message(int connfd, void *msg, unsigned int len)
+handle_pong_message(void *msg, unsigned int len)
 {
     if (len == HLEN) {
         /* This is a pong message reacting to heartbeat */
-        struct nb_node * nb = g_nb_list_find_by_connfd(connfd);
-        nb->ts = time(NULL);
         return 0;
     }
 
@@ -700,6 +713,8 @@ handle_bye_message(int connfd)
         return -1;
     }
 
+    p2plog(INFO, "Bye received, drop neighbour node %s, fd = %d\n",
+           sock_ntop(&nb->ip, nb->lport), connfd);
     Close(connfd);
     g_pc_list_remove_by_connfd(connfd);
     g_nb_list_del(nb);

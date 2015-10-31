@@ -142,6 +142,7 @@ recv_msg(struct peer_cache *pc)
     if (from_neigh()) {
         p2plog(DEBUG, "From neighbour node: %s\n", 
                sock_ntop(&nb->ip, nb->lport));
+        nb->ts = time(NULL);
     } else {
         p2plog(DEBUG, "From waiting node: %s\n", 
                sock_ntop(&wt->ip, wt->lport));
@@ -163,7 +164,7 @@ recv_msg(struct peer_cache *pc)
             break;
 
         case MSG_PONG:
-            handle_pong_message(connfd, ph, msglen);
+            handle_pong_message(ph, msglen);
             break;
 
         case MSG_BYE:
@@ -267,7 +268,9 @@ handle_waiting_list(time_t now)
                     wt_urgent_reset(wt);
                     g_pc_list_add(pc_new(connfd));
                 } else {
-                    p2plog(ERROR, "Connection error, drop it\n");
+                    p2plog(ERROR, 
+                           "Connection failed, drop waiting node %s, fd = %d\n", 
+                           sock_ntop(&wt->ip, wt->lport), connfd);
                     Close(connfd);
                     g_wt_list_del(wt);
                 }
@@ -281,8 +284,8 @@ handle_waiting_list(time_t now)
     /* kick those who neither send Join Request nor accept our Join */
     list_for_each_entry_safe(wt, wt_tmp, &g_wt_list.list, list) {
         if (now - wt->ts > (ZOMBIE_SECONDS >> 1)) {
-            p2plog(INFO, "Drop zombie waiting node %s\n", 
-                   sock_ntop(&wt->ip, wt->lport));
+            p2plog(INFO, "Zombie, drop waiting node %s, fd = %d\n", 
+                   sock_ntop(&wt->ip, wt->lport), wt->connfd);
             if (wt_connected(wt)) {
                 Close(wt->connfd);
                 g_pc_list_remove_by_connfd(wt->connfd);                 
@@ -312,8 +315,8 @@ handle_neighbour_list(time_t now)
     struct nb_node *nb, *nb_tmp;
     list_for_each_entry_safe(nb, nb_tmp, &g_nb_list.list, list) {
         if (now - nb->ts > ZOMBIE_SECONDS) {
-            p2plog(INFO, "Drop zombie neighbour node %s\n", 
-                   sock_ntop(&nb->ip, nb->lport));
+            p2plog(INFO, "Zombie, drop neighbour node %s, fd = %d\n", 
+                   sock_ntop(&nb->ip, nb->lport), nb->connfd);
             Close(nb->connfd);
             g_pc_list_remove_by_connfd(nb->connfd);
             g_nb_list_del(nb);
@@ -478,12 +481,12 @@ node_loop()
                 peer_error = 0;
                 if ((n = Read(nb->connfd, buf, MSG_MAX)) <= 0) {
                     if (n == 0) {
-                        p2plog(WARN, 
-                            "Disconnect from neighbor: %s, fd = %d\n",
+                        p2plog(INFO, 
+                            "Disconnect from neighbour node: %s, fd = %d\n",
                             sock_ntop(&nb->ip, nb->lport), nb->connfd);
                     } else {
                         p2plog(ERROR,
-                            "Read error, drop neighbor: %s, fd = %d\n",
+                            "Read error, drop neighbour node: %s, fd = %d\n",
                             sock_ntop(&nb->ip, nb->lport), nb->connfd);
                     }
                     peer_error = 1;
@@ -505,7 +508,7 @@ node_loop()
                 peer_error = 0;
                 if ((n = Read(wt->connfd, buf, MSG_MAX)) <= 0) {
                     if (n == 0) {
-                        p2plog(WARN,
+                        p2plog(INFO,
                             "Disconnect from waiting node: %s, fd = %d\n",
                             sock_ntop(&wt->ip, wt->lport), wt->connfd);
                     } else {
