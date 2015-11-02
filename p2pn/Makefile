@@ -1,6 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pedantic -std=c99 $(DEBUG)
-DEBUG = -ggdb
+CFLAGS = -Wall -Wextra -Werror -pedantic -std=c99 $(DEBUG_FLAG)
+
+ifeq ($(DEBUG), 1)
+    DEBUG_FLAG = -ggdb
+endif
 
 bins = p2pn pmon
 p2pn_src = p2pn.c proto.c sock_util.c util.c

@@ -235,6 +235,7 @@ recv_byte_stream(int connfd, char *buf, int bufsize)
 
     memcpy(pc->recvbuf + pc->bp, buf, bufsize);
     pc->bp += bufsize;
+
     while ((n = recv_msg(pc)) != 0) {
         /* blank */
     }
@@ -533,6 +534,10 @@ node_loop()
 
         p2plog(INFO, "Waiting: %d  Neighbours: %d\n", 
                g_wt_list_size, g_nb_list_size);
+
+        if (peer_error == 4) {
+            p2plog(WARN, "SIGPIPE captured.\n");
+        }
     }
 
     return 0;

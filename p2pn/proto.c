@@ -232,18 +232,23 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
         if ((nbytes = Write(connfd, (char*)msg + nsent, nleft)) < 0) {
             if (errno == EINTR) continue;
 
+            /* Leave the connection alive because it is not safe to clear the 
+             * neighbour list or waiting list here as for_each_entry_safe() is
+             * not really safe. Therefore, we leave the connection alive here 
+             * and wait for it becoming zombie, then it will be removed 
+             * eventually. */
             if (nb) {
                 p2plog(ERROR, "Write error, drop neighbour node %s, fd = %d\n", 
                        sock_ntop(&nb->ip, nb->lport), connfd);
-                Close(connfd);
-                g_pc_list_remove_by_connfd(connfd);
-                g_nb_list_del(nb);
+//                Close(connfd);
+//                g_pc_list_remove_by_connfd(connfd);
+//                g_nb_list_del(nb);
             } else if (wt) {
                 p2plog(ERROR, "Write error, drop waiting node %s, fd = %d\n", 
                        sock_ntop(&wt->ip, wt->lport), connfd);
-                Close(connfd);
-                g_pc_list_remove_by_connfd(connfd);
-                g_wt_list_del(wt);
+//                Close(connfd);
+//                g_pc_list_remove_by_connfd(connfd);
+//                g_wt_list_del(wt);                
             }
 
             return -1;
@@ -300,17 +305,16 @@ handle_join_message(int connfd, void *msg, unsigned int len)
 {
     struct P2P_h *ph_in;
     struct P2P_join *pj;
-    struct in_addr *ipaddr;
-    uint16_t lport;
 
     struct wt_node *wt_in;
     struct nb_node *nb;
 
     ph_in = (struct P2P_h *) msg;
-//    ipaddr = (struct in_addr *)&ph_in->org_ip;
-    lport = ph_in->org_port;
 
     if (len == HLEN) { /* JOIN REQUEST */
+        struct in_addr *ipaddr = (struct in_addr *)&ph_in->org_ip;
+        uint16_t lport = ph_in->org_port;
+
         /* JOIN message is sent normally after a node connects another one
          * successfully. However, we also allow an established neighbor to 
          * send JOIN in case the response is somehow lost. */
@@ -330,8 +334,17 @@ handle_join_message(int connfd, void *msg, unsigned int len)
                 return -1;
             }
             /* For NAT reason, we should use incoming connection IP address
-             * instead of original address. But we should use original port.*/
+             * instead of original address. But we should use original port.
+             * Normally a node using NAT will not accept JOIN request sending
+             * by us because it cannot accept the connection from outside 
+             * except for specific configuration at NAT gateway. */
+            if (memcmp(ipaddr, &wt_in->ip, sizeof(struct in_addr))) {
+                p2plog(INFO, "NAT Found: %s (%s)\n",
+                       sock_ntop(ipaddr, lport), 
+                       sock_ntop(&wt_in->ip, lport));
+            }
             ipaddr = &wt_in->ip;
+
             /* Check if neighbour list contains the duplicated peer that has
              * been already a neighbour. This is the case where an established 
              * neightbour wants to send JOIN using a different socket. */
