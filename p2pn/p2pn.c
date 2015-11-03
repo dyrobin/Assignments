@@ -147,10 +147,10 @@ recv_msg(struct peer_cache *pc)
     } else {
         strtmp = sock_ntop(&wt->ip, wt->lport);
     }
-    p2plog(INFO, "In MSG: From %s (%d)\n"
-                  "\t\t id = [%08X], type = %02X, len = %d, ttl = %d\n",
-           strtmp, from_neigh(), 
-           ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
+    p2plog(INFO, "In MSG: (%d) From %s (%02X)\n"
+                  "\t\t id = [%08X], len = %d, ttl = %d\n",
+           from_neigh(), strtmp, ph->msg_type,
+           ph->msg_id, ntohs(ph->length), ph->ttl);
 
     if (!from_neigh() &&
         ((ph->msg_type & MSG_JOIN) != MSG_JOIN)){

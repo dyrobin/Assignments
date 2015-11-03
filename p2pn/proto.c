@@ -225,10 +225,10 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     /* filling the length field in header */
     ph->length = htons(len - HLEN);
 
-    p2plog(DEBUG, "Out MSG: To %s (%d)\n"
-                 "\t\t id = [%08X], type = %02X, len = %d, ttl = %d\n",
-           strtmp, nb != NULL,
-           ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
+    p2plog(DEBUG, "Out MSG: (%d) To %s (%02X)\n"
+                 "\t\t id = [%08X], len = %d, ttl = %d\n",
+           nb != NULL, strtmp, ph->msg_type,
+           ph->msg_id, ntohs(ph->length), ph->ttl);
 
     /* sendint to the remote destination */
     int nbytes, nsent = 0, nleft = len;
@@ -341,8 +341,9 @@ handle_join_message(int connfd, void *msg, unsigned int len)
              * by us because it cannot accept the connection from outside 
              * except for specific configuration at NAT gateway. */
             if (memcmp(ipaddr, &wt_in->ip, sizeof(struct in_addr))) {
-                p2plog(INFO, "NAT Found: origin IP %s\n", 
-                    sock_ntop(ipaddr, lport));
+                p2plog(INFO, "NAT Found: %s\n", 
+                       sock_ntop(&wt_in->ip, wt_in->lport));
+                p2plog(INFO, "origin IP: %s\n", sock_ntop(ipaddr, lport));
             }
             ipaddr = &wt_in->ip;
 
