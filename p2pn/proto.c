@@ -97,7 +97,7 @@ gen_msgid(char *prefix)
     int n;
     char buf[S_LEN];
     n = sprintf(buf, "%s#%ld#%ld#%u",
-        prefix, now.tv_sec, now.tv_usec, ++msg_seq);
+        prefix, (long)now.tv_sec, (long)now.tv_usec, ++msg_seq);
 
     if (n > S_LEN) {
         p2plog(ERROR, "Buffer out of boundary\n");
@@ -167,17 +167,21 @@ init_p2ph(struct P2P_h* ph, uint8_t msgType)
 static int
 send_p2p_message(int connfd, void *msg, unsigned int len)
 {
+    if (len < HLEN) {
+        p2plog(ERROR, "Message is too short to send\n");
+        return -1;
+    }
+
     struct nb_node *nb;
     struct wt_node *wt;
+    const char *strtmp = NULL;
 
     nb = g_nb_list_find_by_connfd(connfd);
     wt = g_wt_list_find_by_connfd(connfd);
     if (nb != NULL && wt == NULL) {
-        p2plog(DEBUG, "To neighbor node %s\n", 
-            sock_ntop(&nb->ip, nb->lport));
+        strtmp = sock_ntop(&nb->ip, nb->lport);
     } else if (nb == NULL && wt != NULL) {
-        p2plog(DEBUG, "To waiting node %s\n", 
-            sock_ntop(&wt->ip, wt->lport));
+        strtmp = sock_ntop(&wt->ip, wt->lport);
     } else if (nb == NULL && wt == NULL) {
         p2plog(ERROR, "No destination found in lists\n");
         return -1;
@@ -219,15 +223,15 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
     }
 
     /* filling the length field in header */
-    if (len < HLEN) {
-        p2plog(ERROR, "Message too short\n");
-        return -1;
-    }
     ph->length = htons(len - HLEN);
+
+    p2plog(DEBUG, "Out MSG: To %s (%d)\n"
+                 "\t\t id = [%08X], type = %02X, len = %d, ttl = %d\n",
+           strtmp, nb != NULL,
+           ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
 
     /* sendint to the remote destination */
     int nbytes, nsent = 0, nleft = len;
-
     while (nleft) {
         if ((nbytes = Write(connfd, (char*)msg + nsent, nleft)) < 0) {
             if (errno == EINTR) continue;
@@ -257,8 +261,6 @@ send_p2p_message(int connfd, void *msg, unsigned int len)
         nleft -= nbytes;
     }
 
-    p2plog(DEBUG, "Out MSG: [%08X], msg_type = %02X, len = %d, ttl = %d\n",
-            ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
     return 0;
 }
 
@@ -339,9 +341,8 @@ handle_join_message(int connfd, void *msg, unsigned int len)
              * by us because it cannot accept the connection from outside 
              * except for specific configuration at NAT gateway. */
             if (memcmp(ipaddr, &wt_in->ip, sizeof(struct in_addr))) {
-                p2plog(INFO, "NAT Found: %s (%s)\n",
-                       sock_ntop(ipaddr, lport), 
-                       sock_ntop(&wt_in->ip, lport));
+                p2plog(INFO, "NAT Found: origin IP %s\n", 
+                    sock_ntop(ipaddr, lport));
             }
             ipaddr = &wt_in->ip;
 
@@ -734,4 +735,3 @@ handle_bye_message(int connfd)
 
     return 0;
 }
-

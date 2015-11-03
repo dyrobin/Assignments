@@ -139,16 +139,18 @@ recv_msg(struct peer_cache *pc)
         return 0;
     }
 
+    const char * strtmp = NULL;
     if (from_neigh()) {
-        p2plog(DEBUG, "From neighbour node: %s\n", 
-               sock_ntop(&nb->ip, nb->lport));
+        strtmp = sock_ntop(&nb->ip, nb->lport);
+        /* Update timestamp for neighbour node */
         nb->ts = time(NULL);
     } else {
-        p2plog(DEBUG, "From waiting node: %s\n", 
-               sock_ntop(&wt->ip, wt->lport));
+        strtmp = sock_ntop(&wt->ip, wt->lport);
     }
-    p2plog(DEBUG, "In MSG: [%08X], msg_type = %02X, len = %d, ttl = %d\n",
-            ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
+    p2plog(INFO, "In MSG: From %s (%d)\n"
+                  "\t\t id = [%08X], type = %02X, len = %d, ttl = %d\n",
+           strtmp, from_neigh(), 
+           ph->msg_id, ph->msg_type, ntohs(ph->length), ph->ttl);
 
     if (!from_neigh() &&
         ((ph->msg_type & MSG_JOIN) != MSG_JOIN)){

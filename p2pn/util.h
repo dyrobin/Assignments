@@ -28,7 +28,7 @@ enum LOGLEVEL {
 };
 /* Logging */
 #define p2plog(log_level, ...) \
-        p2plog_all(log_level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+        p2plog_all(log_level, __FILE__, __LINE__, __func__, __VA_ARGS__)
 void p2plog_all(enum LOGLEVEL lv, const char *file, const int line,
                 const char *function, char *fmt, ...);
 void p2plog_env();
