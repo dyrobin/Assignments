@@ -82,7 +82,7 @@ def euclideanDistance(dictA, dictB):
     return float(math.sqrt(euclideanSum))
 
 
-folders = ["A112", "A118", "A124", "A130", "A136", "A141"]
+folders = ["A112", "A118", "A124", "A128", "A136", "A141"]
 
 refdata1 = refdataGenFromFile(folders)
 refdata2 = refdataGenFromFolder(folders)
@@ -91,7 +91,7 @@ toMatch = dictReadFromFile(sys.argv[1])
 
 
 print "To match location by single measurement......"
-distanceMin = 100.00
+distanceMin = 1000.00
 keyMin = "No Place"
 for key in refdata1.iterkeys():
     distance = euclideanDistance(toMatch, refdata1[key])
@@ -104,7 +104,7 @@ print "Closest place: "+ keyMin + " (" + str(round(distanceMin, 2)) + ")"
 print ""
 
 print "To match location by multiple measurements......"
-distanceMin = 100.00
+distanceMin = 1000.00
 keyMin = "No Place"
 for key in refdata2.iterkeys():
     distance = euclideanDistance(toMatch, refdata2[key])

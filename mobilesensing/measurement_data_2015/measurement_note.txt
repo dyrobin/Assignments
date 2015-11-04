@@ -1,2 +1,0 @@
-In this repository WIFI measurement data are collected from 6 positions. The positions are in a long corridor and each position is about 7-10 meters away from the adjacent one. At each position, there are 3 datasets in both CSV and JSON format measured at different time. Each dataset includes 15 WIFI measurements at 5 seconds interval. Note that in JSON file each measurement is marked by "measurement id" while there is such information in CSV file.
-

@@ -1,0 +1,7 @@
+This repository includes 3 directories, which are 'reference_data', 'measurement_data' and 'A141-near'. 
+
+'reference_data' are collected from 6 positions in a long corridor A and each position is about 7-10 meters away from the adjacent one. At each position, there are 3 datasets in both CSV and JSON format measured at different time. Each dataset includes 15 WIFI measurements at 5 seconds interval. Note that in JSON format each measurement is marked by "measurement id" while there is such information in CSV format.
+
+'measurement_data' are gathered at two random positions and you should use 'reference_data' to estimate the location of them.
+
+'A141-near' is a measurement measured close to A141. Refer to Step 2 of Part C in section 2.1.2 of specification.
