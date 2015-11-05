@@ -43,19 +43,12 @@ FOR COURSE STAFF
 CONTENTS
 -----
 
-  - `p2pn/` : Sample implementation of Peer-to-Peer assignment.
-          Including stripped headers that are supplied to students as
-          reference.
-  - `*.tex` : Assignment instructions and demo sheet.
-  - `group.csv` : Group sign-up book.
-  - TeX -> PDF
-
-  To typeset the TeX files, clone this repository on any
-  Aalto-IT Linux workstations (in Maarintalo, for example) and type:
-
-   `pdflatex <name>.tex`
-
-  and you get the PDF file.
+  - `p2pn/`  : Implementation of Peer-to-Peer assignment, including stripped headers that are supplied to students as reference.
+  - `mosen/` : Implementation of Mobile Sensing assignment.
+  - `amazon/`: Obsoleted assignment.
+  - `docs/`  : Assignment specifications, exams, etc.
+  - `data/`  : Registration list and group information.
+  - `tools/` : Archive all repositories in gitlab
 
 
 AT THE END OF THE SEMESTER
