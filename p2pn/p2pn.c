@@ -134,6 +134,10 @@ recv_msg(struct peer_cache *pc)
 
     unsigned int msglen = HLEN + ntohs(ph->length);
 
+    if (msglen > MSG_MAX) {
+        p2plog(WARN, "packet length (%d) might be too long\n", msglen);
+    }
+
     if (pc->bp < msglen) {
         /* More data pending to parse message */
         return 0;

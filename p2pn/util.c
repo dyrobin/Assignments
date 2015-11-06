@@ -154,6 +154,7 @@ g_kv_list_search(void *msg, unsigned int len)
         }
     }
 
+    p2plog(INFO, "QUERY \"%s\" NOT match\n", buf);
     return 0;
 }
 
