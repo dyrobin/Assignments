@@ -45,7 +45,6 @@ CONTENTS
 
   - `p2pn/`  : Implementation of Peer-to-Peer assignment, including stripped headers that are supplied to students as reference.
   - `mosen/` : Implementation of Mobile Sensing assignment.
-  - `amazon/`: Obsoleted assignment.
   - `docs/`  : Assignment specifications, exams, etc.
   - `data/`  : Registration list and group information.
   - `tools/` : Archive all repositories in gitlab
